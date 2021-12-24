@@ -1,13 +1,29 @@
-(load-file ".emacs.d/libs/packages.el")
+;;; Package --- Emacs initialisation module
+;;; Commentary:
+;;; Code:
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(package-initialize)
+(package-refresh-contents)
+
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+(require 'use-package)
+
 
 ;; Menus
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
 (tool-bar-mode -1)
 
+;; Line numbers
+(global-display-line-numbers-mode)
+(column-number-mode)
+
 ;; Evil mode
-(ensure-package 'evil)
-(evil-mode 1)
+(use-package evil
+  :ensure t
+  :config (evil-mode 1))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -20,9 +36,21 @@
  '(custom-safe-themes
    '("43851bb46b91f16e93a3eb85f711e8afefbd4a80ea1a21e25c6d88544eb22c7d" default))
  '(inhibit-startup-screen t)
+ '(lsp-keymap-prefix "C-c C-c")
  '(org-return-follows-link t)
  '(package-selected-packages
-   '(helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##)))
+   '(yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+ '(safe-local-variable-values
+   '((eval progn
+	   (require 'ocp-indent)
+	   (add-to-list 'load-path "/home/sven/work/tezos/_opam/share/emacs/site-lisp")
+	   (set-opam-env "/home/sven/work/tezos/_opam")
+	   (setenv "WORKDIR" "/home/sven/work/")
+	   (setenv "SRCDIR" "/home/sven/work/tezos/src")
+	   (defun copyright-nl nil "Insert Copyright line for Nomadic Labs."
+		  (interactive)
+		  (insert "(* Copyright (c) 2021 Nomadic Labs <contact@nomadic-labs.com>                *)
+"))))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -31,24 +59,28 @@
  )
 
 ;; Helm
-(ensure-package 'helm)
-(ensure-package 'ac-helm)
+(use-package helm
+  :ensure t)
+(use-package ac-helm
+  :ensure t)
 
 ;; Git
-(ensure-package 'magit)
+(use-package magit
+  :ensure t)
 
 ;; Mu4e config
-(ensure-package 'mu4e-overview)
-(ensure-package 'smtpmail)
+(use-package mu4e-overview
+  :ensure t)
+(use-package auth-source-pass
+  :ensure t)
+(use-package smtpmail
+  :ensure t)
 (setq mu4e-get-mail-command "offlineimap -o"
       mu4e-update-interval (* 10 60)
       mu4e-enable-notifications t
       mu4e-view-show-addresses 't
       message-send-mail-function 'smtpmail-send-it
       auth-sources '(password-store))
-
-(global-set-key (kbd "C-x m") 'mu4e)
-(global-set-key (kbd "C-x b") 'helm-buffers-list)
 
 (with-eval-after-load 'mu4e
   (setq mu4e-contexts
@@ -106,12 +138,42 @@
         ))
   )
 
-;; OCaml
-(ensure-package 'tuareg)
-(add-to-list 'load-path "/home/sven/work/tezos/_opam/share/emacs/site-lisp")
-(autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
-(autoload 'merlin-mode "merlin" nil t nil)
-(add-hook 'tuareg-mode-hook 'tuareg-imenu-set-imenu)
-(add-hook 'tuareg-mode-hook 'merlin-mode t)
-(add-hook 'caml-mode-hook 'merlin-mode t)
-(setq merlin-command "/home/sven/work/tezos/_opam/bin/ocamlmerlin")
+;; Programming language support
+(load-file ".emacs.d/libs/programming/ocaml.el")
+
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode t))
+(use-package yasnippet
+  :ensure t)
+
+(use-package company
+  :ensure t)
+(use-package lsp-mode
+  :ensure t
+  :init (setq lsp-keymap-prefix "C-c C-c")
+  :config (define-key lsp-mode-map (kbd "C-c C-c") lsp-command-map)
+  :hook (haskell-mode . lsp)
+  :commands lsp)
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+
+
+;; Haskell
+(use-package lsp-haskell
+  :ensure t
+  :config
+    (setq lsp-haskell-server-path "haskell-language-server-wrapper")
+    (setq lsp-haskell-server-args ()))
+
+
+(global-set-key (kbd "C-x m") 'mu4e)
+(global-set-key (kbd "C-x b") 'helm-buffers-list)
+(global-set-key (kbd "C-x c c") (lambda ()
+				  (interactive)
+				  (find-file "~/.emacs.d/init.el")))
+
+(provide 'init)
+;;; init.el ends here
+
