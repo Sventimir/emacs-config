@@ -163,6 +163,7 @@
 (use-package lsp-haskell
   :ensure t
   :config
+    (setq-local compile-command "stack build")
     (setq lsp-haskell-server-path "haskell-language-server-wrapper")
     (setq lsp-haskell-server-args ()))
 
