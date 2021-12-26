@@ -20,10 +20,15 @@
 (global-display-line-numbers-mode)
 (column-number-mode)
 
+;; Parenthese
+(electric-pair-mode)
+
 ;; Evil mode
 (use-package evil
   :ensure t
-  :config (evil-mode 1))
+  :config (evil-mode 1)
+          (global-undo-tree-mode)
+          (evil-set-undo-system 'undo-tree))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -35,22 +40,12 @@
  '(custom-enabled-themes '(tango-dark))
  '(custom-safe-themes
    '("43851bb46b91f16e93a3eb85f711e8afefbd4a80ea1a21e25c6d88544eb22c7d" default))
+ '(evil-undo-system 'undo-tree)
  '(inhibit-startup-screen t)
  '(lsp-keymap-prefix "C-c C-c")
  '(org-return-follows-link t)
  '(package-selected-packages
-   '(yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
- '(safe-local-variable-values
-   '((eval progn
-	   (require 'ocp-indent)
-	   (add-to-list 'load-path "/home/sven/work/tezos/_opam/share/emacs/site-lisp")
-	   (set-opam-env "/home/sven/work/tezos/_opam")
-	   (setenv "WORKDIR" "/home/sven/work/")
-	   (setenv "SRCDIR" "/home/sven/work/tezos/src")
-	   (defun copyright-nl nil "Insert Copyright line for Nomadic Labs."
-		  (interactive)
-		  (insert "(* Copyright (c) 2021 Nomadic Labs <contact@nomadic-labs.com>                *)
-"))))))
+   '(flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -139,8 +134,6 @@
   )
 
 ;; Programming language support
-(load-file ".emacs.d/libs/programming/ocaml.el")
-
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode t))
@@ -167,12 +160,16 @@
     (setq lsp-haskell-server-path "haskell-language-server-wrapper")
     (setq lsp-haskell-server-args ()))
 
-
+;; Global key bindings
 (global-set-key (kbd "C-x m") 'mu4e)
 (global-set-key (kbd "C-x b") 'helm-buffers-list)
 (global-set-key (kbd "C-x c c") (lambda ()
 				  (interactive)
 				  (find-file "~/.emacs.d/init.el")))
+(global-set-key (kbd "C-c c") 'compile)
+
+(let ((default-directory  "~/.emacs.d/libs/"))
+  (normal-top-level-add-subdirs-to-load-path))
 
 (provide 'init)
 ;;; init.el ends here
