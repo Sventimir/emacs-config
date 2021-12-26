@@ -24,6 +24,8 @@
 (electric-pair-mode)
 
 ;; Evil mode
+(use-package undo-tree
+  :ensure t)
 (use-package evil
   :ensure t
   :config (evil-mode 1)
@@ -45,7 +47,7 @@
  '(lsp-keymap-prefix "C-c C-c")
  '(org-return-follows-link t)
  '(package-selected-packages
-   '(flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##)))
+   '(helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -146,12 +148,16 @@
   :ensure t
   :init (setq lsp-keymap-prefix "C-c C-c")
   :config (define-key lsp-mode-map (kbd "C-c C-c") lsp-command-map)
-  :hook (haskell-mode . lsp)
-  :commands lsp)
+  :hook
+    (haskell-mode . lsp)
+    (tuareg . lsp-deferred)
+  :commands (lsp lsp-deferred))
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode)
-
+(use-package helm-lsp
+  :ensure t
+  :commands helm-lsp-workspace-symbol)
 
 ;; Haskell
 (use-package lsp-haskell
@@ -159,6 +165,10 @@
   :config
     (setq lsp-haskell-server-path "haskell-language-server-wrapper")
     (setq lsp-haskell-server-args ()))
+
+;; OCaml
+(use-package tuareg
+  :ensure t)
 
 ;; Global key bindings
 (global-set-key (kbd "C-x m") 'mu4e)
