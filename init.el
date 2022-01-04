@@ -47,7 +47,7 @@
  '(lsp-keymap-prefix "C-c C-c")
  '(org-return-follows-link t)
  '(package-selected-packages
-   '(helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##)))
+   '(ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -146,11 +146,12 @@
   :ensure t)
 (use-package lsp-mode
   :ensure t
-  :init (setq lsp-keymap-prefix "C-c C-c")
-  :config (define-key lsp-mode-map (kbd "C-c C-c") lsp-command-map)
+  :init (setq lsp-keymap-prefix "C-c l")
+  :config (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
   :hook
     (haskell-mode . lsp)
-    (tuareg . lsp-deferred)
+    (hack-local-variables . (lambda ()
+			      (when (derived-mode-p 'tuareg-mode) (lsp-deferred))))
   :commands (lsp lsp-deferred))
 (use-package lsp-ui
   :ensure t
@@ -171,13 +172,14 @@
 (use-package tuareg
   :ensure t)
 
+
 ;; Global key bindings
 (global-set-key (kbd "C-x m") 'mu4e)
 (global-set-key (kbd "C-x b") 'helm-buffers-list)
 (global-set-key (kbd "C-x c c") (lambda ()
 				  (interactive)
 				  (find-file "~/.emacs.d/init.el")))
-(global-set-key (kbd "C-c c") 'compile)
+(global-set-key (kbd "C-x w s") 'split-window-horizontally)
 
 (let ((default-directory  "~/.emacs.d/libs/"))
   (normal-top-level-add-subdirs-to-load-path))

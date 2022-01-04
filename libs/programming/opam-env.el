@@ -50,15 +50,5 @@ system shell."
                 )))
     (dolist (var vars nil) (setenv (car var) (cdr var)))))
 
-(defun setup-lsp ()
-  "Enables use of OCaml language server as installed in OPAM.
-`set-opam-env' function should be called before this one is LSP for OCaml
-is not installed globally for the whole system."
-  (lsp-register-client
-   (make-lsp-client
-    :new-connection (lsp-stdio-connection '("ocamllsp"))
-    :major-modes '(tuareg-mode)
-    :server-id 'ocamllsp)))
-
 (provide 'opam-env)
 ;;; opam-env.el ends here
