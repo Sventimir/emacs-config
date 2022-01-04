@@ -179,7 +179,12 @@
 (global-set-key (kbd "C-x c c") (lambda ()
 				  (interactive)
 				  (find-file "~/.emacs.d/init.el")))
+
+;; Window management
 (global-set-key (kbd "C-x w s") 'split-window-horizontally)
+
+;; Programming utilities
+(global-set-key (kbd "C-c C-c") 'compile)
 
 (let ((default-directory  "~/.emacs.d/libs/"))
   (normal-top-level-add-subdirs-to-load-path))
