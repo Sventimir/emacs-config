@@ -46,8 +46,22 @@
  '(inhibit-startup-screen t)
  '(lsp-keymap-prefix "C-c C-c")
  '(org-return-follows-link t)
+ '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##)))
+   '(yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+ '(safe-local-variable-values
+   '((eval progn
+	   (require 'opam-env)
+	   (add-to-list 'load-path "/home/sven/work/tezos/_opam/share/emacs/site-lisp")
+	   (set-opam-env "/home/sven/work/tezos/_opam")
+	   (setenv "WORKDIR" "/home/sven/work")
+	   (setenv "TEZOS" "/home/sven/work/tezos")
+	   (setenv "SRCDIR" "/home/sven/work/tezos/src")
+	   (add-to-list 'exec-path "/home/sven/work/tezos/_opam/bin")
+	   (defun copyright-nl nil "Insert Copyright line for Nomadic Labs."
+		  (interactive)
+		  (insert "(* Copyright (c) 2021 Nomadic Labs <contact@nomadic-labs.com>                *)
+"))))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -136,6 +150,9 @@
   )
 
 ;; Programming language support
+(use-package deferred
+  :ensure t)
+
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode t))
@@ -146,8 +163,8 @@
   :ensure t)
 (use-package lsp-mode
   :ensure t
-  :init (setq lsp-keymap-prefix "C-c l")
-  :config (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
+  :init (setq lsp-keymap-prefix "C-l")
+  :config (define-key lsp-mode-map (kbd "C-l") lsp-command-map)
   :hook
     (haskell-mode . lsp)
     (hack-local-variables . (lambda ()
@@ -164,14 +181,46 @@
 (use-package lsp-haskell
   :ensure t
   :config
-    (setq-local compile-command "stack build")
     (setq lsp-haskell-server-path "haskell-language-server-wrapper")
-    (setq lsp-haskell-server-args ()))
+    (setq lsp-haskell-server-args ())
+    :hook (lsp-haskell . (lambda () (setq-local compile-command "stack build"))))
 
 ;; OCaml
 (use-package tuareg
   :ensure t)
 
+(use-package dune
+  :ensure t)
+   
+;; Michelson support
+(use-package michelson-mode
+  :load-path "/home/sven/work/tezos/emacs"
+  :mode ("\\.tz\\'" . michelson-mode))
+
+(defun michelson-with-mockup (&optional protocol)
+  "Set Michelson mode to work in mockup mode.
+Select PROTOCOL to use (defaults to Alpha)."
+  (interactive "sProtocol to use (default: Alpha):")
+  (setq michelson-client-command
+	(format "/home/sven/work/tezos/tezos-client --mode mockup --protocol %s"
+		(or protocol "ProtoALphaALphaALphaALphaALphaALphaALphaALphaDdp3zK"))))
+
+(defun michelson-with-node (&optional host)
+  "Set Michelson mode to work with given Tezos node.
+Select HOST to look for the node on (defaults to localhost.)"
+  (interactive "sNode's hostname and port:")
+  (setq michelson-client-command
+	(format "/home/sven/work/tezos/tezos-client -E http://%s"
+		(or host "localhost:8732"))))
+
+(setq michelson-alphanet nil)
+(michelson-with-mockup)
+
+;; JSON and YAML
+(use-package yaml-mode
+  :ensure t)
+(use-package json-mode
+  :ensure t)
 
 ;; Global key bindings
 (global-set-key (kbd "C-x m") 'mu4e)
