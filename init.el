@@ -44,6 +44,8 @@
    '("43851bb46b91f16e93a3eb85f711e8afefbd4a80ea1a21e25c6d88544eb22c7d" default))
  '(evil-undo-system 'undo-tree)
  '(inhibit-startup-screen t)
+ '(ispell-dictionary "en_GB")
+ '(ispell-program-name "hunspell")
  '(lsp-keymap-prefix "C-c C-c")
  '(org-return-follows-link t)
  '(org-support-shift-select 'always)
@@ -222,6 +224,10 @@ Select HOST to look for the node on (defaults to localhost.)"
 (use-package json-mode
   :ensure t)
 
+;; Spell-checking
+(add-hook 'text-mode-hook 'flyspell-mode)
+(add-hook 'prog-mode-hook 'flyspell-prog-mode)
+
 ;; Global key bindings
 (global-set-key (kbd "C-x m") 'mu4e)
 (global-set-key (kbd "C-x b") 'helm-buffers-list)
@@ -234,6 +240,7 @@ Select HOST to look for the node on (defaults to localhost.)"
 
 ;; Programming utilities
 (global-set-key (kbd "C-c C-c") 'compile)
+(global-set-key (kbd "C-x C-g") 'magit-blame)
 
 (let ((default-directory  "~/.emacs.d/libs/"))
   (normal-top-level-add-subdirs-to-load-path))
