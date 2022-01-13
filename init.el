@@ -234,8 +234,13 @@ Select HOST to look for the node on (defaults to localhost.)"
 (global-set-key (kbd "C-x c c") (lambda ()
 				  (interactive)
 				  (find-file "~/.emacs.d/init.el")))
+(global-set-key (kbd "C-c s f") 'flycheck-buffer)
+(global-set-key (kbd "C-c s c") 'flycheck-correct-word)
+(global-set-key (kbd "C-c s d") 'ispell-change-dictionary)
 
 ;; Window management
+(global-set-key (kbd "C->") (lambda () (interactive) (select-window (next-window))))
+(global-set-key (kbd "C-<") (lambda () (interactive) (select-window (previous-window))))
 (global-set-key (kbd "C-x w s") 'split-window-horizontally)
 
 ;; Programming utilities
