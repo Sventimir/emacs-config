@@ -24,6 +24,11 @@
 (global-display-line-numbers-mode)
 (column-number-mode)
 
+;; Indentation and tabulation
+(setq-default indent-tabs-mode nil
+    	      tab-width 4)
+(setq indent-line-function 'insert-tab)
+
 ;; Parenthese
 (electric-pair-mode)
 
