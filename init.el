@@ -10,6 +10,10 @@
   (package-install 'use-package))
 (require 'use-package)
 
+;; Add libs/ directory to the load path
+(let ((default-directory  "~/.emacs.d/libs/"))
+  (normal-top-level-add-subdirs-to-load-path))
+
 
 ;; Menus
 (menu-bar-mode -1)
@@ -50,7 +54,7 @@
  '(org-return-follows-link t)
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(safe-local-variable-values
    '((eval progn
 	   (require 'opam-env)
@@ -218,6 +222,15 @@ Select HOST to look for the node on (defaults to localhost.)"
 (setq michelson-alphanet nil)
 (michelson-with-mockup)
 
+;; Idris
+(use-package idris-mode
+  :ensure t
+  :init
+    (require 'project-utils)
+    (setq idris-interpreter-path "/home/sven/.idris2/bin/idris2")
+  :hook
+    (idris-mode . (lambda () (goto-project-root "\.ipkg"))))
+
 ;; JSON and YAML
 (use-package yaml-mode
   :ensure t)
@@ -246,9 +259,6 @@ Select HOST to look for the node on (defaults to localhost.)"
 ;; Programming utilities
 (global-set-key (kbd "C-c C-c") 'compile)
 (global-set-key (kbd "C-x C-g") 'magit-blame)
-
-(let ((default-directory  "~/.emacs.d/libs/"))
-  (normal-top-level-add-subdirs-to-load-path))
 
 (provide 'init)
 ;;; init.el ends here
