@@ -257,7 +257,7 @@ Select HOST to look for the node on (defaults to localhost.)"
 				  (interactive)
 				  (find-file "~/.emacs.d/init.el")))
 (global-set-key (kbd "C-c s f") 'flycheck-buffer)
-(global-set-key (kbd "C-c s c") 'flycheck-correct-word)
+(global-set-key (kbd "C-c s c") 'flyspell-correct-word-before-point)
 (global-set-key (kbd "C-c s d") 'ispell-change-dictionary)
 
 ;; Window management
