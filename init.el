@@ -200,6 +200,10 @@
 (use-package tuareg
   :ensure t)
 
+(use-package merlin
+  :ensure t
+  :hook (tuareg-mode . merlin-mode))
+
 (use-package dune
   :ensure t)
    
