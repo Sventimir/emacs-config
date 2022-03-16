@@ -14,6 +14,7 @@
 (let ((default-directory  "~/.emacs.d/libs/"))
   (normal-top-level-add-subdirs-to-load-path))
 
+(require 'gitlab)
 
 ;; Menus
 (menu-bar-mode -1)
@@ -48,6 +49,7 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-faces-vector
    [default default default italic underline success warning error])
+ '(compilation-scroll-output 'first-error)
  '(custom-enabled-themes '(tango-dark))
  '(custom-safe-themes
    '("43851bb46b91f16e93a3eb85f711e8afefbd4a80ea1a21e25c6d88544eb22c7d" default))
@@ -56,22 +58,64 @@
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(lsp-keymap-prefix "C-c C-c")
+ '(org-babel-haskell-compiler "ghc -dynamic")
+ '(org-link-parameters
+   '(("bibtex" :follow org-bibtex-open :store org-bibtex-store-link)
+     ("mu4e" :follow mu4e-org-open :store mu4e-org-store-link)
+     ("file+sys")
+     ("file+emacs")
+     ("shell" :follow org-link--open-shell)
+     ("news" :follow
+      #[514 "\301\300\302Q\"\207"
+            ["news" browse-url ":"]
+            6 "
+
+(fn URL ARG)"])
+     ("mailto" :follow
+      #[514 "\301\300\302Q\"\207"
+            ["mailto" browse-url ":"]
+            6 "
+
+(fn URL ARG)"])
+     ("https" :follow
+      #[514 "\301\300\302Q\"\207"
+            ["https" browse-url ":"]
+            6 "
+
+(fn URL ARG)"])
+     ("http" :follow
+      #[514 "\301\300\302Q\"\207"
+            ["http" browse-url ":"]
+            6 "
+
+(fn URL ARG)"])
+     ("ftp" :follow
+      #[514 "\301\300\302Q\"\207"
+            ["ftp" browse-url ":"]
+            6 "
+
+(fn URL ARG)"])
+     ("help" :follow org-link--open-help)
+     ("file" :complete org-link-complete-file)
+     ("elisp" :follow org-link--open-elisp)
+     ("doi" :follow org-link--open-doi)
+     ("zoommtg" :follow org-link--zoom-follow)))
  '(org-return-follows-link t)
  '(org-support-shift-select 'always)
  '(package-selected-packages
    '(project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(safe-local-variable-values
    '((eval progn
-	   (require 'opam-env)
-	   (add-to-list 'load-path "/home/sven/work/tezos/_opam/share/emacs/site-lisp")
-	   (set-opam-env "/home/sven/work/tezos/_opam")
-	   (setenv "WORKDIR" "/home/sven/work")
-	   (setenv "TEZOS" "/home/sven/work/tezos")
-	   (setenv "SRCDIR" "/home/sven/work/tezos/src")
-	   (add-to-list 'exec-path "/home/sven/work/tezos/_opam/bin")
-	   (defun copyright-nl nil "Insert Copyright line for Nomadic Labs."
-		  (interactive)
-		  (insert "(* Copyright (c) 2021 Nomadic Labs <contact@nomadic-labs.com>                *)
+           (require 'opam-env)
+           (add-to-list 'load-path "/home/sven/work/tezos/_opam/share/emacs/site-lisp")
+           (set-opam-env "/home/sven/work/tezos/_opam")
+           (setenv "WORKDIR" "/home/sven/work")
+           (setenv "TEZOS" "/home/sven/work/tezos")
+           (setenv "SRCDIR" "/home/sven/work/tezos/src")
+           (add-to-list 'exec-path "/home/sven/work/tezos/_opam/bin")
+           (defun copyright-nl nil "Insert Copyright line for Nomadic Labs."
+                  (interactive)
+                  (insert "(* Copyright (c) 2021 Nomadic Labs <contact@nomadic-labs.com>                *)
 "))))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -92,7 +136,8 @@
 
 ;; Mu4e config
 (use-package mu4e-overview
-  :ensure t)
+  :ensure t
+  :hook (mu4e-compose . (lambda () (setq indent-tabs-mode nil))))
 (use-package auth-source-pass
   :ensure t)
 (use-package smtpmail
@@ -216,9 +261,10 @@
   "Set Michelson mode to work in mockup mode.
 Select PROTOCOL to use (defaults to Alpha)."
   (interactive "sProtocol to use (default: Alpha):")
-  (setq michelson-client-command
-	(format "/home/sven/work/tezos/tezos-client --mode mockup --protocol %s"
-		(or protocol "ProtoALphaALphaALphaALphaALphaALphaALphaALphaDdp3zK"))))
+  (let ((proto (cond ((not protocol) "ProtoALphaALphaALphaALphaALphaALphaALphaALphaDdp3zK")
+                     ((equal protocol "") "ProtoALphaALphaALphaALphaALphaALphaALphaALphaDdp3zK"))))
+    (setq michelson-client-command
+	      (format "/home/sven/work/tezos/tezos-client --mode mockup --protocol %s" proto))))
 
 (defun michelson-with-node (&optional host)
   "Set Michelson mode to work with given Tezos node.
@@ -250,6 +296,31 @@ Select HOST to look for the node on (defaults to localhost.)"
 (add-hook 'text-mode-hook 'flyspell-mode)
 (add-hook 'prog-mode-hook 'flyspell-prog-mode)
 
+;; Org-mode
+(define-key org-mode-map (kbd "C-c SPC") (lambda ()
+                                           "Clear table cell at point and enter insert state."
+                                           (interactive)
+                                           (progn
+                                             (org-table-blank-field)
+                                             (evil-insert-state))))
+(define-key org-mode-map (kbd "C-c l y") (lambda ()
+                                           "Copy URL of the link at point."
+                                           (interactive)
+                                           (kill-new (org-element-property :raw-link (org-element-context)))))
+
+
+;; Opening Zoom links from Org mode (configured via customize):
+(defun org-link--zoom-follow (link)
+  "Open Zoom link using Zoom application.  LINK is the target."
+  (start-process "*Zoom*" nil "zoom" (concat "zoommtg://" link)))
+
+;; Executing Org mode's code blocks
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((shell . t)
+   (python . t)
+   (haskell . t)))
+
 ;; Global key bindings
 (global-set-key (kbd "C-x m") 'mu4e)
 (global-set-key (kbd "C-x b") 'helm-buffers-list)
@@ -271,4 +342,3 @@ Select HOST to look for the node on (defaults to localhost.)"
 
 (provide 'init)
 ;;; init.el ends here
-
