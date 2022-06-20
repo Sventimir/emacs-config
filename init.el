@@ -95,7 +95,7 @@
             6 "
 
 (fn URL ARG)"])
-     ("help" :follow org-link--open-help)
+     ("help" :follow org-link--open-help :store org-link--store-help)
      ("file" :complete org-link-complete-file)
      ("elisp" :follow org-link--open-elisp)
      ("doi" :follow org-link--open-doi)
@@ -106,6 +106,19 @@
    '(project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(safe-local-variable-values
    '((eval progn
+           (require 'opam-env)
+           (add-to-list 'load-path "/home/sven/work/tezos/_opam/share/emacs/site-lisp")
+           (set-opam-env "/home/sven/work/tezos/_opam")
+           (setenv "WORKDIR" "/home/sven/work")
+           (setenv "TEZOS" "/home/sven/work/tezos")
+           (setenv "SRCDIR" "/home/sven/work/tezos/src")
+           (setenv "PROTO" "/home/sven/work/tezos/src/proto_alpha/lib_protocol")
+           (add-to-list 'exec-path "/home/sven/work/tezos/_opam/bin")
+           (defun copyright-nl nil "Insert Copyright line for Nomadic Labs."
+                  (interactive)
+                  (insert "(* Copyright (c) 2021 Nomadic Labs <contact@nomadic-labs.com>                *)
+")))
+     (eval progn
            (require 'opam-env)
            (add-to-list 'load-path "/home/sven/work/tezos/_opam/share/emacs/site-lisp")
            (set-opam-env "/home/sven/work/tezos/_opam")
@@ -334,7 +347,8 @@ Select HOST to look for the node on (defaults to localhost.)"
 ;; Window management
 (global-set-key (kbd "C->") (lambda () (interactive) (select-window (next-window))))
 (global-set-key (kbd "C-<") (lambda () (interactive) (select-window (previous-window))))
-(global-set-key (kbd "C-x w s") 'split-window-horizontally)
+(global-set-key (kbd "C-x w h") 'split-window-horizontally)
+(global-set-key (kbd "C-x w v") 'split-window-vertically)
 
 ;; Programming utilities
 (global-set-key (kbd "C-c C-c") 'compile)
