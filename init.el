@@ -349,6 +349,10 @@ Select HOST to look for the node on (defaults to localhost.)"
 (global-set-key (kbd "C-<") (lambda () (interactive) (select-window (previous-window))))
 (global-set-key (kbd "C-x w h") 'split-window-horizontally)
 (global-set-key (kbd "C-x w v") 'split-window-vertically)
+(global-set-key (kbd "C-M-<up>") 'enlarge-window)
+(global-set-key (kbd "C-M-<right>") 'enlarge-window-horizontally)
+(global-set-key (kbd "C-M-<down>") 'shrink-window)
+(global-set-key (kbd "C-M-<left>") 'shrink-window-horizontally)
 
 ;; Programming utilities
 (global-set-key (kbd "C-c C-c") 'compile)
