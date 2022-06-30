@@ -327,6 +327,15 @@ Select HOST to look for the node on (defaults to localhost.)"
   "Open Zoom link using Zoom application.  LINK is the target."
   (start-process "*Zoom*" nil "zoom" (concat "zoommtg://" link)))
 
+(defun toggle-selected-window-dedicated-p ()
+  "Toggle dedicated status of the currently selected window."
+  (interactive)
+  (let* ((window (selected-window))
+         (status (not (window-dedicated-p window))))
+    (progn
+      (set-window-dedicated-p window status)
+      (message "The %s %s dedicated now" window (if status "is" "is not")))))
+
 ;; Executing Org mode's code blocks
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -349,6 +358,7 @@ Select HOST to look for the node on (defaults to localhost.)"
 (global-set-key (kbd "C-<") (lambda () (interactive) (select-window (previous-window))))
 (global-set-key (kbd "C-x w h") 'split-window-horizontally)
 (global-set-key (kbd "C-x w v") 'split-window-vertically)
+(global-set-key (kbd "C-x w d") 'toggle-selected-window-dedicated-p)
 (global-set-key (kbd "C-M-<up>") 'enlarge-window)
 (global-set-key (kbd "C-M-<right>") 'enlarge-window-horizontally)
 (global-set-key (kbd "C-M-<down>") 'shrink-window)
