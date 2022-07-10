@@ -117,18 +117,6 @@
            (defun copyright-nl nil "Insert Copyright line for Nomadic Labs."
                   (interactive)
                   (insert "(* Copyright (c) 2021 Nomadic Labs <contact@nomadic-labs.com>                *)
-")))
-     (eval progn
-           (require 'opam-env)
-           (add-to-list 'load-path "/home/sven/work/tezos/_opam/share/emacs/site-lisp")
-           (set-opam-env "/home/sven/work/tezos/_opam")
-           (setenv "WORKDIR" "/home/sven/work")
-           (setenv "TEZOS" "/home/sven/work/tezos")
-           (setenv "SRCDIR" "/home/sven/work/tezos/src")
-           (add-to-list 'exec-path "/home/sven/work/tezos/_opam/bin")
-           (defun copyright-nl nil "Insert Copyright line for Nomadic Labs."
-                  (interactive)
-                  (insert "(* Copyright (c) 2021 Nomadic Labs <contact@nomadic-labs.com>                *)
 "))))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
