@@ -223,7 +223,7 @@
   :init (setq lsp-keymap-prefix "C-l")
   :config (define-key lsp-mode-map (kbd "C-l") lsp-command-map)
   :hook
-    (haskell-mode . lsp)
+    (tuareg-mode . lsp)
     (hack-local-variables . (lambda ()
 			      (when (derived-mode-p 'tuareg-mode) (lsp-deferred))))
   :commands (lsp lsp-deferred))
@@ -235,12 +235,13 @@
   :commands helm-lsp-workspace-symbol)
 
 ;; Haskell
-(use-package lsp-haskell
+(use-package haskell-mode
   :ensure t
-  :config
-    (setq lsp-haskell-server-path "haskell-language-server-wrapper")
-    (setq lsp-haskell-server-args ())
-    :hook (lsp-haskell . (lambda () (setq-local compile-command "stack build"))))
+  :bind (("C-c g" . 'haskell-mode-jump-to-def-or-tag)
+         ("C-c i" . 'haskell-add-import)
+         ("C-c c" . 'haskell-compile)
+         ("C-c C-x" . 'haskell-goto-next-error)
+         ("C-c C-t" . 'haskell-doc-show-type)))
 
 ;; OCaml
 (use-package tuareg
