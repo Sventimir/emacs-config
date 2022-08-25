@@ -103,9 +103,15 @@
  '(org-return-follows-link t)
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(safe-local-variable-values
    '((eval progn
+           (require 'opam-env)
+           (add-to-list 'load-path "/home/sven/code/ocaml/arrows/_opam/share/emacs/site-lisp")
+           (set-opam-env "/home/sven/code/ocaml/arrows/_opam")
+           (setenv "WORKDIR" "/home/sven/code/arrows")
+           (add-to-list 'exec-path "/home/sven/code/ocaml/arrows/_opam/bin"))
+     (eval progn
            (require 'opam-env)
            (add-to-list 'load-path "/home/sven/work/tezos/_opam/share/emacs/site-lisp")
            (set-opam-env "/home/sven/work/tezos/_opam")
@@ -292,6 +298,10 @@ Select HOST to look for the node on (defaults to localhost.)"
 (use-package yaml-mode
   :ensure t)
 (use-package json-mode
+  :ensure t)
+
+;; Rust
+(use-package rust-mode
   :ensure t)
 
 ;; Spell-checking
