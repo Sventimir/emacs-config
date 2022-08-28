@@ -1,0 +1,5 @@
+
+resolver: lts-6.6
+packages:
+- '.'
+extra-deps: [ atto-lisp-0.2.2.2 ]

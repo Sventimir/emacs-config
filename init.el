@@ -54,10 +54,11 @@
  '(custom-safe-themes
    '("43851bb46b91f16e93a3eb85f711e8afefbd4a80ea1a21e25c6d88544eb22c7d" default))
  '(evil-undo-system 'undo-tree)
+ '(haskell-emacs-dir "~/.emacs.d/haskell/")
  '(inhibit-startup-screen t)
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
- '(lsp-keymap-prefix "C-c C-c")
+ '(lsp-keymap-prefix "C-c C-c" t)
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-link-parameters
    '(("bibtex" :follow org-bibtex-open :store org-bibtex-store-link)
@@ -103,7 +104,7 @@
  '(org-return-follows-link t)
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(safe-local-variable-values
    '((eval progn
            (require 'opam-env)
@@ -366,6 +367,11 @@ Select HOST to look for the node on (defaults to localhost.)"
 ;; Programming utilities
 (global-set-key (kbd "C-c C-c") 'compile)
 (global-set-key (kbd "C-x C-g") 'magit-blame)
+
+;; Extending Emacs
+(use-package haskell-emacs
+  :ensure t
+  :config (haskell-emacs-init))
 
 (provide 'init)
 ;;; init.el ends here
