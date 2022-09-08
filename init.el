@@ -12,7 +12,9 @@
 
 ;; Add libs/ directory to the load path
 (let ((default-directory  "~/.emacs.d/libs/"))
-  (normal-top-level-add-subdirs-to-load-path))
+  (progn
+    (normal-top-level-add-to-load-path (list default-directory))
+    (normal-top-level-add-subdirs-to-load-path)))
 
 (require 'gitlab)
 
@@ -108,23 +110,10 @@
  '(safe-local-variable-values
    '((eval progn
            (require 'opam-env)
-           (add-to-list 'load-path "/home/sven/code/ocaml/arrows/_opam/share/emacs/site-lisp")
-           (set-opam-env "/home/sven/code/ocaml/arrows/_opam")
-           (setenv "WORKDIR" "/home/sven/code/arrows")
-           (add-to-list 'exec-path "/home/sven/code/ocaml/arrows/_opam/bin"))
-     (eval progn
-           (require 'opam-env)
-           (add-to-list 'load-path "/home/sven/work/tezos/_opam/share/emacs/site-lisp")
-           (set-opam-env "/home/sven/work/tezos/_opam")
+           (add-to-list 'load-path "/home/sven/.opam/mina/share/emacs/site-lisp")
+           (set-opam-env "/home/sven/.opam/mina")
            (setenv "WORKDIR" "/home/sven/work")
-           (setenv "TEZOS" "/home/sven/work/tezos")
-           (setenv "SRCDIR" "/home/sven/work/tezos/src")
-           (setenv "PROTO" "/home/sven/work/tezos/src/proto_alpha/lib_protocol")
-           (add-to-list 'exec-path "/home/sven/work/tezos/_opam/bin")
-           (defun copyright-nl nil "Insert Copyright line for Nomadic Labs."
-                  (interactive)
-                  (insert "(* Copyright (c) 2021 Nomadic Labs <contact@nomadic-labs.com>                *)
-"))))))
+           (add-to-list 'exec-path "/home/sven/.opam/mina/bin")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
