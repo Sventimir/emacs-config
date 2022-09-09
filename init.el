@@ -101,12 +101,12 @@
      ("help" :follow org-link--open-help :store org-link--store-help)
      ("file" :complete org-link-complete-file)
      ("elisp" :follow org-link--open-elisp)
-     ("doi" :follow org-link--open-doi)
+     ("doi" :follow org-link-doi-open :export org-link-doi-export)
      ("zoommtg" :follow org-link--zoom-follow)))
  '(org-return-follows-link t)
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(safe-local-variable-values
    '((eval progn
            (require 'opam-env)
@@ -203,6 +203,11 @@
   )
 
 ;; Programming language support
+(use-package direnv
+  :ensure t
+  :config
+  (direnv-mode))
+
 (use-package deferred
   :ensure t)
 
@@ -242,10 +247,6 @@
 ;; OCaml
 (use-package tuareg
   :ensure t)
-
-(use-package merlin
-  :ensure t
-  :hook (tuareg-mode . merlin-mode))
 
 (use-package dune
   :ensure t)
@@ -358,9 +359,9 @@ Select HOST to look for the node on (defaults to localhost.)"
 (global-set-key (kbd "C-x C-g") 'magit-blame)
 
 ;; Extending Emacs
-(use-package haskell-emacs
-  :ensure t
-  :config (haskell-emacs-init))
+;; (use-package haskell-emacs
+;;   :ensure t
+;;   :config (haskell-emacs-init))
 
 (provide 'init)
 ;;; init.el ends here

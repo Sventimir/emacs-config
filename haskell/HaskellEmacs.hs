@@ -1,5 +1,5 @@
 -- hash of haskell-emacs: 168affad7374b5ff0679f27969dc6e54826fb629
--- hash of all functions: f93d8bc0e12d8f3aec2bd2770543dfaa9618a532
+-- hash of all functions: 3cbe881ced2080dc2ef1445291321cd119761be0
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -8,8 +8,7 @@
 -- If you want to change this file, you have to clone the github repo and apply the changes in a local repo.
 
 module Main where
-import qualified Matrix
-
+{--<<import>>--}
 import           Control.Applicative              (optional, (<$>), (<*>))
 import           Control.Arrow                    hiding (app)
 import           Control.Concurrent
@@ -134,10 +133,7 @@ dispatcher = M.fromList $
   , ("arityList",   transform $ \() -> toDispatcher arityList)
   , ("formatCode",  transform $ uncurry formatCode)
   , ("getDocumentation", transform $ uncurry getDocumentation)
-  ] ++ []++[("Matrix.transpose", transform (\ (x1) -> Matrix.transpose x1)),
- ("Matrix.identity", transform (\ (x1) -> Matrix.identity x1)),
- ("Matrix.isIdentity", transform (\ (x1) -> Matrix.isIdentity x1)),
- ("Matrix.dyadic", transform (\ (x1, x2) -> Matrix.dyadic x1 x2))]
+  ] ++ []{--<<export>>--}
 
 -- | Transform a curried function to a function which receives and
 -- returns lisp forms.
@@ -162,10 +158,7 @@ toDispatcher = ("++"++) . prettyPrint . listE . map fun
 
 -- | List of functions and their arities (filled by emacs).
 arityList :: [(String, Int)]
-arityList = []++[("Matrix.transpose", arity Matrix.transpose),
- ("Matrix.identity", arity Matrix.identity),
- ("Matrix.isIdentity", arity Matrix.isIdentity),
- ("Matrix.dyadic", arity Matrix.dyadic)]
+arityList = []{--<<arity>>--}
 
 -- | Splice user functions into the haskell module.
 formatCode :: (Text, Text, Text) -> Text -> Text
