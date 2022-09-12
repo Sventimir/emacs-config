@@ -213,7 +213,11 @@
 
 (use-package flycheck
   :ensure t
-  :init (global-flycheck-mode t))
+  :init (global-flycheck-mode t)
+  :bind (("C-c e 1" . 'flycheck-first-error)
+         ("C-c e n" . 'flycheck-next-error)
+         ("C-c e p" . 'flycheck-previous-error)))
+
 (use-package yasnippet
   :ensure t)
 
