@@ -44,6 +44,15 @@
           (global-undo-tree-mode)
           (evil-set-undo-system 'undo-tree))
 
+;; Qutebrowser
+(defun new-qutebrowser-window (url &rest args)
+  "Opens given URL in a new qutebrowser window.
+Additional ARGS may be passed to the browser if needed."
+  (interactive "sURL: ")
+  (let ((rest (mapconcat (lambda (str) (if str (format "'%s'" str) "")) args " ")))
+    (shell-command (format "qutebrowser --target window %s '%s'" rest url))))
+
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -51,16 +60,21 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-faces-vector
    [default default default italic underline success warning error])
+ '(backup-by-copying t)
+ '(backup-by-copying-when-linked t)
+ '(backup-directory-alist '((".*" . "~/.emacs-backups")))
+ '(browse-url-handlers '(("^https://meet.google.com/.*" . new-qutebrowser-window)))
  '(compilation-scroll-output 'first-error)
  '(custom-enabled-themes '(tango-dark))
  '(custom-safe-themes
    '("43851bb46b91f16e93a3eb85f711e8afefbd4a80ea1a21e25c6d88544eb22c7d" default))
  '(evil-undo-system 'undo-tree)
+ '(global-undo-tree-mode t)
  '(haskell-emacs-dir "~/.emacs.d/haskell/")
  '(inhibit-startup-screen t)
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
- '(lsp-keymap-prefix "C-c C-c" t)
+ '(lsp-keymap-prefix "C-c C-c")
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-link-parameters
    '(("bibtex" :follow org-bibtex-open :store org-bibtex-store-link)
@@ -113,7 +127,8 @@
            (add-to-list 'load-path "/home/sven/.opam/mina/share/emacs/site-lisp")
            (set-opam-env "/home/sven/.opam/mina")
            (setenv "WORKDIR" "/home/sven/work")
-           (add-to-list 'exec-path "/home/sven/.opam/mina/bin")))))
+           (add-to-list 'exec-path "/home/sven/.opam/mina/bin"))))
+ '(undo-tree-auto-save-history nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
