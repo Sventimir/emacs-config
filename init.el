@@ -74,8 +74,9 @@ Additional ARGS may be passed to the browser if needed."
  '(inhibit-startup-screen t)
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
- '(lsp-keymap-prefix "C-c C-c")
+ '(lsp-keymap-prefix "C-c C-c" t)
  '(org-babel-haskell-compiler "ghc -dynamic")
+ '(org-babel-load-languages '((shell . t) (python . t) (haskell . t) (sql . t)))
  '(org-link-parameters
    '(("bibtex" :follow org-bibtex-open :store org-bibtex-store-link)
      ("mu4e" :follow mu4e-org-open :store mu4e-org-store-link)
@@ -118,9 +119,11 @@ Additional ARGS may be passed to the browser if needed."
      ("doi" :follow org-link-doi-open :export org-link-doi-export)
      ("zoommtg" :follow org-link--zoom-follow)))
  '(org-return-follows-link t)
+ '(org-sql-db-config
+   '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(safe-local-variable-values
    '((eval progn
            (require 'opam-env)
@@ -218,10 +221,8 @@ Additional ARGS may be passed to the browser if needed."
   )
 
 ;; Programming language support
-(use-package direnv
-  :ensure t
-  :config
-  (direnv-mode))
+(use-package envrc
+  :ensure t)
 
 (use-package deferred
   :ensure t)
@@ -268,6 +269,9 @@ Additional ARGS may be passed to the browser if needed."
   :ensure t)
 
 (use-package dune
+  :ensure t)
+
+(use-package dockerfile-mode
   :ensure t)
    
 ;; Michelson support
@@ -381,6 +385,9 @@ Select HOST to look for the node on (defaults to localhost.)"
 ;; (use-package haskell-emacs
 ;;   :ensure t
 ;;   :config (haskell-emacs-init))
+
+;; Enable envrc
+(envrc-global-mode)
 
 (provide 'init)
 ;;; init.el ends here
