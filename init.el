@@ -202,21 +202,21 @@ Additional ARGS may be passed to the browser if needed."
                   (mu4e-trash-folder  . "/marcin-pastudzki/[Gmail].Kosz")))
 
         ,(make-mu4e-context
-          :name "Lambda-coins"
+          :name "Minaprotocol"
           :match-func
           (lambda (msg)
             (when msg
-              (string-prefix-p "/lambda-coins" (mu4e-message-field msg :maildir))))
-          :vars '((user-mail-address . "marcin.pastudzki@lambda-coins.com")
+              (string-prefix-p "/mina" (mu4e-message-field msg :maildir))))
+          :vars '((user-mail-address . "marcin.pastudzki@minaprotocol.com")
                   (user-full-name    . "Marcin Pastudzki")
                   (smtpmail-smtp-server  . "smtp.gmail.com")
-                  (smtpmail-smtp-user . "marcin.pastudzki@lambda-coins.com")
+                  (smtpmail-smtp-user . "marcin.pastudzki@minaprotocol.com")
                   (smtpmail-smtp-service . 587)
                   (smtpmail-stream-type  . starttls)
-                  (mu4e-drafts-folder  . "/lambda-coins/[Gmail].Wersje robocze")
-                  (mu4e-sent-folder  . "/lambda-coins/[Gmail].Wa&AXw-ne")
-                  (mu4e-refile-folder  . "/lambda-coins/[Gmail].Wszystkie")
-                  (mu4e-trash-folder  . "/lambda-coins/[Gmail].Kosz")))
+                  (mu4e-drafts-folder  . "/mina/[Gmail].Wersje robocze")
+                  (mu4e-sent-folder  . "/mina/[Gmail].Wa&AXw-ne")
+                  (mu4e-refile-folder  . "/mina/[Gmail].Wszystkie")
+                  (mu4e-trash-folder  . "/mina/[Gmail].Kosz")))
         ))
   )
 
@@ -388,6 +388,17 @@ Select HOST to look for the node on (defaults to localhost.)"
 
 ;; Enable envrc
 (envrc-global-mode)
+
+;; Enable Merlin for Mina project:
+(let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
+  (when (and opam-share (file-directory-p opam-share))
+    ;; Register Merlin
+    (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
+    (load "tuareg-site-file")
+    (autoload 'merlin-mode "merlin" nil t nil)
+    ;; Automatically start it in OCaml buffers
+    (add-hook 'tuareg-mode-hook 'merlin-mode t)
+    (add-hook 'caml-mode-hook 'merlin-mode t)))
 
 (provide 'init)
 ;;; init.el ends here
