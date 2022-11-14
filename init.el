@@ -74,7 +74,7 @@ Additional ARGS may be passed to the browser if needed."
  '(inhibit-startup-screen t)
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
- '(lsp-keymap-prefix "C-c C-c" t)
+ '(lsp-keymap-prefix "C-c C-c")
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
    '((shell . t)
@@ -128,7 +128,7 @@ Additional ARGS may be passed to the browser if needed."
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(safe-local-variable-values
    '((eval progn
            (require 'opam-env)
@@ -322,6 +322,9 @@ Select HOST to look for the node on (defaults to localhost.)"
 
 ;; Rust
 (use-package rust-mode
+  :ensure t)
+
+(use-package typescript-mode
   :ensure t)
 
 ;; Spell-checking
