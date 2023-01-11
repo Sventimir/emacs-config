@@ -74,9 +74,11 @@ Additional ARGS may be passed to the browser if needed."
  '(evil-undo-system 'undo-tree)
  '(global-undo-tree-mode t)
  '(haskell-emacs-dir "~/.emacs.d/haskell/")
+ '(haskell-interactive-popup-errors nil)
  '(inhibit-startup-screen t)
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
+ '(js-indent-level 2)
  '(lsp-keymap-prefix "C-c C-c" t)
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
@@ -268,6 +270,7 @@ Additional ARGS may be passed to the browser if needed."
 ;; Haskell
 (use-package haskell-mode
   :ensure t
+  :hook (haskell-mode . interactive-haskell-mode)
   :bind (("C-c g" . 'haskell-mode-jump-to-def-or-tag)
          ("C-c i" . 'haskell-add-import)
          ("C-c c" . 'haskell-compile)
@@ -397,6 +400,9 @@ Select HOST to look for the node on (defaults to localhost.)"
 ;; Programming utilities
 (global-set-key (kbd "C-c C-c") 'compile)
 (global-set-key (kbd "C-x C-g") 'magit-blame)
+
+;; Extended org-mode
+(require 'org-ext)
 
 ;; Extending Emacs
 ;; (use-package haskell-emacs
