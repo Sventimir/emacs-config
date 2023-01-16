@@ -35,6 +35,9 @@
 ;; Parenthese
 (electric-pair-mode)
 
+(use-package request
+  :ensure t)
+
 (use-package eshell
   :ensure t)
 
