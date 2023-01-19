@@ -406,6 +406,7 @@ Select HOST to look for the node on (defaults to localhost.)"
 
 ;; Extended org-mode
 (require 'org-ext)
+(require 'github)
 
 ;; Extending Emacs
 ;; (use-package haskell-emacs
