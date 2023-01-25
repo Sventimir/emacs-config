@@ -17,6 +17,7 @@
     (normal-top-level-add-subdirs-to-load-path)))
 
 (require 'gitlab)
+(require 'polynomial)
 
 ;; Menus
 (menu-bar-mode -1)
@@ -136,7 +137,7 @@ Additional ARGS may be passed to the browser if needed."
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(safe-local-variable-values
    '((eval progn
            (require 'opam-env)
@@ -378,6 +379,10 @@ Select HOST to look for the node on (defaults to localhost.)"
  '((shell . t)
    (python . t)
    (haskell . t)))
+
+;; Plots in ORG mode
+(use-package gnuplot
+  :ensure t)
 
 ;; Global key bindings
 (global-set-key (kbd "C-x m") 'mu4e)
