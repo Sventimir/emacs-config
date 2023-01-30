@@ -258,7 +258,9 @@ Additional ARGS may be passed to the browser if needed."
 (use-package lsp-mode
   :ensure t
   :init (setq lsp-keymap-prefix "C-l")
-  :config (define-key lsp-mode-map (kbd "C-l") lsp-command-map)
+  :config (progn
+            (define-key lsp-mode-map (kbd "C-l") lsp-command-map)
+            (define-key lsp-command-map (kbd "t") 'lsp-describe-thing-at-point))
   :hook
     (tuareg-mode . lsp)
     (hack-local-variables . (lambda ()
