@@ -359,6 +359,7 @@ Select HOST to look for the node on (defaults to localhost.)"
                                            "Copy URL of the link at point."
                                            (interactive)
                                            (kill-new (org-element-property :raw-link (org-element-context)))))
+(define-key org-mode-map (kbd "C-c C-RET") 'org-table-insert-row)
 
 
 ;; Opening Zoom links from Org mode (configured via customize):
@@ -414,6 +415,7 @@ Select HOST to look for the node on (defaults to localhost.)"
 ;; Extended org-mode
 (require 'org-ext)
 (require 'github)
+(require 'nbp)
 
 ;; Extending Emacs
 ;; (use-package haskell-emacs
