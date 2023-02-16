@@ -28,10 +28,9 @@ body for an HTTP request.  Display the response in buffer."
                      (json-pretty-print-buffer)
                      (js-mode)))))))
 
-(defun org-table-extreme-dates (&optional table)
-  "Find extreme dates in a TABLE.
-If TABLE is omitted, read the table at point.  Return the earliest
-and the latest dates as a cons-pair.")
+(defun org-table-with-nums (f &rest args)
+  "Apply F to ARGS converted to numbers."
+  (apply f (mapcar 'string-to-number args)))
 
 (with-eval-after-load "org"
   (define-key org-mode-map (kbd "C-c h") 'org-http-request))
