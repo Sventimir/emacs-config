@@ -43,6 +43,14 @@
 (use-package eshell
   :ensure t)
 
+(use-package recentf
+  :ensure t
+  :config (recentf-mode 1)
+  :init (setq recentf-max-menu-items 25
+              recentf-max-saved-items 25
+              initial-buffer-choice 'recentf-open-files)
+  :bind (("C-x C-r" . 'recentf-open-files)))
+
 ;; Evil mode
 (use-package undo-tree
   :ensure t)
@@ -84,8 +92,9 @@ Additional ARGS may be passed to the browser if needed."
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-c C-c")
- '(org-agenda-files '("~/work/timed_account.org"))
+ '(lsp-keymap-prefix "C-c C-c" t)
+ '(org-agenda-files
+   '("~/doc/agentka/payments.org" "/home/sven/work/timed_account.org"))
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
    '((shell . t)
