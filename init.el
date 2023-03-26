@@ -47,8 +47,7 @@
   :ensure t
   :config (recentf-mode 1)
   :init (setq recentf-max-menu-items 25
-              recentf-max-saved-items 25
-              initial-buffer-choice 'recentf-open-files)
+              recentf-max-saved-items 25)
   :bind (("C-x C-r" . 'recentf-open-files)))
 
 ;; Evil mode
@@ -449,6 +448,14 @@ Select HOST to look for the node on (defaults to localhost.)"
     ;; Automatically start it in OCaml buffers
     (add-hook 'tuareg-mode-hook 'merlin-mode t)
     (add-hook 'caml-mode-hook 'merlin-mode t)))
+
+(defun init-view ()
+  "Initially open buffers."
+  (progn
+    (split-window-right)
+    (recentf-open-files)))
+
+(setq initial-buffer-choice 'init-view)
 
 (provide 'init)
 ;;; init.el ends here
