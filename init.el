@@ -211,7 +211,7 @@ Additional ARGS may be passed to the browser if needed."
                   (mu4e-trash-folder  . "/sventimir/[Gmail].Kosz")))
 
         ,(make-mu4e-context
-          :name "MarcinPastudzki"
+          :name "Gmail-MarcinPastudzki"
           :match-func
             (lambda (msg)
               (when msg
@@ -228,7 +228,7 @@ Additional ARGS may be passed to the browser if needed."
                   (mu4e-trash-folder  . "/marcin-pastudzki/[Gmail].Kosz")))
 
         ,(make-mu4e-context
-          :name "Minaprotocol"
+          :name "MinaProtocol"
           :match-func
           (lambda (msg)
             (when msg
