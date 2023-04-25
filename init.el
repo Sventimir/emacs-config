@@ -37,6 +37,9 @@
 ;; Parenthese
 (electric-pair-mode)
 
+(use-package quelpa-use-package
+  :ensure t)
+
 (use-package request
   :ensure t)
 
@@ -57,7 +60,13 @@
   :ensure t
   :config (evil-mode 1)
           (global-undo-tree-mode)
-          (evil-set-undo-system 'undo-tree))
+          (evil-set-undo-system 'undo-tree)
+          (unbind-key (kbd "C-p") evil-normal-state-map)
+          (unbind-key (kbd "C-p") evil-emacs-state-map)
+          (unbind-key (kbd "C-p") evil-insert-state-map)
+          (unbind-key (kbd "C-p") evil-motion-state-map)
+          (unbind-key (kbd "C-p") evil-operator-state-map)
+          (unbind-key (kbd "C-p") evil-visual-state-map))
 
 ;; Qutebrowser
 (defun new-qutebrowser-window (url &rest args)
@@ -147,7 +156,7 @@ Additional ARGS may be passed to the browser if needed."
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(safe-local-variable-values
    '((eval progn
            (require 'opam-env)
@@ -307,6 +316,19 @@ Additional ARGS may be passed to the browser if needed."
   :ensure t
   :mode "\\.nix\\'")
 
+(use-package copilot
+  :quelpa (copilot :fetcher github
+                   :repo "zerolfx/copilot.el"
+                   :branch "main"
+                   :files ("dist" "*.el"))
+  :config (global-unset-key (kbd "C-p"))
+  :bind (("C-p C-p" . 'copilot-mode)
+         ("C-p c" . 'copilot-complete)
+         ("C-p n" . 'copilot-next-completion)
+         ("C-p p" . 'copilot-previous-completion)
+         ("C-p RET" . 'copilot-accept-completion)
+         ("C-p x" . 'copilot-clear-overlay)))
+
 ;; Michelson support
 (use-package michelson-mode
   :load-path "/home/sven/work/tezos/emacs"
@@ -456,6 +478,8 @@ Select HOST to look for the node on (defaults to localhost.)"
     (recentf-open-files)))
 
 (setq initial-buffer-choice 'init-view)
+
+
 
 (provide 'init)
 ;;; init.el ends here
