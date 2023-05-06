@@ -96,13 +96,14 @@ Additional ARGS may be passed to the browser if needed."
  '(global-undo-tree-mode t)
  '(haskell-emacs-dir "~/.emacs.d/haskell/")
  '(haskell-interactive-popup-errors nil)
+ '(haskell-process-type 'stack-ghci)
  '(inhibit-startup-screen t)
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
  '(lsp-keymap-prefix "C-c C-c" t)
  '(org-agenda-files
-   '("~/doc/agentka/payments.org" "/home/sven/work/timed_account.org"))
+   '("~/doc/mieszkanie/koszty.org" "/home/sven/doc/agentka/payments.org" "/home/sven/work/timed_account.org"))
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
    '((shell . t)
@@ -295,6 +296,7 @@ Additional ARGS may be passed to the browser if needed."
 ;; Haskell
 (use-package haskell-mode
   :ensure t
+  :init (setq compile-command "stack build")
   :hook (haskell-mode . interactive-haskell-mode)
   :bind (("C-c g" . 'haskell-mode-jump-to-def-or-tag)
          ("C-c i" . 'haskell-add-import)
