@@ -61,6 +61,7 @@
   :config (evil-mode 1)
           (global-undo-tree-mode)
           (evil-set-undo-system 'undo-tree)
+          (evil-select-search-module 'evil-search-module 'evil-search)
           (unbind-key (kbd "C-p") evil-normal-state-map)
           (unbind-key (kbd "C-p") evil-emacs-state-map)
           (unbind-key (kbd "C-p") evil-insert-state-map)
