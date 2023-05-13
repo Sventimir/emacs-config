@@ -159,6 +159,7 @@ Additional ARGS may be passed to the browser if needed."
  '(org-support-shift-select 'always)
  '(package-selected-packages
    '(copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+ '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(safe-local-variable-values
    '((eval progn
            (require 'opam-env)
@@ -473,15 +474,6 @@ Select HOST to look for the node on (defaults to localhost.)"
     ;; Automatically start it in OCaml buffers
     (add-hook 'tuareg-mode-hook 'merlin-mode t)
     (add-hook 'caml-mode-hook 'merlin-mode t)))
-
-(defun init-view ()
-  "Initially open buffers."
-  (progn
-    (split-window-right)
-    (recentf-open-files)))
-
-(setq initial-buffer-choice 'init-view)
-
 
 
 (provide 'init)
