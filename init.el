@@ -19,6 +19,7 @@
 (require 'gitlab)
 (require 'polynomial)
 (require 'numeric)
+(require 'locstack)
 
 ;; Menus
 (menu-bar-mode -1)
@@ -52,6 +53,14 @@
   :init (setq recentf-max-menu-items 25
               recentf-max-saved-items 25)
   :bind (("C-x C-r" . 'recentf-open-files)))
+
+;; Perspectives
+(use-package perspective
+  :ensure t
+  :bind ("C-x C-b" . persp-list-buffers)
+  :custom (persp-mode-prefix-key (kbd "C-q"))
+  :init (persp-mode))
+
 
 ;; Evil mode
 (use-package undo-tree
@@ -158,7 +167,7 @@ Additional ARGS may be passed to the browser if needed."
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(tuareg-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(safe-local-variable-values
    '((eval progn
@@ -308,7 +317,11 @@ Additional ARGS may be passed to the browser if needed."
 
 ;; OCaml
 (use-package tuareg
-  :ensure t)
+  :ensure t
+  :hook (tuareg-mode-hook . #'locstack-mode))
+
+
+(add-hook 'tuareg-mode-hook 'locstack-mode)
 
 (use-package dune
   :ensure t)
