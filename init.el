@@ -99,6 +99,7 @@ Additional ARGS may be passed to the browser if needed."
  '(backup-directory-alist '((".*" . "~/.emacs-backups")))
  '(browse-url-handlers '(("^https://meet.google.com/.*" . new-qutebrowser-window)))
  '(compilation-scroll-output 'first-error)
+ '(compile-command "dune build")
  '(custom-enabled-themes '(tango-dark))
  '(custom-safe-themes
    '("43851bb46b91f16e93a3eb85f711e8afefbd4a80ea1a21e25c6d88544eb22c7d" default))
@@ -167,7 +168,7 @@ Additional ARGS may be passed to the browser if needed."
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(tuareg-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(safe-local-variable-values
    '((eval progn
@@ -307,7 +308,6 @@ Additional ARGS may be passed to the browser if needed."
 ;; Haskell
 (use-package haskell-mode
   :ensure t
-  :init (setq compile-command "stack build")
   :hook (haskell-mode . interactive-haskell-mode)
   :bind (("C-c g" . 'haskell-mode-jump-to-def-or-tag)
          ("C-c i" . 'haskell-add-import)
