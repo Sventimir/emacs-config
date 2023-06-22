@@ -170,6 +170,8 @@ Additional ARGS may be passed to the browser if needed."
  '(package-selected-packages
    '(copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
+ '(python-indent-guess-indent-offset nil)
+ '(python-indent-offset 2)
  '(safe-local-variable-values
    '((eval progn
            (require 'opam-env)
@@ -255,7 +257,7 @@ Additional ARGS may be passed to the browser if needed."
           (lambda (msg)
             (when msg
               (string-prefix-p "/mina" (mu4e-message-field msg :maildir))))
-          :vars '((user-mail-address . "marcin.pastudzki@minaprotocol.com")
+          :vars '((user-mail-address . "marcin.pastudzki@minafoundation.com")
                   (user-full-name    . "Marcin Pastudzki")
                   (smtpmail-smtp-server  . "smtp.gmail.com")
                   (smtpmail-smtp-user . "marcin.pastudzki@minaprotocol.com")
@@ -317,9 +319,7 @@ Additional ARGS may be passed to the browser if needed."
 
 ;; OCaml
 (use-package tuareg
-  :ensure t
-  :hook (tuareg-mode-hook . #'locstack-mode))
-
+  :ensure t)
 
 (add-hook 'tuareg-mode-hook 'locstack-mode)
 
