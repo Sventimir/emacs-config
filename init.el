@@ -108,6 +108,7 @@ Additional ARGS may be passed to the browser if needed."
  '(haskell-emacs-dir "~/.emacs.d/haskell/")
  '(haskell-interactive-popup-errors nil)
  '(haskell-process-type 'stack-ghci)
+ '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
@@ -172,6 +173,7 @@ Additional ARGS may be passed to the browser if needed."
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 2)
+ '(rust-indent-offset 2)
  '(safe-local-variable-values
    '((eval progn
            (require 'opam-env)
@@ -463,6 +465,7 @@ Select HOST to look for the node on (defaults to localhost.)"
 ;; Programming utilities
 (global-set-key (kbd "C-c C-c") 'compile)
 (global-set-key (kbd "C-x C-g") 'magit-blame)
+(global-set-key (kbd "C-c _") (lambda () (interactive) (insert-sep-region "_" 3)))
 
 ;; Extended org-mode
 (require 'org-ext)
