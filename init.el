@@ -37,6 +37,7 @@
 
 ;; Parenthese
 (electric-pair-mode)
+(electric-indent-mode -1)
 
 (use-package quelpa-use-package
   :ensure t)
@@ -105,6 +106,7 @@ Additional ARGS may be passed to the browser if needed."
    '("43851bb46b91f16e93a3eb85f711e8afefbd4a80ea1a21e25c6d88544eb22c7d" default))
  '(evil-undo-system 'undo-tree)
  '(global-undo-tree-mode t)
+ '(haskell-compiler-type 'stack)
  '(haskell-emacs-dir "~/.emacs.d/haskell/")
  '(haskell-interactive-popup-errors nil)
  '(haskell-process-type 'stack-ghci)
@@ -298,10 +300,12 @@ Additional ARGS may be passed to the browser if needed."
             (define-key lsp-mode-map (kbd "C-l") lsp-command-map)
             (define-key lsp-command-map (kbd "t") 'lsp-describe-thing-at-point))
   :hook
+    (rust-mode . lsp)
     (tuareg-mode . lsp)
     (hack-local-variables . (lambda ()
 			      (when (derived-mode-p 'tuareg-mode) (lsp-deferred))))
   :commands (lsp lsp-deferred))
+
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode)
