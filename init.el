@@ -474,6 +474,24 @@ Select HOST to look for the node on (defaults to localhost.)"
 (global-set-key (kbd "C-x C-g") 'magit-blame)
 (global-set-key (kbd "C-c _") (lambda () (interactive) (insert-sep-region "_" 3)))
 
+;; Inserting special characters
+(defmacro lambda-insert (chrs)
+  "Return a lambda inserting CHRS."
+  `(lambda () (interactive) (insert ,chrs)))
+
+(unbind-key (kbd "C-k") evil-insert-state-map)
+(unbind-key (kbd "C-k") global-map)
+(define-key evil-insert-state-map (kbd "C-k c") (lambda-insert "♣"))
+(define-key evil-insert-state-map (kbd "C-k d") (lambda-insert "♦"))
+(define-key evil-insert-state-map (kbd "C-k h") (lambda-insert "♥"))
+(define-key evil-insert-state-map (kbd "C-k s") (lambda-insert "♠"))
+
+;; Miscellanea
+(defun active-minor-modes ()
+  "Return a list of active minor modes for the current buffer."
+  (interactive)
+  (seq-filter 'symbol-value (mapcar 'car minor-mode-alist)))
+
 ;; Extended org-mode
 (require 'org-ext)
 (require 'github)
