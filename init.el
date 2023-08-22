@@ -55,6 +55,9 @@
               recentf-max-saved-items 25)
   :bind (("C-x C-r" . 'recentf-open-files)))
 
+(use-package direnv
+  :ensure t)
+
 ;; Perspectives
 (use-package perspective
   :ensure t
