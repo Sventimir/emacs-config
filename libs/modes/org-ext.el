@@ -21,12 +21,15 @@ body for an HTTP request.  Display the response in buffer."
       :complete (cl-function
                  (lambda (&key response &allow-other-keys)
                    (progn
-                     (pop-to-buffer "*org-http-response*")
-                     (erase-buffer)
-                     (message (format "HTTP status code: %s." (request-response-status-code response)))
-                     (insert (request-response-data response))
-                     (json-pretty-print-buffer)
-                     (js-mode)))))))
+                     (if (get-buffer-window "*org-http-response*")
+                         nil
+                       (pop-to-buffer "*org-http-response*"))
+                     (with-current-buffer "*org-http-response*"
+                       (erase-buffer)
+                       (message (format "HTTP status code: %s." (request-response-status-code response)))
+                       (insert (request-response-data response))
+                       (json-pretty-print-buffer)
+                       (js-mode))))))))
 
 (defun org-table-with-nums (f &rest args)
   "Apply F to ARGS converted to numbers."
