@@ -16,6 +16,7 @@
     (normal-top-level-add-to-load-path (list default-directory))
     (normal-top-level-add-subdirs-to-load-path)))
 
+(require 'bridge)
 (require 'gitlab)
 (require 'polynomial)
 (require 'numeric)
@@ -135,35 +136,25 @@ Additional ARGS may be passed to the browser if needed."
      ("file+emacs")
      ("shell" :follow org-link--open-shell)
      ("news" :follow
-      #[514 "\301\300\302Q\"\207"
+      #[514 "\301\300\302\4Q\2\"\207"
             ["news" browse-url ":"]
-            6 "
-
-(fn URL ARG)"])
+            6 "\12\12(fn URL ARG)"])
      ("mailto" :follow
-      #[514 "\301\300\302Q\"\207"
+      #[514 "\301\300\302\4Q\2\"\207"
             ["mailto" browse-url ":"]
-            6 "
-
-(fn URL ARG)"])
+            6 "\12\12(fn URL ARG)"])
      ("https" :follow
-      #[514 "\301\300\302Q\"\207"
+      #[514 "\301\300\302\4Q\2\"\207"
             ["https" browse-url ":"]
-            6 "
-
-(fn URL ARG)"])
+            6 "\12\12(fn URL ARG)"])
      ("http" :follow
-      #[514 "\301\300\302Q\"\207"
+      #[514 "\301\300\302\4Q\2\"\207"
             ["http" browse-url ":"]
-            6 "
-
-(fn URL ARG)"])
+            6 "\12\12(fn URL ARG)"])
      ("ftp" :follow
-      #[514 "\301\300\302Q\"\207"
+      #[514 "\301\300\302\4Q\2\"\207"
             ["ftp" browse-url ":"]
-            6 "
-
-(fn URL ARG)"])
+            6 "\12\12(fn URL ARG)"])
      ("help" :follow org-link--open-help :store org-link--store-help)
      ("file" :complete org-link-complete-file)
      ("elisp" :follow org-link--open-elisp)
@@ -174,7 +165,7 @@ Additional ARGS may be passed to the browser if needed."
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 2)
@@ -354,6 +345,9 @@ Additional ARGS may be passed to the browser if needed."
          ("C-p p" . 'copilot-previous-completion)
          ("C-p RET" . 'copilot-accept-completion)
          ("C-p x" . 'copilot-clear-overlay)))
+
+(use-package graphql-mode
+  :ensure t)
 
 ;; Michelson support
 (use-package michelson-mode
