@@ -510,6 +510,28 @@ Select HOST to look for the node on (defaults to localhost.)"
     (add-hook 'tuareg-mode-hook 'merlin-mode t)
     (add-hook 'caml-mode-hook 'merlin-mode t)))
 
+;; Predefined perspectives
+(defun persp-mail ()
+  "Create a perspective and open mu4e inside it."
+  (interactive)
+  (persp-switch "mail")
+  (mu4e))
+
+(defun ide (workdir &optional name)
+  "Create perspective NAME and open the project in WORKDIR inside it."
+  (interactive "fWorkdir: ")
+  (persp-switch name)
+  (split-window-right)
+  (magit workdir)
+  (toggle-selected-window-dedicated-p)
+  (split-window-below)
+  (select-window (previous-window)))
+
+(defun mina ()
+  "Create a perspective and open the Mina project inside it."
+  (interactive)
+  (ide "/home/sven/mina"))
+
 
 (provide 'init)
 ;;; init.el ends here
