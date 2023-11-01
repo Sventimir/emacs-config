@@ -119,7 +119,7 @@ Additional ARGS may be passed to the browser if needed."
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-c C-c" t)
+ '(lsp-keymap-prefix "C-c C-c")
  '(org-agenda-files
    '("~/doc/mieszkanie/koszty.org" "/home/sven/doc/agentka/payments.org" "/home/sven/work/timed_account.org"))
  '(org-babel-haskell-compiler "ghc -dynamic")
@@ -165,7 +165,7 @@ Additional ARGS may be passed to the browser if needed."
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 2)
@@ -399,6 +399,9 @@ Select HOST to look for the node on (defaults to localhost.)"
 (use-package elisp-format
   :ensure t)
 
+(use-package csv-mode
+  :ensure t)
+
 ;; Spell-checking
 (add-hook 'text-mode-hook 'flyspell-mode)
 (add-hook 'prog-mode-hook 'flyspell-prog-mode)
@@ -521,6 +524,7 @@ Select HOST to look for the node on (defaults to localhost.)"
   "Create perspective NAME and open the project in WORKDIR inside it."
   (interactive "fWorkdir: ")
   (persp-switch name)
+  (setq default-directory workdir)
   (split-window-right)
   (magit workdir)
   (toggle-selected-window-dedicated-p)
@@ -530,7 +534,7 @@ Select HOST to look for the node on (defaults to localhost.)"
 (defun mina ()
   "Create a perspective and open the Mina project inside it."
   (interactive)
-  (ide "/home/sven/mina"))
+  (ide "/home/sven/work/mina" "mina"))
 
 
 (provide 'init)
