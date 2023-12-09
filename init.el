@@ -120,6 +120,8 @@ Additional ARGS may be passed to the browser if needed."
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
  '(lsp-keymap-prefix "C-c C-c" t)
+ '(lua-indent-level 2)
+ '(lua-prefix-key "C-c")
  '(org-agenda-files
    '("~/doc/mieszkanie/koszty.org" "/home/sven/doc/agentka/payments.org" "/home/sven/work/timed_account.org"))
  '(org-babel-haskell-compiler "ghc -dynamic")
@@ -401,11 +403,12 @@ Select HOST to look for the node on (defaults to localhost.)"
 (use-package lua-mode
   :ensure t
   :bind (("C-c C-s" . 'lua-start-process)
-         ("C-c C-c" . 'lua-send-buffer)
+         ("C-c C-b" . 'lua-send-buffer)
          ("C-c C-r" . 'lua-send-region)
          ("C-c C-l" . 'lua-send-current-line)
          ("C-c C-z" . 'lua-show-process-buffer)
-         ("C-c C-f" . 'lua-send-defun)))
+         ("C-c C-f" . 'lua-send-defun)
+         ("C-c C-c" . 'lua-restart-with-whole-file)))
 
 (use-package elisp-format
   :ensure t)
