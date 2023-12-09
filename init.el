@@ -119,7 +119,7 @@ Additional ARGS may be passed to the browser if needed."
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-c C-c")
+ '(lsp-keymap-prefix "C-c C-c" t)
  '(org-agenda-files
    '("~/doc/mieszkanie/koszty.org" "/home/sven/doc/agentka/payments.org" "/home/sven/work/timed_account.org"))
  '(org-babel-haskell-compiler "ghc -dynamic")
@@ -165,7 +165,7 @@ Additional ARGS may be passed to the browser if needed."
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(lua-mode csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 2)
@@ -177,6 +177,7 @@ Additional ARGS may be passed to the browser if needed."
            (set-opam-env "/home/sven/.opam/mina")
            (setenv "WORKDIR" "/home/sven/work")
            (add-to-list 'exec-path "/home/sven/.opam/mina/bin"))))
+ '(sh-basic-offset 2)
  '(sql-connection-alist nil)
  '(typescript-indent-level 2)
  '(undo-tree-auto-save-history nil))
@@ -396,6 +397,16 @@ Select HOST to look for the node on (defaults to localhost.)"
 (use-package typescript-mode
   :ensure t)
 
+
+(use-package lua-mode
+  :ensure t
+  :bind (("C-c C-s" . 'lua-start-process)
+         ("C-c C-c" . 'lua-send-buffer)
+         ("C-c C-r" . 'lua-send-region)
+         ("C-c C-l" . 'lua-send-current-line)
+         ("C-c C-z" . 'lua-show-process-buffer)
+         ("C-c C-f" . 'lua-send-defun)))
+
 (use-package elisp-format
   :ensure t)
 
@@ -493,6 +504,11 @@ Select HOST to look for the node on (defaults to localhost.)"
 (require 'org-ext)
 (require 'github)
 (require 'nbp)
+
+;; Wesnoth mode
+(add-to-list 'load-path "/usr/share/wesnoth/data/tools/emacs_mode/")
+(autoload 'wesnoth-mode "wesnoth-mode" "Major mode for editing WML." t)
+(add-to-list 'auto-mode-alist '("\\.cfg\\'" . wesnoth-mode))
 
 ;; Extending Emacs
 ;; (use-package haskell-emacs
