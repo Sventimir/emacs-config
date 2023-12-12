@@ -86,7 +86,7 @@ Assume TRICKS is greater(!) than 0."
      (setf (bridge-contract-level contract) level)
      (substring str 1))))
 
-(defun brodge--parse-suit (contract str)
+(defun bridge--parse-suit (contract str)
   "Parse the suit of CONTRACT from STR."
   (let ((suit (substring str 0 1)))
     (list
