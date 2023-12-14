@@ -316,13 +316,14 @@ Additional ARGS may be passed to the browser if needed."
   :hook (haskell-mode . interactive-haskell-mode)
   :bind (("C-c g" . 'haskell-mode-jump-to-def-or-tag)
          ("C-c i" . 'haskell-add-import)
-         ("C-c c" . 'haskell-compile)
+         ("C-c C-c" . 'haskell-compile)
          ("C-c C-x" . 'haskell-goto-next-error)
          ("C-c C-t" . 'haskell-doc-show-type)))
 
 ;; OCaml
 (use-package tuareg
-  :ensure t)
+  :ensure t
+  :bind (("C-c C-c" . 'compile)))
 
 (add-hook 'tuareg-mode-hook 'locstack-mode)
 
@@ -481,7 +482,6 @@ Select HOST to look for the node on (defaults to localhost.)"
 (global-set-key (kbd "C-M-<left>") 'shrink-window-horizontally)
 
 ;; Programming utilities
-(global-set-key (kbd "C-c C-c") 'compile)
 (global-set-key (kbd "C-x C-g") 'magit-blame)
 (global-set-key (kbd "C-c _") (lambda () (interactive) (insert-sep-region "_" 3)))
 
@@ -548,6 +548,7 @@ Select HOST to look for the node on (defaults to localhost.)"
   (magit workdir)
   (toggle-selected-window-dedicated-p)
   (split-window-below)
+  (switch-to-buffer "*scratch*")
   (select-window (previous-window)))
 
 (defun mina ()
