@@ -21,6 +21,7 @@
 (require 'polynomial)
 (require 'numeric)
 (require 'locstack)
+(require 'pacman)
 
 ;; Menus
 (menu-bar-mode -1)
@@ -473,8 +474,8 @@ Select HOST to look for the node on (defaults to localhost.)"
 ;; Window management
 (global-set-key (kbd "C->") (lambda () (interactive) (select-window (next-window))))
 (global-set-key (kbd "C-<") (lambda () (interactive) (select-window (previous-window))))
-(global-set-key (kbd "C-x w h") 'split-window-horizontally)
-(global-set-key (kbd "C-x w v") 'split-window-vertically)
+(global-set-key (kbd "C-x w h") 'split-window-right)
+(global-set-key (kbd "C-x w v") 'split-window-below)
 (global-set-key (kbd "C-x w d") 'toggle-selected-window-dedicated-p)
 (global-set-key (kbd "C-M-<up>") 'enlarge-window)
 (global-set-key (kbd "C-M-<right>") 'enlarge-window-horizontally)
