@@ -120,7 +120,7 @@ Additional ARGS may be passed to the browser if needed."
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-c C-c" t)
+ '(lsp-keymap-prefix "C-c C-c")
  '(lua-indent-level 2)
  '(lua-prefix-key "C-c")
  '(org-agenda-files
@@ -168,10 +168,10 @@ Additional ARGS may be passed to the browser if needed."
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(lua-mode csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(pyenv pylsp lua-mode csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
- '(python-indent-offset 2)
+ '(python-indent-offset 4)
  '(rust-indent-offset 2)
  '(safe-local-variable-values
    '((eval progn
@@ -276,6 +276,17 @@ Additional ARGS may be passed to the browser if needed."
 (use-package envrc
   :ensure t)
 
+(use-package pyvenv
+  :ensure t
+  :config (pyvenv-mode t))
+
+(setq pyvenv-post-activate-hooks
+      (list (lambda ()
+              (setq python-shell-interpreter (concat pyvenv-virtual-env "bin/python3")))))
+(setq pyvenv-post-deactivate-hooks
+      (list (lambda ()
+              (setq python-shell-interpreter "python3"))))
+
 (use-package deferred
   :ensure t)
 
@@ -299,6 +310,7 @@ Additional ARGS may be passed to the browser if needed."
             (define-key lsp-command-map (kbd "t") 'lsp-describe-thing-at-point))
   :hook
     (rust-mode . lsp)
+    (python-mode . lsp)
     (tuareg-mode . lsp)
     (hack-local-variables . (lambda ()
 			      (when (derived-mode-p 'tuareg-mode) (lsp-deferred))))
@@ -329,6 +341,9 @@ Additional ARGS may be passed to the browser if needed."
 (add-hook 'tuareg-mode-hook 'locstack-mode)
 
 (use-package dune
+  :ensure t)
+
+(use-package python
   :ensure t)
 
 (use-package dockerfile-mode
@@ -497,6 +512,9 @@ Select HOST to look for the node on (defaults to localhost.)"
 (define-key evil-insert-state-map (kbd "C-k d") (lambda-insert "♦"))
 (define-key evil-insert-state-map (kbd "C-k h") (lambda-insert "♥"))
 (define-key evil-insert-state-map (kbd "C-k s") (lambda-insert "♠"))
+
+(define-key epa-key-list-mode-map (kbd "C-s") 'epa-mark-key)
+(define-key epa-key-list-mode-map (kbd "C-u") 'epa-unmark-key)
 
 ;; Miscellanea
 (defun active-minor-modes ()
