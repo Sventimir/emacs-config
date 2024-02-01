@@ -476,6 +476,9 @@ Select HOST to look for the node on (defaults to localhost.)"
 (use-package gnuplot
   :ensure t)
 
+;; Encrypted org-mode extension
+(add-to-list 'auto-mode-alist '("\\.org.gpg\\'" . org-mode))
+
 ;; Global key bindings
 (global-set-key (kbd "C-x m") 'mu4e)
 (global-set-key (kbd "C-x b") 'helm-buffers-list)
