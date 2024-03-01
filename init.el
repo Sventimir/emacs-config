@@ -37,7 +37,7 @@
     	      tab-width 4)
 (setq indent-line-function 'insert-tab)
 
-;; Parenthese
+;; Parentheses
 (electric-pair-mode)
 (electric-indent-mode -1)
 
@@ -277,6 +277,13 @@ Additional ARGS may be passed to the browser if needed."
   )
 
 ;; Programming language support
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode t)
+  :bind (("C-c e 1" . 'flycheck-first-error)
+         ("C-c e n" . 'flycheck-next-error)
+         ("C-c e p" . 'flycheck-previous-error)))
+
 (use-package envrc
   :ensure t)
 
@@ -286,26 +293,22 @@ Additional ARGS may be passed to the browser if needed."
 
 (setq pyvenv-post-activate-hooks
       (list (lambda ()
-              (setq python-shell-interpreter (concat pyvenv-virtual-env "bin/python3")))))
+              (setq python-shell-interpreter (concat pyvenv-virtual-env "bin/python")
+                    flycheck-python-pylint-executable (concat pyvenv-virtual-env "bin/python")))))
 (setq pyvenv-post-deactivate-hooks
       (list (lambda ()
-              (setq python-shell-interpreter "python3"))))
+              (setq python-shell-interpreter "python3"
+                    flycheck-python-pylint-executable (concat pyvenv-virtual-env "bin/python")))))
 
 (use-package deferred
   :ensure t)
-
-(use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode t)
-  :bind (("C-c e 1" . 'flycheck-first-error)
-         ("C-c e n" . 'flycheck-next-error)
-         ("C-c e p" . 'flycheck-previous-error)))
 
 (use-package yasnippet
   :ensure t)
 
 (use-package company
   :ensure t)
+
 (use-package lsp-mode
   :ensure t
   :init (setq lsp-keymap-prefix "C-l")
@@ -348,7 +351,9 @@ Additional ARGS may be passed to the browser if needed."
   :ensure t)
 
 (use-package python
-  :ensure t)
+  :ensure t
+  :hook (python-mode . (lambda ()
+                         (flycheck-add-next-checker 'lsp 'python-pylint))))
 
 (use-package dockerfile-mode
   :ensure t)
@@ -571,7 +576,7 @@ Select HOST to look for the node on (defaults to localhost.)"
   (persp-switch name)
   (setq default-directory workdir)
   (split-window-right)
-  (magit workdir)
+  (magit-status-setup-buffer workdir)
   (toggle-selected-window-dedicated-p)
   (split-window-below)
   (switch-to-buffer "*scratch*")

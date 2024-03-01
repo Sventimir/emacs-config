@@ -11,10 +11,9 @@
 The search is based on looking for a file whose name matches REGEX.
 Returns the dir where the file was found.  Returns NIL when the root (/)
 directory is reached before the file was found."
-  (progn (message dir)
   (cond ((directory-files dir nil regex) dir)
 	((equal dir "/") nil)
-	(t (find-project-root regex (rm-suffix "/" (file-name-directory dir)))))))
+	(t (find-project-root regex (rm-suffix "/" (file-name-directory dir))))))
 
 (defun goto-project-root (file)
   "Find the project root directory and move there if it was found.
