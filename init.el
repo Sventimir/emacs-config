@@ -338,7 +338,12 @@ Additional ARGS may be passed to the browser if needed."
          ("C-c i" . 'haskell-add-import)
          ("C-c C-c" . 'haskell-compile)
          ("C-c C-x" . 'haskell-goto-next-error)
-         ("C-c C-t" . 'haskell-doc-show-type)))
+         ("C-c C-t" . 'haskell-doc-show-type)
+         ("C-c t" . (lambda ()
+                      (interactive)
+                      (setq-local haskell-compile-stack-build-command "stack test")
+                      (haskell-compile)
+                      (setq-local haskell-compile-stack-build-command "stack build --fast")))))
 
 ;; OCaml
 (use-package tuareg
