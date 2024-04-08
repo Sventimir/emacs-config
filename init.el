@@ -124,7 +124,7 @@ Additional ARGS may be passed to the browser if needed."
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-c C-c" t)
+ '(lsp-keymap-prefix "C-c C-c")
  '(lua-indent-level 2)
  '(lua-prefix-key "C-c")
  '(org-agenda-files
@@ -172,11 +172,10 @@ Additional ARGS may be passed to the browser if needed."
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(crux pyenv pylsp lua-mode csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(docker-tramp tree-sitter crux pyenv pylsp lua-mode csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 4)
- '(rust-indent-offset 2)
  '(safe-local-variable-values
    '((eval progn
            (require 'opam-env)
@@ -195,6 +194,13 @@ Additional ARGS may be passed to the browser if needed."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;; Tree-sitter support
+(use-package tree-sitter
+  :ensure t)
+
+(use-package tsc
+  :ensure t)
 
 ;; Configure Tree-sitter. Unfortunately this cannot
 ;; be done through Customize at this point.
@@ -375,6 +381,10 @@ Additional ARGS may be passed to the browser if needed."
                          (flycheck-add-next-checker 'lsp 'python-pylint))))
 
 (use-package dockerfile-mode
+  :ensure t)
+
+;; Explore and edit running docker containers with Emacs.
+(use-package docker-tramp
   :ensure t)
 
 (use-package nix-mode
