@@ -16,7 +16,6 @@
     (normal-top-level-add-to-load-path (list default-directory))
     (normal-top-level-add-subdirs-to-load-path)))
 
-(require 'bridge)
 (require 'gitlab)
 (require 'polynomial)
 (require 'numeric)
@@ -130,12 +129,7 @@ Additional ARGS may be passed to the browser if needed."
  '(org-agenda-files
    '("~/doc/mieszkanie/koszty.org" "/home/sven/doc/agentka/payments.org" "/home/sven/work/timed_account.org"))
  '(org-babel-haskell-compiler "ghc -dynamic")
- '(org-babel-load-languages
-   '((shell . t)
-     (python . t)
-     (haskell . t)
-     (sql . t)
-     (emacs-lisp . t)))
+ '(org-babel-load-languages '((shell . t) (python . t) (dot . t)))
  '(org-link-parameters
    '(("bibtex" :follow org-bibtex-open :store org-bibtex-store-link)
      ("mu4e" :follow mu4e-org-open :store mu4e-org-store-link)
