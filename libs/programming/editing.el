@@ -3,39 +3,55 @@
 ;;; Code:
 (require 'range)
 
-(defun capitalize-current-char ()
+(defun lowercase-current-char ()
   "Replace current char with its lowercase version."
   (let ((char (char-after)))
     (delete-char 1)
-    (insert (char-to-string (+ char 32)))))
+    (insert (char-to-string (+ char 32)))
+    (backward-char)))
 
-(defun to-snake-case-until-end-of-word ()
-  "Convert the word at point to snake case."
+(defun transform-camel-until-end-of-word (trans-cap)
+  "Convert the word at point using TRANS-CAP."
   (forward-char)
   (let ((char (char-after)))
     (cond
      ((or (small-letter-p char) (digit-p char))
       (progn
-        (to-snake-case-until-end-of-word)))
+        (transform-camel-until-end-of-word trans-cap)))
      ((capital-letter-p char) (progn
-                                (insert "_")
-                                (capitalize-current-char)
-                                (to-snake-case-until-end-of-word)))
+                                (funcall trans-cap nil)
+                                (transform-camel-until-end-of-word trans-cap)))
      (t nil))))
 
-(defun to-snake-case ()
-  "Convert the word at point to snake case."
-  (interactive)
+(defun cap-to-snake (first-p)
+  "Convert character at point to lowercase; insert '_' unless FIRST-P."
+  (if (not first-p) (insert "_"))
+  (lowercase-current-char))
+
+(defun transform-camel-case (trans-cap)
+  "Transform the word at point by applying TRANS-CAP to every capital letter."
   (save-excursion
     (forward-char)
     (forward-word -1)
     (let ((c (char-after)))
       (cond
-       ((or (small-letter-p c) (digit-p c)) (to-snake-case-until-end-of-word))
+       ((or (small-letter-p c) (digit-p c)) (transform-camel-until-end-of-word trans-cap))
        ((capital-letter-p c) (progn
-                               (capitalize-current-char)
-                               (to-snake-case-until-end-of-word)))
-       (t (message "to-snake-case only makes sense for words: '%c'" c))))))
+                               (funcall trans-cap t)
+                               (transform-camel-until-end-of-word trans-cap)))
+       (t (message "tramsform-camel-case only makes sense for words: '%c'" c))))))
+
+(defun to-snake-case ()
+  "Convert the word at point to snake case."
+  (interactive)
+  (transform-camel-case 'cap-to-snake))
+
+(defun split-camel-case ()
+  "Insert a space before each capital letter in word at point except the first."
+  (interactive)
+  (transform-camel-case (lambda (first-p)
+                          (if (not first-p) (insert " ")))))
 
 (provide 'editing)
 ;;; editing.el ends here
+
