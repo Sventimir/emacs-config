@@ -21,6 +21,8 @@
 (require 'numeric)
 (require 'locstack)
 (require 'pacman)
+(require 'range)
+(require 'editing)
 
 ;; Menus
 (menu-bar-mode -1)
@@ -129,7 +131,12 @@ Additional ARGS may be passed to the browser if needed."
  '(org-agenda-files
    '("~/doc/mieszkanie/koszty.org" "/home/sven/doc/agentka/payments.org" "/home/sven/work/timed_account.org"))
  '(org-babel-haskell-compiler "ghc -dynamic")
- '(org-babel-load-languages '((shell . t) (python . t) (dot . t)))
+ '(org-babel-load-languages
+   '((dot . t)
+     (emacs-lisp . t)
+     (python . t)
+     (shell . t)
+     (sql . t)))
  '(org-link-parameters
    '(("bibtex" :follow org-bibtex-open :store org-bibtex-store-link)
      ("mu4e" :follow mu4e-org-open :store mu4e-org-store-link)
