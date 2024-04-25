@@ -108,6 +108,7 @@ Additional ARGS may be passed to the browser if needed."
  '(backup-by-copying t)
  '(backup-by-copying-when-linked t)
  '(backup-directory-alist '((".*" . "~/.emacs-backups")))
+ '(bridge-dealer-bin "/home/sven/code/rust/bridge-mentor/target/release/dealer")
  '(browse-url-handlers '(("^https://meet.google.com/.*" . new-qutebrowser-window)))
  '(compilation-scroll-output 'first-error)
  '(compile-command "dune build")
@@ -603,7 +604,8 @@ Select HOST to look for the node on (defaults to localhost.)"
 (defun ide (workdir &optional name)
   "Create perspective NAME and open the project in WORKDIR inside it."
   (interactive "fWorkdir: ")
-  (persp-switch name)
+  (let ((default (file-name-base workdir)))
+    (persp-switch (or name (read-string "Perspective name: " default))))
   (setq default-directory workdir)
   (split-window-right)
   (magit-status-setup-buffer workdir)
