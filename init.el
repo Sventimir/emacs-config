@@ -11,10 +11,14 @@
 (require 'use-package)
 
 ;; Add libs/ directory to the load path
-(let ((default-directory  "~/.emacs.d/libs/"))
-  (progn
-    (normal-top-level-add-to-load-path (list default-directory))
-    (normal-top-level-add-subdirs-to-load-path)))
+(defun load-dir (dir)
+  "Add all files in DIR to the load path."
+  (let ((default-directory dir))
+    (progn
+      (normal-top-level-add-to-load-path (list default-directory))
+      (normal-top-level-add-subdirs-to-load-path))))
+
+(load-dir "~/.emacs.d/libs/")
 
 (require 'gitlab)
 (require 'polynomial)
@@ -607,18 +611,19 @@ Select HOST to look for the node on (defaults to localhost.)"
   (let ((default (file-name-base workdir)))
     (persp-switch (or name (read-string "Perspective name: " default))))
   (setq default-directory workdir)
+  (load-dir workdir)
   (split-window-right)
   (magit-status-setup-buffer workdir)
   (toggle-selected-window-dedicated-p)
   (split-window-below)
   (switch-to-buffer "*scratch*")
+  (setq default-directory workdir)
   (select-window (previous-window)))
 
 (defun mina ()
   "Create a perspective and open the Mina project inside it."
   (interactive)
   (ide "/home/sven/work/mina" "mina"))
-
 
 (provide 'init)
 ;;; init.el ends here
