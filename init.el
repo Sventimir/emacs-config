@@ -26,7 +26,8 @@
 (require 'locstack)
 (require 'pacman)
 (require 'range)
-(require 'editing)
+(require 'editing)'
+(require 'rust-ext)
 
 ;; Menus
 (menu-bar-mode -1)
@@ -612,6 +613,7 @@ Select HOST to look for the node on (defaults to localhost.)"
     (persp-switch (or name (read-string "Perspective name: " default))))
   (setq default-directory workdir)
   (load-dir workdir)
+  (persp-add-buffer "*Messages*")
   (split-window-right)
   (magit-status-setup-buffer workdir)
   (toggle-selected-window-dedicated-p)
@@ -624,6 +626,10 @@ Select HOST to look for the node on (defaults to localhost.)"
   "Create a perspective and open the Mina project inside it."
   (interactive)
   (ide "/home/sven/work/mina" "mina"))
+
+;; Add key bindings:
+(eval-after-load 'rust-mode
+  '(define-key rust-mode-map (kbd "C-c t") 'rust-mode-run-test-at-point))
 
 (provide 'init)
 ;;; init.el ends here
