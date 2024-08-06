@@ -2,6 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 (require 'range)
+(require 'evil)
 
 (defun lowercase-current-char ()
   "Replace current char with its lowercase version."
@@ -92,6 +93,18 @@
   (transform-snake-case (lambda (first-p)
                           (if (not first-p) (delete-char 1))
                           (upcase-current-char))))
+
+;; Inserting special characters
+(defmacro lambda-insert (chrs)
+  "Return a lambda inserting CHRS."
+  `(lambda () (interactive) (insert ,chrs)))
+
+(unbind-key (kbd "C-k") evil-insert-state-map)
+(unbind-key (kbd "C-k") global-map)
+(define-key evil-insert-state-map (kbd "C-k c") (lambda-insert "♣"))
+(define-key evil-insert-state-map (kbd "C-k d") (lambda-insert "♦"))
+(define-key evil-insert-state-map (kbd "C-k h") (lambda-insert "♥"))
+(define-key evil-insert-state-map (kbd "C-k s") (lambda-insert "♠"))
 
 (provide 'editing)
 ;;; editing.el ends here

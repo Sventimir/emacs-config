@@ -3,6 +3,7 @@
 ;;; Code:
 
 (require 'org)
+(require 'subr-x)
 
 (setq github-monitored-path "src/app/rosetta"
       github-table-spec '((number ".number" "ID")
@@ -91,6 +92,29 @@
 
 (with-eval-after-load "org"
   (define-key org-mode-map (kbd "C-c g p") 'github-pr-table))
+
+(defun list-drop (n lst)
+  "Drop N elements from the begining of LST and return the remainder if any."
+  (let ((ret lst))
+    (dotimes (_ n ret)
+      (setq ret (cdr ret)))))
+
+(defun github-open-file (url)
+  "Opens local file corresponding to the URL."
+  (interactive "sURL: ")
+  (let* ((addr (url-generic-parse-url url))
+         (host (url-host addr))
+         (path (file-name-split (url-filename addr)))
+         (user (nth 1 path))
+         (repo (nth 2 path))
+         (branch (nth 4 path))
+         (filename (mapconcat 'identity (list-drop 5 path) "/"))
+         (repo-root (string-trim (shell-command-to-string "git rev-parse --show-toplevel")))
+         (remote (shell-command-to-string "git remote -v"))
+         (remote-url (cadr (split-string remote "[@\s]"))))
+    (if (string= remote-url (format "%s:%s/%s" host user repo))
+        (find-file (format "%s/%s" repo-root filename))
+      (error "Remote URL does not match current repository"))))
 
 (provide 'github)
 ;;; github.el ends here

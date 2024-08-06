@@ -2,7 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+;; (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
 (package-refresh-contents)
 
@@ -28,6 +28,12 @@
 (require 'range)
 (require 'editing)'
 (require 'rust-ext)
+
+;; Extended org-mode
+(require 'org-ext)
+(require 'github)
+(require 'nbp)
+(require 'ipbox)
 
 ;; Menus
 (menu-bar-mode -1)
@@ -134,6 +140,9 @@ Additional ARGS may be passed to the browser if needed."
  '(lsp-keymap-prefix "C-c C-c")
  '(lua-indent-level 2)
  '(lua-prefix-key "C-c")
+ '(openmina-config-file "/home/sven/work/mina-configs/devnet.json")
+ '(openmina-debug-build nil)
+ '(openmina-peer-list-url "")
  '(org-agenda-files
    '("~/doc/mieszkanie/koszty.org" "/home/sven/doc/agentka/payments.org" "/home/sven/work/timed_account.org"))
  '(org-babel-haskell-compiler "ghc -dynamic")
@@ -285,21 +294,21 @@ Additional ARGS may be passed to the browser if needed."
                   (mu4e-trash-folder  . "/marcin-pastudzki/[Gmail].Kosz")))
 
         ,(make-mu4e-context
-          :name "MinaProtocol"
+          :name "Gmail-ComposableFinance"
           :match-func
           (lambda (msg)
             (when msg
-              (string-prefix-p "/mina" (mu4e-message-field msg :maildir))))
-          :vars '((user-mail-address . "marcin.pastudzki@minafoundation.com")
+              (string-prefix-p "/composable-finance" (mu4e-message-field msg :maildir))))
+          :vars '((user-mail-address . "marcin.@composable.finance")
                   (user-full-name    . "Marcin Pastudzki")
                   (smtpmail-smtp-server  . "smtp.gmail.com")
-                  (smtpmail-smtp-user . "marcin.pastudzki@minaprotocol.com")
+                  (smtpmail-smtp-user . "marcin@composable.finance")
                   (smtpmail-smtp-service . 587)
                   (smtpmail-stream-type  . starttls)
-                  (mu4e-drafts-folder  . "/mina/[Gmail].Wersje robocze")
-                  (mu4e-sent-folder  . "/mina/[Gmail].Wa&AXw-ne")
-                  (mu4e-refile-folder  . "/mina/[Gmail].Wszystkie")
-                  (mu4e-trash-folder  . "/mina/[Gmail].Kosz")))
+                  (mu4e-drafts-folder  . "/composable-finance/[Gmail].Drafts")
+                  (mu4e-sent-folder  . "/composable-finance/[Gmail].Important")
+                  (mu4e-refile-folder  . "/composable-finance/[Gmail].All Mail")
+                  (mu4e-trash-folder  . "/composable-finance/[Gmail].Trash")))
         ))
   )
 
@@ -546,20 +555,9 @@ Select HOST to look for the node on (defaults to localhost.)"
 (global-set-key (kbd "C-M-<left>") 'shrink-window-horizontally)
 
 ;; Programming utilities
-(global-set-key (kbd "C-x C-g") 'magit-blame)
+(global-set-key (kbd "C-x C-g b") 'magit-blame)
 (global-set-key (kbd "C-c _") (lambda () (interactive) (insert-sep-region "_" 3)))
-
-;; Inserting special characters
-(defmacro lambda-insert (chrs)
-  "Return a lambda inserting CHRS."
-  `(lambda () (interactive) (insert ,chrs)))
-
-(unbind-key (kbd "C-k") evil-insert-state-map)
-(unbind-key (kbd "C-k") global-map)
-(define-key evil-insert-state-map (kbd "C-k c") (lambda-insert "♣"))
-(define-key evil-insert-state-map (kbd "C-k d") (lambda-insert "♦"))
-(define-key evil-insert-state-map (kbd "C-k h") (lambda-insert "♥"))
-(define-key evil-insert-state-map (kbd "C-k s") (lambda-insert "♠"))
+(global-set-key (kbd "C-x C-g C-f") 'github-open-file)
 
 (define-key epa-key-list-mode-map (kbd "C-s") 'epa-mark-key)
 (define-key epa-key-list-mode-map (kbd "C-u") 'epa-unmark-key)
@@ -569,11 +567,6 @@ Select HOST to look for the node on (defaults to localhost.)"
   "Return a list of active minor modes for the current buffer."
   (interactive)
   (seq-filter 'symbol-value (mapcar 'car minor-mode-alist)))
-
-;; Extended org-mode
-(require 'org-ext)
-(require 'github)
-(require 'nbp)
 
 ;; Wesnoth mode
 (add-to-list 'load-path "/usr/share/wesnoth/data/tools/emacs_mode/")
@@ -587,17 +580,6 @@ Select HOST to look for the node on (defaults to localhost.)"
 
 ;; Enable envrc
 (envrc-global-mode)
-
-;; Enable Merlin for Mina project:
-(let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
-  (when (and opam-share (file-directory-p opam-share))
-    ;; Register Merlin
-    (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
-    (load "tuareg-site-file")
-    (autoload 'merlin-mode "merlin" nil t nil)
-    ;; Automatically start it in OCaml buffers
-    (add-hook 'tuareg-mode-hook 'merlin-mode t)
-    (add-hook 'caml-mode-hook 'merlin-mode t)))
 
 ;; Predefined perspectives
 (defun persp-mail ()
@@ -621,11 +603,6 @@ Select HOST to look for the node on (defaults to localhost.)"
   (switch-to-buffer "*scratch*")
   (setq default-directory workdir)
   (select-window (previous-window)))
-
-(defun mina ()
-  "Create a perspective and open the Mina project inside it."
-  (interactive)
-  (ide "/home/sven/work/mina" "mina"))
 
 ;; Add key bindings:
 (eval-after-load 'rust-mode
