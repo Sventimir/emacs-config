@@ -413,31 +413,6 @@ Additional ARGS may be passed to the browser if needed."
 (use-package graphql-mode
   :ensure t)
 
-;; Michelson support
-(use-package michelson-mode
-  :load-path "/home/sven/work/tezos/emacs"
-  :mode ("\\.tz\\'" . michelson-mode))
-
-(defun michelson-with-mockup (&optional protocol)
-  "Set Michelson mode to work in mockup mode.
-Select PROTOCOL to use (defaults to Alpha)."
-  (interactive "sProtocol to use (default: Alpha):")
-  (let ((proto (cond ((not protocol) "ProtoALphaALphaALphaALphaALphaALphaALphaALphaDdp3zK")
-                     ((equal protocol "") "ProtoALphaALphaALphaALphaALphaALphaALphaALphaDdp3zK"))))
-    (setq michelson-client-command
-	      (format "/home/sven/work/tezos/tezos-client --mode mockup --protocol %s" proto))))
-
-(defun michelson-with-node (&optional host)
-  "Set Michelson mode to work with given Tezos node.
-Select HOST to look for the node on (defaults to localhost.)"
-  (interactive "sNode's hostname and port:")
-  (setq michelson-client-command
-	(format "/home/sven/work/tezos/tezos-client -E http://%s"
-		(or host "localhost:8732"))))
-
-(setq michelson-alphanet nil)
-(michelson-with-mockup)
-
 ;; Idris
 (use-package idris-mode
   :ensure t
