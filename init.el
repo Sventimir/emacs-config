@@ -140,9 +140,6 @@ Additional ARGS may be passed to the browser if needed."
  '(lsp-keymap-prefix "C-c C-c")
  '(lua-indent-level 2)
  '(lua-prefix-key "C-c")
- '(openmina-config-file "/home/sven/work/mina-configs/devnet.json")
- '(openmina-debug-build nil)
- '(openmina-peer-list-url "")
  '(org-agenda-files
    '("~/doc/mieszkanie/koszty.org" "/home/sven/doc/agentka/payments.org" "/home/sven/work/timed_account.org"))
  '(org-babel-haskell-compiler "ghc -dynamic")
@@ -192,13 +189,6 @@ Additional ARGS may be passed to the browser if needed."
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 4)
- '(safe-local-variable-values
-   '((eval progn
-           (require 'opam-env)
-           (add-to-list 'load-path "/home/sven/.opam/mina/share/emacs/site-lisp")
-           (set-opam-env "/home/sven/.opam/mina")
-           (setenv "WORKDIR" "/home/sven/work")
-           (add-to-list 'exec-path "/home/sven/.opam/mina/bin"))))
  '(sh-basic-offset 2)
  '(sql-connection-alist nil)
  '(typescript-indent-level 2)
