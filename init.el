@@ -569,6 +569,14 @@ Additional ARGS may be passed to the browser if needed."
   (setq default-directory workdir)
   (select-window (previous-window)))
 
+(defun work (repository)
+  "Create a perspective for work in REPOSITORY."
+  (interactive (list (read-string "Repository: " "composable-ibc")))
+  (load-dir "%s/work/emacs" (getenv "HOME"))
+  (require 'zombienet)
+  (require 'hyperspace-test)
+  (ide (format "%s/work/%s" (getenv "HOME") repository)))
+
 ;; Add key bindings:
 (eval-after-load 'rust-mode
   '(define-key rust-mode-map (kbd "C-c t") 'rust-mode-run-test-at-point))
