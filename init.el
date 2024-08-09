@@ -578,8 +578,7 @@ Additional ARGS may be passed to the browser if needed."
   "Create a perspective for work in REPOSITORY."
   (interactive (list (read-string "Repository: " "composable-ibc")))
   (load-dir "%s/work/emacs" (getenv "HOME"))
-  (require 'zombienet)
-  (require 'hyperspace-test)
+  (require 'work-setup)
   (ide (format "%s/work/%s" (getenv "HOME") repository)))
 
 ;; Add key bindings:
