@@ -28,6 +28,7 @@
 (require 'range)
 (require 'editing)'
 (require 'rust-ext)
+(require 'evil)
 
 ;; Extended org-mode
 (require 'org-ext)
@@ -511,6 +512,10 @@ Additional ARGS may be passed to the browser if needed."
 ;; Window management
 (global-set-key (kbd "C->") (lambda () (interactive) (select-window (next-window))))
 (global-set-key (kbd "C-<") (lambda () (interactive) (select-window (previous-window))))
+(global-set-key (kbd "M-<down>") 'evil-window-down)
+(global-set-key (kbd "M-<up>") 'evil-window-up)
+(global-set-key (kbd "M-<left>") 'evil-window-left)
+(global-set-key (kbd "M-<right>") 'evil-window-right)
 (global-set-key (kbd "C-x w h") 'split-window-right)
 (global-set-key (kbd "C-x w v") 'split-window-below)
 (global-set-key (kbd "C-x w d") 'toggle-selected-window-dedicated-p)
