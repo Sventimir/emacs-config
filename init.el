@@ -1,6 +1,7 @@
 ;;; Package --- Emacs initialisation module
 ;;; Commentary:
 ;;; Code:
+
 (require 'package)
 ;; (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
@@ -502,9 +503,7 @@ Additional ARGS may be passed to the browser if needed."
 ;; Global key bindings
 (global-set-key (kbd "C-x m") 'mu4e)
 (global-set-key (kbd "C-x b") 'helm-buffers-list)
-(global-set-key (kbd "C-x c c") (lambda ()
-				  (interactive)
-				  (find-file "~/.emacs.d/init.el")))
+(global-set-key (kbd "C-x c c") 'config) ;; see config function defined below
 (global-set-key (kbd "C-c s f") 'flycheck-buffer)
 (global-set-key (kbd "C-c s c") 'flyspell-correct-word-before-point)
 (global-set-key (kbd "C-c s d") 'ispell-change-dictionary)
@@ -574,10 +573,16 @@ Additional ARGS may be passed to the browser if needed."
   (setq default-directory workdir)
   (select-window (previous-window)))
 
+(defun config ()
+  "Create a perspective for editing Emacs configuration."
+  (interactive)
+  (ide "~/.emacs.d" "emacs-config")
+  (find-file "~/.emacs.d/init.el"))
+
 (defun work (repository)
   "Create a perspective for work in REPOSITORY."
   (interactive (list (read-string "Repository: " "composable-ibc")))
-  (load-dir "%s/work/emacs" (getenv "HOME"))
+  (load-dir (format "%s/work/emacs" (getenv "HOME")))
   (require 'work-setup)
   (ide (format "%s/work/%s" (getenv "HOME") repository)))
 
