@@ -509,16 +509,15 @@
 (defun ide (workdir &optional name)
   "Create perspective NAME and open the project in WORKDIR inside it."
   (interactive "fWorkdir: ")
-  (let ((default (file-name-base workdir)))
+  (let ((default (file-name-base (string-remove-suffix "/" workdir))))
     (persp-switch (or name (read-string "Perspective name: " default))))
   (setq default-directory workdir)
   (load-dir workdir)
-  (persp-add-buffer "*Messages*")
   (split-window-right)
   (magit-status-setup-buffer workdir)
   (toggle-selected-window-dedicated-p)
   (split-window-below)
-  (switch-to-buffer "*scratch*")
+  (switch-to-buffer "*Messages*")
   (setq default-directory workdir)
   (select-window (previous-window)))
 
