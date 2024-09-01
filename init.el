@@ -27,7 +27,7 @@
 (require 'locstack)
 (require 'pacman)
 (require 'range)
-(require 'editing)'
+(require 'editing)
 (require 'rust-ext)
 (require 'evil)
 
@@ -345,7 +345,7 @@
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-l")
+ '(lsp-keymap-prefix "C-l" t)
  '(lua-indent-level 2)
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
@@ -458,25 +458,7 @@
                   (mu4e-drafts-folder  . "/marcin-pastudzki/[Gmail].Wersje robocze")
                   (mu4e-sent-folder  . "/marcin-pastudzki/[Gmail].Wa&AXw-ne")
                   (mu4e-refile-folder  . "/marcin-pastudzki/[Gmail].Wszystkie")
-                  (mu4e-trash-folder  . "/marcin-pastudzki/[Gmail].Kosz")))
-
-        ,(make-mu4e-context
-          :name "Gmail-ComposableFinance"
-          :match-func
-          (lambda (msg)
-            (when msg
-              (string-prefix-p "/composable-finance" (mu4e-message-field msg :maildir))))
-          :vars '((user-mail-address . "marcin.@composable.finance")
-                  (user-full-name    . "Marcin Pastudzki")
-                  (smtpmail-smtp-server  . "smtp.gmail.com")
-                  (smtpmail-smtp-user . "marcin@composable.finance")
-                  (smtpmail-smtp-service . 587)
-                  (smtpmail-stream-type  . starttls)
-                  (mu4e-drafts-folder  . "/composable-finance/[Gmail].Drafts")
-                  (mu4e-sent-folder  . "/composable-finance/[Gmail].Important")
-                  (mu4e-refile-folder  . "/composable-finance/[Gmail].All Mail")
-                  (mu4e-trash-folder  . "/composable-finance/[Gmail].Trash")))
-        ))
+                  (mu4e-trash-folder  . "/marcin-pastudzki/[Gmail].Kosz")))))
   )
 
 
