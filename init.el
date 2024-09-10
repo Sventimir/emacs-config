@@ -444,6 +444,23 @@
                   (mu4e-trash-folder  . "/sventimir/[Gmail].Kosz")))
 
         ,(make-mu4e-context
+          :name "Gmail-MarcinJarmuzynski"
+          :match-func
+            (lambda (msg)
+              (when msg
+                (string-prefix-p "/marcin-jarmuzynski" (mu4e-message-field msg :maildir))))
+          :vars '((user-mail-address . "marcin.jarmuzynski@gmail.com")
+                  (user-full-name    . "Marcin Jarmużyński")
+                  (smtpmail-smtp-server  . "smtp.gmail.com")
+                  (smtpmail-smtp-user . "marcin.jarmuzynski@gmail.com")
+                  (smtpmail-smtp-service . 587)
+                  (smtpmail-stream-type  . starttls)
+                  (mu4e-drafts-folder  . "/marcin-jarmuzynski/[Gmail].Wersje robocze")
+                  (mu4e-sent-folder  . "/marcin-jarmuzynski/[Gmail].Wa&AXw-ne")
+                  (mu4e-refile-folder  . "/marcin-jarmuzynski/[Gmail].Wszystkie")
+                  (mu4e-trash-folder  . "/marcin-jarmuzynski/[Gmail].Kosz")))
+
+        ,(make-mu4e-context
           :name "Gmail-MarcinPastudzki"
           :match-func
             (lambda (msg)
