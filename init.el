@@ -562,8 +562,14 @@
 
 ;; Programming utilities
 (global-set-key (kbd "C-x C-g b") 'magit-blame)
-(global-set-key (kbd "C-c _") (lambda () (interactive) (insert-sep-region "_" 3)))
 (global-set-key (kbd "C-x C-g C-f") 'github-open-file)
+(global-set-key (kbd "C-c _") (lambda () (interactive) (insert-sep-region "_" 3)))
+
+(global-set-key (kbd "C-x C-g g") (lambda () (interactive)
+                                    (make-process
+                                     :name "gitg"
+                                     :buffer "*gitg*"
+                                     :command '("gitg"))))
 
 (define-key epa-key-list-mode-map (kbd "C-s") 'epa-mark-key)
 (define-key epa-key-list-mode-map (kbd "C-u") 'epa-unmark-key)
