@@ -23,6 +23,7 @@
 
 (require 'gitlab)
 (require 'polynomial)
+(require 'music-meta)
 (require 'numeric)
 (require 'locstack)
 (require 'pacman)
