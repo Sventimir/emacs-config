@@ -529,10 +529,10 @@
 
 (defun work (repository)
   "Create a perspective for work in REPOSITORY."
-  (interactive (list (read-string "Repository: " "composable-ibc")))
+  (interactive (list (read-file-name "Repository: " (format "%s/work/composable-ibc" (getenv "HOME")))))
   (load-dir (format "%s/work/emacs" (getenv "HOME")))
   (require 'work-setup)
-  (ide (format "%s/work/%s" (getenv "HOME") repository)))
+  (ide repository))
 
 ;; Encrypted org-mode extension
 (add-to-list 'auto-mode-alist '("\\.org.gpg\\'" . org-mode))
