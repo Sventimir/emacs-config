@@ -578,9 +578,5 @@
 ;; Enable envrc
 (envrc-global-mode)
 
-;; Add key bindings:
-(eval-after-load 'rust-mode
-  '(define-key rust-mode-map (kbd "C-c t") 'rust-mode-run-test-at-point))
-
 (provide 'init)
 ;;; init.el ends here
