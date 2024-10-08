@@ -35,6 +35,18 @@ body for an HTTP request.  Display the response in buffer."
   "Apply F to ARGS converted to numbers."
   (apply f (mapcar 'string-to-number args)))
 
+(defun org-link--zoom-follow (link)
+  "Open Zoom link using Zoom application.  LINK is the target."
+  (start-process "*Zoom*" nil "zoom" (concat "zoommtg://" link)))
+
+(defun org-link-custom-open (program link)
+  "Open LINK with PROGRAM."
+  (call-process program nil nil nil link))
+
+(defun org-link--open-firefox (url &optional _)
+  "Open URL with Firefox."
+  (org-link-custom-open "firefox" url))
+
 (with-eval-after-load "org"
   (define-key org-mode-map (kbd "C-c h") 'org-http-request))
 

@@ -60,11 +60,6 @@
 
 (define-key org-mode-map (kbd "C-c C-RET") 'org-table-insert-row)
 
-;; Opening Zoom links from Org mode (configured via customize):
-(defun org-link--zoom-follow (link)
-  "Open Zoom link using Zoom application.  LINK is the target."
-  (start-process "*Zoom*" nil "zoom" (concat "zoommtg://" link)))
-
 ;; Plots in ORG mode
 (use-package gnuplot
   :ensure t)
