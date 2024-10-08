@@ -109,12 +109,17 @@
          (repo (nth 2 path))
          (branch (nth 4 path))
          (filename (mapconcat 'identity (list-drop 5 path) "/"))
+         (target (url-target addr))
          (repo-root (string-trim (shell-command-to-string "git rev-parse --show-toplevel")))
          (remote (shell-command-to-string "git remote -v"))
          (remote-url (cadr (split-string remote "[@\s]"))))
-    (if (string= remote-url (format "%s:%s/%s" host user repo))
+    (if (or
+         (string= remote-url (format "%s:%s/%s" host user repo))
+         (string= remote-url (format "%s:%s/%s.git" host user repo)))
         (find-file (format "%s/%s" repo-root filename))
-      (error "Remote URL does not match current repository"))))
+      (error "Remote URL does not match current repository"))
+    (if (string-match "^L[0-9]+$" target)
+        (goto-line (string-to-number (substring target 1))))))
 
 (provide 'github)
 ;;; github.el ends here
