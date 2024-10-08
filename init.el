@@ -3,7 +3,7 @@
 ;;; Code:
 
 (require 'package)
-;; (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
 (package-refresh-contents)
 
@@ -250,6 +250,8 @@
   :hook (python-mode . (lambda ()
                          (flycheck-add-next-checker 'lsp 'python-pylint))))
 
+(add-hook 'python-mode-hook 'lsp-deferred)
+
 (use-package dockerfile-mode
   :ensure t)
 
@@ -323,6 +325,9 @@
 (use-package json-mode
   :ensure t)
 
+(use-package solidity-mode
+  :ensure t)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -346,7 +351,7 @@
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-l" t)
+ '(lsp-keymap-prefix "C-l")
  '(lua-indent-level 2)
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
@@ -391,7 +396,7 @@
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(docker-tramp tree-sitter crux pyenv pylsp lua-mode csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(solidity-mode docker-tramp tree-sitter crux pyenv pylsp lua-mode csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 4)
