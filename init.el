@@ -564,6 +564,7 @@
 ;; Programming utilities
 (global-set-key (kbd "C-x C-g b") 'magit-blame)
 (global-set-key (kbd "C-x C-g C-f") 'github-open-file)
+(global-set-key (kbd "C-x C-g l" 'github-generate-link)
 (global-set-key (kbd "C-c _") (lambda () (interactive) (insert-sep-region "_" 3)))
 
 (global-set-key (kbd "C-x C-g g") (lambda () (interactive)

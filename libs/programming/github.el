@@ -121,5 +121,26 @@
     (if (string-match "^L[0-9]+$" target)
         (goto-line (string-to-number (substring target 1))))))
 
+(defun github-generate-link ()
+  "Generate a GitHub link to the current file."
+  (interactive)
+  (let* ((repo-root (string-trim (shell-command-to-string "git rev-parse --show-toplevel")))
+         (filename (file-relative-name (buffer-file-name) repo-root))
+         (line (line-number-at-pos))
+         (remote (string-trim (shell-command-to-string "git remote -v")))
+         (branch (string-trim (shell-command-to-string "git rev-parse --abbrev-ref HEAD")))
+         (remote-url (cadr (split-string remote "[@\s]")))
+         (remote-url (replace-regexp-in-string "github.com:" "github.com/" remote-url))
+         (remote-url (if (string-match-p "\\.git$" remote-url)
+                         (substring remote-url 0 -4)
+                       remote-url))
+         (remote-url (if (string-match-p "^git@" remote-url)
+                         (replace-regexp-in-string "^git@" "https://" remote-url)
+                       remote-url))
+         (url (format "https://%s/blob/%s/%s#L%d" remote-url branch filename line)))
+    (progn
+      (kill-new url)
+      (message url))))
+
 (provide 'github)
 ;;; github.el ends here
