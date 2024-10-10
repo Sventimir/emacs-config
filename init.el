@@ -385,6 +385,7 @@
      ("file" :complete org-link-complete-file)
      ("elisp" :follow org-link--open-elisp)
      ("doi" :follow org-link-doi-open :export org-link-doi-export)
+     ("firefox" :follow org-link--open-firefox)
      ("zoommtg" :follow org-link--zoom-follow)))
  '(org-return-follows-link t)
  '(org-sql-db-config
