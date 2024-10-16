@@ -6,30 +6,21 @@
 (require 'org-element)
 (require 'request)
 
-(defun org-http-request (url)
-  "Construct and HTTP request to the URL.
-Take contents of the ORG element at point and use it as
-body for an HTTP request.  Display the response in buffer."
-  (interactive "sURL: ")
-  (let* ((block (org-element-at-point))
-         (input-json (org-element-property :value block)))
-    (request url
-      :type "POST"
-      :params nil
-      :data input-json
-      :parser 'buffer-string
-      :complete (cl-function
-                 (lambda (&key response &allow-other-keys)
-                   (progn
-                     (if (get-buffer-window "*org-http-response*")
-                         nil
-                       (pop-to-buffer "*org-http-response*"))
-                     (with-current-buffer "*org-http-response*"
-                       (erase-buffer)
-                       (message (format "HTTP status code: %s." (request-response-status-code response)))
-                       (insert (request-response-data response))
-                       (json-pretty-print-buffer)
-                       (js-mode))))))))
+(defun org-babel-execute:curl (body params)
+  "Pass the BODY as a curl request and and PARAMS as options."
+  (let* ((url (cdr (assoc :url params)))
+         (method (or (cdr (assoc :method params)) "POST"))
+         (headers (or (cdr (assoc :headers params)) ""))
+         (args (list url "-X" method "-d" body)))
+    (with-current-buffer (get-buffer-create "*curl-output*")
+      (progn
+        (dolist (header (string-split headers "," t "[ \t\n\r]+"))
+          (setq args (append args (list "-H" header))))
+        (message "$ curl %s" args)
+        (erase-buffer)
+        (apply 'call-process "curl" nil "*curl-output*" nil args)
+        (goto-line 4) ; Skip the networking stats.
+        (buffer-substring (point) (point-max))))))
 
 (defun org-table-with-nums (f &rest args)
   "Apply F to ARGS converted to numbers."
@@ -46,9 +37,6 @@ body for an HTTP request.  Display the response in buffer."
 (defun org-link--open-firefox (url &optional _)
   "Open URL with Firefox."
   (org-link-custom-open "firefox" url))
-
-(with-eval-after-load "org"
-  (define-key org-mode-map (kbd "C-c h") 'org-http-request))
 
 (provide 'org-ext)
 ;;; org-ext.el ends here
