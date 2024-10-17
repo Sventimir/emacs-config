@@ -16,7 +16,6 @@
       (progn
         (dolist (header (string-split headers "," t "[ \t\n\r]+"))
           (setq args (append args (list "-H" header))))
-        (message "$ curl %s" args)
         (erase-buffer)
         (apply 'call-process "curl" nil "*curl-output*" nil args)
         (goto-line 4) ; Skip the networking stats.
