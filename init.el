@@ -540,7 +540,7 @@
 
 
 ;; Global key bindings
-(global-set-key (kbd "C-x m") 'mu4e)
+(global-set-key (kbd "C-x m") 'persp-mail)
 (global-set-key (kbd "C-x b") 'helm-buffers-list)
 (global-set-key (kbd "C-x c c") 'config) ;; see config function defined below
 (global-set-key (kbd "C-c s f") 'flycheck-buffer)
