@@ -20,7 +20,8 @@
         (erase-buffer)
         (apply 'call-process "curl" nil "*curl-output*" nil args)
         (goto-line 4) ; Skip the networking stats.
-        (buffer-substring (point) (point-max))))))
+        (let ((output (buffer-substring (point) (point-max))))
+          (if (string= output "") (buffer-string) output))))))
 
 (defun org-table-with-nums (f &rest args)
   "Apply F to ARGS converted to numbers."
