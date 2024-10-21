@@ -19,6 +19,9 @@
         (erase-buffer)
         (apply 'call-process "curl" nil "*curl-output*" nil args)
         (goto-line 4) ; Skip the networking stats.
+        (condition-case nil
+            (json-pretty-print (point) (point-max))
+          (error nil))
         (let ((output (buffer-substring (point) (point-max))))
           (if (string= output "") (buffer-string) output))))))
 
