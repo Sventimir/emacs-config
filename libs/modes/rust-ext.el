@@ -14,11 +14,18 @@
   (compile "cargo run" 't)
   (pop-to-buffer "*compilation*")) ;; 't means comint enabled.
 
+(defun rust-format-project ()
+  "Run the current rust project in an interactive (comitn mode) buffer."
+  (interactive)
+  (compile "cargo fmt")
+  (pop-to-buffer "*compilation*"))
+
 ;; Add key bindings:
 (eval-after-load 'rust-mode
   '(progn
      (define-key rust-mode-map (kbd "C-c t") 'rust-mode-run-test-at-point)
      (define-key rust-mode-map (kbd "C-c r") 'rust-mode-run-interactive)
+     (define-key rust-mode-map (kbd "C-c C-c C-f") 'rust-format-buffer)
      (define-key comint-mode-map (kbd "C-c C-k") 'delete-process)))
 
 (provide 'rust-ext)
