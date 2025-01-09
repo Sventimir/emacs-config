@@ -21,6 +21,12 @@
 
 (load-dir "~/.emacs.d/libs/")
 
+(use-package evil
+  :ensure t)
+
+(use-package request
+  :ensure t)
+
 (require 'gitlab)
 (require 'polynomial)
 (require 'music-meta)
@@ -30,7 +36,6 @@
 (require 'range)
 (require 'editing)
 (require 'rust-ext)
-(require 'evil)
 
 ;; Extended org-mode
 (require 'org-ext)
