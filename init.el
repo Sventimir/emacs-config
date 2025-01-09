@@ -203,6 +203,7 @@
     (rust-mode . lsp)
     (python-mode . lsp)
     (tuareg-mode . lsp)
+    (haskell-mode . lsp)
     (hack-local-variables . (lambda ()
 			      (when (derived-mode-p 'tuareg-mode) (lsp-deferred))))
   :commands (lsp lsp-deferred))
@@ -217,18 +218,10 @@
 
 ;; Haskell
 (use-package haskell-mode
-  :ensure t
-  :hook (haskell-mode . interactive-haskell-mode)
-  :bind (("C-c g" . 'haskell-mode-jump-to-def-or-tag)
-         ("C-c i" . 'haskell-add-import)
-         ("C-c C-c" . 'haskell-compile)
-         ("C-c C-x" . 'haskell-goto-next-error)
-         ("C-c C-t" . 'haskell-doc-show-type)
-         ("C-c t" . (lambda ()
-                      (interactive)
-                      (setq-local haskell-compile-stack-build-command "stack test")
-                      (haskell-compile)
-                      (setq-local haskell-compile-stack-build-command "stack build --fast")))))
+  :ensure t)
+
+(use-package lsp-haskell
+  :ensure t)
 
 ;; OCaml
 (use-package tuareg
