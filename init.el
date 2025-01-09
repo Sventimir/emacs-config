@@ -21,8 +21,23 @@
 
 (load-dir "~/.emacs.d/libs/")
 
-(use-package evil
+;; Evil mode
+(use-package undo-tree
   :ensure t)
+
+(use-package evil
+  :ensure t
+  :config (evil-mode 1)
+          (global-undo-tree-mode)
+          (evil-set-undo-system 'undo-tree)
+          (evil-select-search-module 'evil-search-module 'evil-search)
+          (unbind-key (kbd "C-p") evil-normal-state-map)
+          (unbind-key (kbd "C-p") evil-emacs-state-map)
+          (unbind-key (kbd "C-p") evil-insert-state-map)
+          (unbind-key (kbd "C-p") evil-motion-state-map)
+          (unbind-key (kbd "C-p") evil-operator-state-map)
+          (unbind-key (kbd "C-p") evil-visual-state-map))
+
 
 (use-package request
   :ensure t)
@@ -117,23 +132,6 @@
   :ensure t
   :bind (("C-x E" . crux-eval-and-replace)))
 
-
-;; Evil mode
-(use-package undo-tree
-  :ensure t)
-
-(use-package evil
-  :ensure t
-  :config (evil-mode 1)
-          (global-undo-tree-mode)
-          (evil-set-undo-system 'undo-tree)
-          (evil-select-search-module 'evil-search-module 'evil-search)
-          (unbind-key (kbd "C-p") evil-normal-state-map)
-          (unbind-key (kbd "C-p") evil-emacs-state-map)
-          (unbind-key (kbd "C-p") evil-insert-state-map)
-          (unbind-key (kbd "C-p") evil-motion-state-map)
-          (unbind-key (kbd "C-p") evil-operator-state-map)
-          (unbind-key (kbd "C-p") evil-visual-state-map))
 
 ;; Tree-sitter support
 (use-package tree-sitter
@@ -563,7 +561,7 @@
 ;; Programming utilities
 (global-set-key (kbd "C-x C-g b") 'magit-blame)
 (global-set-key (kbd "C-x C-g C-f") 'github-open-file)
-(global-set-key (kbd "C-x C-g l" 'github-generate-link)
+(global-set-key (kbd "C-x C-g l") 'github-generate-link)
 (global-set-key (kbd "C-c _") (lambda () (interactive) (insert-sep-region "_" 3)))
 
 (global-set-key (kbd "C-x C-g g") (lambda () (interactive)
