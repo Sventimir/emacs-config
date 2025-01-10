@@ -295,13 +295,15 @@
 
 (use-package lua-mode
   :ensure t
-  :bind (("C-l C-s" . 'lua-start-process)
-         ("C-l C-b" . 'lua-send-buffer)
-         ("C-l C-r" . 'lua-send-region)
-         ("C-l C-l" . 'lua-send-current-line)
-         ("C-l C-z" . 'lua-show-process-buffer)
-         ("C-l C-f" . 'lua-send-defun)
-         ("C-l C-c" . 'lua-restart-with-whole-file)))
+  :bind-keymap ("C-l" . lua-mode-map)
+  :bind (:map lua-mode-map
+              ("C-l C-s" . 'lua-start-process)
+              ("C-l C-b" . 'lua-send-buffer)
+              ("C-l C-r" . 'lua-send-region)
+              ("C-l C-l" . 'lua-send-current-line)
+              ("C-l C-z" . 'lua-show-process-buffer)
+              ("C-l C-f" . 'lua-send-defun)
+              ("C-l C-c" . 'lua-restart-with-whole-file)))
 
 ;; Wesnoth mode
 (add-to-list 'load-path "/usr/share/wesnoth/data/tools/emacs_mode/")
