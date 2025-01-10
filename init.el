@@ -221,7 +221,8 @@
 
 ;; Haskell
 (use-package haskell-mode
-  :ensure t)
+  :ensure t
+  :hook (haskell-mode . (lambda () (setq-local compile-command "stack build"))))
 
 (use-package lsp-haskell
   :ensure t)
@@ -229,7 +230,8 @@
 ;; OCaml
 (use-package tuareg
   :ensure t
-  :bind (("C-c C-c" . 'compile)))
+  :bind (("C-c C-c" . 'compile))
+  :hook (tuareg-mode . (lambda () (setq-local compile-command "dune build"))))
 
 (add-hook 'tuareg-mode-hook 'locstack-mode)
 
@@ -281,7 +283,10 @@
 
 ;; Rust
 (use-package rust-mode
-  :ensure t)
+  :ensure t
+  :bind (:map rust-mode-map
+              ("C-c C-c C-c" . 'compile))
+  :hook (rust-mode . (lambda () (setq-local compile-command "cargo build"))))
 
 (add-hook 'tuareg-mode-hook 'locstack-mode)
 
@@ -330,7 +335,6 @@
  '(backup-by-copying-when-linked t)
  '(backup-directory-alist '((".*" . "~/.emacs-backups")))
  '(compilation-scroll-output 'first-error)
- '(compile-command "cargo build")
  '(custom-enabled-themes '(tango-dark))
  '(evil-undo-system 'undo-tree)
  '(global-undo-tree-mode t)
