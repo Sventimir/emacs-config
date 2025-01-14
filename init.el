@@ -49,12 +49,15 @@
           (global-undo-tree-mode)
           (evil-set-undo-system 'undo-tree)
           (evil-select-search-module 'evil-search-module 'evil-search)
+          (unbind-key (kbd "C-e") evil-motion-state-map)
           (unbind-key (kbd "C-p") evil-normal-state-map)
           (unbind-key (kbd "C-p") evil-emacs-state-map)
           (unbind-key (kbd "C-p") evil-insert-state-map)
           (unbind-key (kbd "C-p") evil-motion-state-map)
           (unbind-key (kbd "C-p") evil-operator-state-map)
-          (unbind-key (kbd "C-p") evil-visual-state-map))
+          (unbind-key (kbd "C-p") evil-visual-state-map)
+  :bind (:map evil-insert-state-map
+              ([kp-separator] . (lambda () (interactive) (insert ".")))))
 
 
 (use-package request
@@ -165,7 +168,6 @@
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode t)
-  :config (unbind-key (kbd "C-e") evil-motion-state-map)
   :bind-keymap ("C-e" . flycheck-command-map)
   :bind (:map flycheck-command-map
               ("1" . 'flycheck-first-error)
