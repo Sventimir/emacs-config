@@ -21,6 +21,24 @@
 
 (load-dir "~/.emacs.d/libs/")
 
+;; Menus
+(menu-bar-mode -1)
+(toggle-scroll-bar -1)
+(tool-bar-mode -1)
+
+;; Line numbers
+(global-display-line-numbers-mode)
+(column-number-mode)
+
+;; Indentation and tabulation
+(setq-default indent-tabs-mode nil
+    	      tab-width 4)
+(setq indent-line-function 'insert-tab)
+
+;; Parentheses
+(electric-pair-mode)
+(electric-indent-mode -1)
+
 ;; Evil mode
 (use-package undo-tree
   :ensure t)
@@ -84,28 +102,7 @@
 (use-package gnuplot
   :ensure t)
 
-;; Menus
-(menu-bar-mode -1)
-(toggle-scroll-bar -1)
-(tool-bar-mode -1)
-
-;; Line numbers
-(global-display-line-numbers-mode)
-(column-number-mode)
-
-;; Indentation and tabulation
-(setq-default indent-tabs-mode nil
-    	      tab-width 4)
-(setq indent-line-function 'insert-tab)
-
-;; Parentheses
-(electric-pair-mode)
-(electric-indent-mode -1)
-
 (use-package quelpa-use-package
-  :ensure t)
-
-(use-package request
   :ensure t)
 
 (use-package eshell
@@ -118,6 +115,7 @@
               recentf-max-saved-items 25)
   :bind (("C-x C-r" . 'recentf-open-files)))
 
+;; Direnv
 (use-package direnv
   :ensure t)
 
@@ -128,6 +126,7 @@
   :custom (persp-mode-prefix-key (kbd "C-q"))
   :init (persp-mode))
 
+;; Crux
 (use-package crux
   :ensure t
   :bind (("C-x E" . crux-eval-and-replace)))
@@ -163,7 +162,6 @@
 (use-package magit
   :ensure t)
 
-;; Programming language support
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode t)
@@ -180,19 +178,6 @@
 (use-package envrc
   :ensure t)
 
-(use-package pyvenv
-  :ensure t
-  :config (pyvenv-mode t))
-
-(setq pyvenv-post-activate-hooks
-      (list (lambda ()
-              (setq python-shell-interpreter (concat pyvenv-virtual-env "bin/python")
-                    flycheck-python-pylint-executable (concat pyvenv-virtual-env "bin/python")))))
-(setq pyvenv-post-deactivate-hooks
-      (list (lambda ()
-              (setq python-shell-interpreter "python3"
-                    flycheck-python-pylint-executable (concat pyvenv-virtual-env "bin/python")))))
-
 (use-package deferred
   :ensure t)
 
@@ -202,6 +187,7 @@
 (use-package company
   :ensure t)
 
+;; Programming language support
 (use-package lsp-mode
   :ensure t
   :init (setq lsp-keymap-prefix "C-l")
@@ -260,6 +246,19 @@
                          (flycheck-add-next-checker 'lsp 'python-pylint))))
 
 (add-hook 'python-mode-hook 'lsp-deferred)
+
+(use-package pyvenv
+  :ensure t
+  :config (pyvenv-mode t))
+
+(setq pyvenv-post-activate-hooks
+      (list (lambda ()
+              (setq python-shell-interpreter (concat pyvenv-virtual-env "bin/python")
+                    flycheck-python-pylint-executable (concat pyvenv-virtual-env "bin/python")))))
+(setq pyvenv-post-deactivate-hooks
+      (list (lambda ()
+              (setq python-shell-interpreter "python3"
+                    flycheck-python-pylint-executable (concat pyvenv-virtual-env "bin/python")))))
 
 (use-package dockerfile-mode
   :ensure t)
