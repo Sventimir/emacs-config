@@ -167,9 +167,15 @@
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode t)
-  :bind (("C-c e 1" . 'flycheck-first-error)
-         ("C-c e n" . 'flycheck-next-error)
-         ("C-c e p" . 'flycheck-previous-error)))
+  :config (unbind-key (kbd "C-e") evil-motion-state-map)
+  :bind-keymap ("C-e" . flycheck-command-map)
+  :bind (:map flycheck-command-map
+              ("1" . 'flycheck-first-error)
+              ("n" . 'flycheck-next-error)
+              ("p" . 'flycheck-previous-error)
+              ("f" . 'flycheck-buffer)
+              ("c" . 'flyspell-correct-word-before-point)
+              ("d" . 'ispell-change-dictionary)))
 
 (use-package envrc
   :ensure t)
@@ -555,9 +561,6 @@
 (global-set-key (kbd "C-x m") 'persp-mail)
 (global-set-key (kbd "C-x b") 'helm-buffers-list)
 (global-set-key (kbd "C-x c c") 'config) ;; see config function defined below
-(global-set-key (kbd "C-c s f") 'flycheck-buffer)
-(global-set-key (kbd "C-c s c") 'flyspell-correct-word-before-point)
-(global-set-key (kbd "C-c s d") 'ispell-change-dictionary)
 
 ;; Window management
 (global-set-key (kbd "C->") (lambda () (interactive) (select-window (next-window))))
@@ -578,7 +581,7 @@
 (global-set-key (kbd "C-x C-g b") 'magit-blame)
 (global-set-key (kbd "C-x C-g C-f") 'github-open-file)
 (global-set-key (kbd "C-x C-g l") 'github-generate-link)
-(global-set-key (kbd "C-c _") (lambda () (interactive) (insert-sep-region "_" 3)))
+(global-set-key (kbd "C-x _") (lambda () (interactive) (insert-sep-region "_" 3)))
 
 (global-set-key (kbd "C-x C-g g") (lambda () (interactive)
                                     (make-process
