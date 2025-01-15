@@ -55,9 +55,7 @@
           (unbind-key (kbd "C-p") evil-insert-state-map)
           (unbind-key (kbd "C-p") evil-motion-state-map)
           (unbind-key (kbd "C-p") evil-operator-state-map)
-          (unbind-key (kbd "C-p") evil-visual-state-map)
-  :bind (:map evil-insert-state-map
-              ([kp-separator] . (lambda () (interactive) (insert ".")))))
+          (unbind-key (kbd "C-p") evil-visual-state-map))
 
 
 (use-package request
@@ -592,6 +590,9 @@
 
 (define-key epa-key-list-mode-map (kbd "C-s") 'epa-mark-key)
 (define-key epa-key-list-mode-map (kbd "C-u") 'epa-unmark-key)
+
+;; Make numpad decimal separator behave like period rather than coma.
+(global-set-key [kp-separator] (kbd "."))
 
 ;; Enable envrc
 (envrc-global-mode)
