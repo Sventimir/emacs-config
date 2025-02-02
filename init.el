@@ -46,6 +46,7 @@
 (use-package evil
   :ensure t
   :config (evil-mode 1)
+          (evil-set-initial-state 'special-mode 'emacs)
           (global-undo-tree-mode)
           (evil-set-undo-system 'undo-tree)
           (evil-select-search-module 'evil-search-module 'evil-search)
@@ -70,6 +71,7 @@
 (require 'range)
 (require 'editing)
 (require 'rust-ext)
+(require 'recorder)
 
 ;; Extended org-mode
 (require 'org-ext)
@@ -414,6 +416,9 @@
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 4)
+ '(recorder-ffmpeg-capture-coords '(1920 160 1920 920))
+ '(recorder-ffmpeg-video-filter "[2:v]scale=384:216[cam], [1:v][cam]overlay=30:690[video]")
+ '(recorder-playback-program "vlc")
  '(sh-basic-offset 2)
  '(sql-connection-alist nil)
  '(typescript-indent-level 2)
