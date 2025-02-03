@@ -144,17 +144,6 @@ Sexp format is (stream-type device (width height))"
 NOTE: any excess elements in COORDINATES list are ignored."
   (format "%d:%d" (car coordinates) (cadr coordinates)))
 
-(defun recorder-ffmpeg-input-top-left ()
-  "Format the screen capture top-left coordinate for ffmpeg."
-  (format "%s+%d,%d"
-          (getenv "DISPLAY")
-          (car recorder-ffmpeg-capture-coords)
-          (cadr recorder-ffmpeg-capture-coords)))
-
-(defun recorder-ffmpeg-input-bottom-right ()
-  "Format the screen capture bottom-right coordinate-for ffmpeg.."
-  (recorder-ffmpeg-format-resolution (cddr recorder-ffmpeg-capture-coords)))
-
 (defun recorder-ffmpeg-filter-arg ()
   "Format ffmpeg arguments for complex filter."
   (if (and recorder-ffmpeg-video-stream recorder-ffmpeg-desktop-stream)
