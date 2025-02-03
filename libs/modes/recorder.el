@@ -78,6 +78,38 @@ Format: \\'(start-x, start-y, stop-x stop-y)."
 (defvar recorder-ffmpeg-last-output-file nil
   "Last output file used for recording.")
 
+(defvar recorder-ffmpeg-streams nil
+  "List of streams to record.")
+
+(defun recorder-format-option (option value)
+  "Format OPTION and VALUE for ffmpeg command.
+Omit the option entirely if VALUE is nil."
+  (if value
+      (list option value)
+    nil))
+
+(defun recorder-opt-map (f x)
+  "Map an optional argument X over a function F."
+  (if x
+      (funcall f x)
+    nil))
+
+(defun recorder-ffmpeg-desktop-device (&optional dev start-coords)
+  "Format the desktop device DEV for ffmpeg with START-COORDS."
+  (let ((coords (or start-coords recorder-ffmpeg-capture-coords)))
+    (format "%s+%d,%d"
+            (or dev (getenv "DISPLAY") "0.0")
+            (car coords)
+            (cadr coords))))
+
+(defun recorder-ffmpeg-stream-args (stream)
+  "Decode sexp STREAM into a list of ffmpeg arguments.
+Sexp format is (stream-type device (width height))"
+  (append
+   (recorder-format-option "-f" (car stream))
+   (recorder-format-option "-s" (recorder-opt-map 'recorder-ffmpeg-format-resolution (caddr stream)))
+   (recorder-format-option "-i" (cadr stream))))
+
 (defun recorder-playback ()
   "Play back the recorded file using RECORDER-PLAYBACK-PROGRAM."
   (interactive)
@@ -112,29 +144,6 @@ NOTE: any excess elements in COORDINATES list are ignored."
 (defun recorder-ffmpeg-input-bottom-right ()
   "Format the screen capture bottom-right coordinate-for ffmpeg.."
   (recorder-ffmpeg-format-resolution (cddr recorder-ffmpeg-capture-coords)))
-
-(defun recorder-ffmpeg-audio-stream-config ()
-  "Format ffmpeg arguments for audio input stream."
-  (if recorder-ffmpeg-audio-stream
-      (list "-f" recorder-ffmpeg-audio-stream
-            "-i" recorder-ffmpeg-microphone-device)
-    nil))
-
-(defun recorder-ffmpeg-video-stream-config ()
-  "Format ffmpeg arguments for video input stream."
-  (if recorder-ffmpeg-video-stream
-      (list "-f" recorder-ffmpeg-video-stream
-            "-s" (recorder-ffmpeg-format-resolution recorder-ffmpeg-video-resolution)
-            "-i" recorder-ffmpeg-video-device)
-    nil))
-
-(defun recorder-ffmpeg-desktop-stream-config ()
-  "Format ffmpeg arguments for desktop input stream."
-  (if recorder-ffmpeg-desktop-stream
-      (list "-f" recorder-ffmpeg-desktop-stream
-            "-s" (recorder-ffmpeg-input-bottom-right)
-            "-i" (recorder-ffmpeg-input-top-left))
-    nil))
 
 (defun recorder-ffmpeg-filter-arg ()
   "Format ffmpeg arguments for complex filter."
@@ -171,14 +180,12 @@ NOTE: any excess elements in COORDINATES list are ignored."
   "Construct the ffmpeg command writing to OUTPUT-FILE."
   (append
    (list recorder-ffmpeg-path "-y")
-   (recorder-ffmpeg-audio-stream-config)
-   (recorder-ffmpeg-desktop-stream-config)
-   (recorder-ffmpeg-video-stream-config)
+   (mapcan 'recorder-ffmpeg-stream-args recorder-ffmpeg-streams)
    (recorder-ffmpeg-filter-arg)
    (recorder-ffmpeg-audio-codec-arg)
    (recorder-ffmpeg-video-codec-arg)
    (recorder-ffmpeg-output-mapping)
-   (list "-shortest" output-file)))
+   (list output-file)))
 
 (defun recorder-ffmpeg-sentinel (proc status)
   "Sentinel function for fmmpeg process using PROC and STATUS."
@@ -232,6 +239,19 @@ NOTE: any excess elements in COORDINATES list are ignored."
     (pop-to-buffer "*recorder*")
     (recorder-mode)
     (add-hook 'kill-buffer-query-functions 'recorder-check-unsaved-streams)
+    (if recorder-ffmpeg-desktop-stream
+        (add-to-list 'recorder-ffmpeg-streams
+                     (list recorder-ffmpeg-desktop-stream
+                           (recorder-ffmpeg-desktop-device)
+                           (cddr recorder-ffmpeg-capture-coords))))
+    (if recorder-ffmpeg-video-stream
+        (add-to-list 'recorder-ffmpeg-streams
+                     (list recorder-ffmpeg-video-stream
+                           recorder-ffmpeg-video-device
+                           recorder-ffmpeg-video-resolution)))
+    (if recorder-ffmpeg-audio-stream
+        (add-to-list 'recorder-ffmpeg-streams
+                     (list recorder-ffmpeg-audio-stream recorder-ffmpeg-microphone-device)))
     (let ((inhibit-read-only t))
       (insert (propertize "*RECORDER*" 'face 'bold) "\n"))))
 
