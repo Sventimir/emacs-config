@@ -115,6 +115,15 @@ Omit the option entirely if VALUE is nil."
            (lambda (s) (format ", size: %s" (recorder-ffmpeg-format-resolution s)))
            (caddr stream))))
 
+(defun recorder-find-stream (types streams)
+  "Find the first stream in STREAMS that has on of TYPES as its first element.
+Return the index of the stream and the stream itself."
+  (let ((i 0))
+    (cl-dolist (stream streams)
+      (if (member (car stream) types)
+        (cl-return (list i stream))
+        (setq i (1+ i))))))
+
 (defun recorder-ffmpeg-stream-args (stream)
   "Decode sexp STREAM into a list of ffmpeg arguments.
 Sexp format is (stream-type device (width height))"
@@ -122,6 +131,14 @@ Sexp format is (stream-type device (width height))"
    (recorder-format-option "-f" (car stream))
    (recorder-format-option "-s" (recorder-opt-map 'recorder-ffmpeg-format-resolution (caddr stream)))
    (recorder-format-option "-i" (cadr stream))))
+
+(defun recorder-ffmpeg-mapping-args (&optional streams)
+  "Format ffmpeg mapping arguments for STREAMS."
+  (let* ((streams (or streams recorder-ffmpeg-streams))
+         (audio (recorder-find-stream '("alsa" "pulse") streams)))
+    (append
+     (if audio (list "-map" (format "%d:a" (car audio)) "-c:a" recorder-ffmpeg-output-acodec))
+     (list "-map" "[video]" "-c:v" recorder-ffmpeg-output-vcodec))))
 
 (defun recorder-ffmpeg-format-resolution (coordinates)
   "Conver a list of 2 COORDINATES to a string readable for ffmpeg.
@@ -134,40 +151,13 @@ NOTE: any excess elements in COORDINATES list are ignored."
       (list "-filter_complex" recorder-ffmpeg-video-filter)
     nil))
 
-(defun recorder-ffmpeg-audio-codec-arg ()
-  "Fomrat ffmpeg arg for audio output codec."
-  (if recorder-ffmpeg-audio-stream
-      (list "-acodec" recorder-ffmpeg-output-acodec)
-    nil))
-
-(defun recorder-ffmpeg-video-codec-arg ()
-  "Fomrat ffmpeg arg for video output codec."
-  (if (or recorder-ffmpeg-video-stream recorder-ffmpeg-desktop-stream)
-      (list "-vcodec" recorder-ffmpeg-output-vcodec)
-    nil))
-
-(defun recorder-ffmpeg-output-mapping ()
-  "Format ffmpeg args for output stream mapping."
-  (let* ((stream-index -1)
-         (audio (if recorder-ffmpeg-audio-stream
-                    (format "%d:a" (setq stream-index (1+ stream-index)))
-                  nil))
-         (video (cond ((and recorder-ffmpeg-video-stream recorder-ffmpeg-desktop-stream) "[video]")
-                      ((or recorder-ffmpeg-video-stream (format "%d:v" stream-index)))
-                      (t nil))))
-    (append
-     (if audio (list "-map" audio) nil)
-     (if video (list "-map" video) nil))))
-
 (defun recorder-ffmpeg-command (output-file)
   "Construct the ffmpeg command writing to OUTPUT-FILE."
   (append
    (list recorder-ffmpeg-path "-y")
    (mapcan 'recorder-ffmpeg-stream-args recorder-ffmpeg-streams)
    (recorder-ffmpeg-filter-arg)
-   (recorder-ffmpeg-audio-codec-arg)
-   (recorder-ffmpeg-video-codec-arg)
-   (recorder-ffmpeg-output-mapping)
+   (recorder-ffmpeg-mapping-args)
    (list output-file)))
 
 (defun recorder-ffmpeg-sentinel (proc status)
