@@ -191,6 +191,24 @@ NOTE: any excess elements in COORDINATES list are ignored."
     t))
 
 ;; Recorder commands:
+(defun recorder-reload-stream-data ()
+  "Reload the stream data from the customisation variables."
+  (interactive)
+  (setq recorder-ffmpeg-streams nil)
+  (if recorder-ffmpeg-desktop-stream
+      (add-to-list 'recorder-ffmpeg-streams
+                   (list recorder-ffmpeg-desktop-stream
+                         (recorder-ffmpeg-desktop-device)
+                         (recorder-screen-capture-size recorder-ffmpeg-capture-coords))))
+  (if recorder-ffmpeg-video-stream
+      (add-to-list 'recorder-ffmpeg-streams
+                   (list recorder-ffmpeg-video-stream
+                         recorder-ffmpeg-video-device
+                         recorder-ffmpeg-video-resolution)))
+  (if recorder-ffmpeg-audio-stream
+      (add-to-list 'recorder-ffmpeg-streams
+                   (list recorder-ffmpeg-audio-stream recorder-ffmpeg-microphone-device))))
+
 (defun recorder-playback ()
   "Play back the recorded file using RECORDER-PLAYBACK-PROGRAM."
   (interactive)
@@ -245,6 +263,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
 (defvar-keymap recorder-mode-map
   :doc "Keymap for the recorder mdoe."
   :parent special-mode-map
+  "l" 'recorder-reload-stream-data
   "p" 'recorder-playback
   "r" 'recorder-start
   "s" 'recorder-stop
@@ -261,19 +280,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
     (pop-to-buffer "*recorder*")
     (recorder-mode)
     (add-hook 'kill-buffer-query-functions 'recorder-check-unsaved-streams)
-    (if recorder-ffmpeg-desktop-stream
-        (add-to-list 'recorder-ffmpeg-streams
-                     (list recorder-ffmpeg-desktop-stream
-                           (recorder-ffmpeg-desktop-device)
-                           (recorder-screen-capture-size recorder-ffmpeg-capture-coords))))
-    (if recorder-ffmpeg-video-stream
-        (add-to-list 'recorder-ffmpeg-streams
-                     (list recorder-ffmpeg-video-stream
-                           recorder-ffmpeg-video-device
-                           recorder-ffmpeg-video-resolution)))
-    (if recorder-ffmpeg-audio-stream
-        (add-to-list 'recorder-ffmpeg-streams
-                     (list recorder-ffmpeg-audio-stream recorder-ffmpeg-microphone-device)))
+    (recorder-reload-stream-data)
     (let ((inhibit-read-only t)
           (stream-index -1))
       (insert (propertize "*RECORDER*" 'face 'bold) "\n")
