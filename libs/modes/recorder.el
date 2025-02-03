@@ -45,7 +45,7 @@
   :type 'file
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-capture-coords '(1920 32 1920 1030)
+(defcustom recorder-ffmpeg-capture-coords (list 0 0 (display-pixel-width) (display-pixel-height))
   "Screen coordinates from which to capture.
 Format: \\'(start-x, start-y, stop-x stop-y)."
   :type '(list natnum)
@@ -115,6 +115,11 @@ Omit the option entirely if VALUE is nil."
            (lambda (s) (format ", size: %s" (recorder-ffmpeg-format-resolution s)))
            (caddr stream))))
 
+(defun recorder-screen-capture-size (coords)
+  "Calculate the size of the screen capture from COORDS."
+  (list (- (caddr coords) (car coords))
+        (- (cadddr coords) (cadr coords))))
+
 (defun recorder-find-stream (types streams)
   "Find the first stream in STREAMS that has on of TYPES as its first element.
 Return the index of the stream and the stream itself."
@@ -178,10 +183,11 @@ NOTE: any excess elements in COORDINATES list are ignored."
 
 (defun recorder-check-unsaved-streams ()
   "Check if there are unsaved streams and prompt the user to save them."
-  (recorder-stop)
+  (if (get-buffer-process "*recorder-ffmpeg*")
+      (recorder-stop))
   (if recorder-ffmpeg-last-output-file
-      (if (yes-or-no-p "There is an unsaved recording.  Save it?")
-          (recorder-save-recording))
+      (if (yes-or-no-p "There is an active recording.  Save it?")
+          (recorder-save-recording ""))
     t))
 
 ;; Recorder commands:
@@ -205,7 +211,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
               (read-file-name "Output file: " recorder-default-writing-dir))))
         (make-process
          :name "recorder-ffmpeg-transcoder"
-         :buffer "*recorder-ffmpeg-process*"
+         :buffer "*recorder-ffmpeg*"
          :command (append
                    (list recorder-ffmpeg-path "-y" "-i" recorder-ffmpeg-last-output-file)
                    (recorder-format-option "-t" time)
@@ -259,7 +265,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
         (add-to-list 'recorder-ffmpeg-streams
                      (list recorder-ffmpeg-desktop-stream
                            (recorder-ffmpeg-desktop-device)
-                           (cddr recorder-ffmpeg-capture-coords))))
+                           (recorder-screen-capture-size recorder-ffmpeg-capture-coords))))
     (if recorder-ffmpeg-video-stream
         (add-to-list 'recorder-ffmpeg-streams
                      (list recorder-ffmpeg-video-stream

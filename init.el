@@ -417,7 +417,7 @@
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 4)
  '(recorder-default-writing-dir "/home/sven/archive/movie/rec")
- '(recorder-ffmpeg-capture-coords '(1920 160 1920 920))
+ '(recorder-ffmpeg-capture-coords '(1920 150 3840 1080))
  '(recorder-playback-program "mpv")
  '(sh-basic-offset 2)
  '(sql-connection-alist nil)
