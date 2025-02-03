@@ -172,11 +172,19 @@ NOTE: any excess elements in COORDINATES list are ignored."
 
 (defun recorder-ffmpeg-sentinel (proc status)
   "Sentinel function for fmmpeg process using PROC and STATUS."
-  (if (not (string= status "finished"))
+  (if (not (string= status "finished\n"))
       (pop-to-buffer "*recorder-ffmpeg*"))
   (with-current-buffer "*recorder*"
     (let ((inhibit-read-only t))
       (insert "Recording stopped: " status))))
+
+(defun recorder-transcoding-sentinel (proc status)
+  "Sentinel function for transcoder ffmpeg process using PROC and STATUS."
+  (if (not (string= status "finished\n"))
+      (pop-to-buffer "*recorder-ffmpeg-process*"))
+  (with-current-buffer "*recorder*"
+    (let ((inhibit-read-only t))
+      (insert "Transcoding stopped: " status))))
 
 (defun recorder-check-unsaved-streams ()
   "Check if there are unsaved streams and prompt the user to save them."
@@ -197,13 +205,25 @@ NOTE: any excess elements in COORDINATES list are ignored."
        :command (list recorder-playback-program recorder-ffmpeg-last-output-file))
     (message "No recorded file to play back.")))
 
-(defun recorder-save-recording ()
-  "Save the recording to a file."
-  (interactive)
+(defun recorder-save-recording (duration)
+  "Save the recording to a file, cutting everything aster DURATION."
+  (interactive "sDuration: ")
   (if recorder-ffmpeg-last-output-file
-      (let ((output-file (read-file-name "Output file: " recorder-default-writing-dir)))
-        (rename-file recorder-ffmpeg-last-output-file output-file)
-        (setq recorder-ffmpeg-last-output-file nil))
+      (let ((time (if (string-empty-p duration) nil duration))
+            (output-file
+             (expand-file-name
+              (read-file-name "Output file: " recorder-default-writing-dir))))
+        (make-process
+         :name "recorder-ffmpeg-transcoder"
+         :buffer "*recorder-ffmpeg-process*"
+         :command (append
+                   (list recorder-ffmpeg-path "-y" "-i" recorder-ffmpeg-last-output-file)
+                   (recorder-format-option "-t" time)
+                   (list output-file))
+         :sentinel 'recorder-transcoding-sentinel)
+        (with-current-buffer "*recorder*"
+          (let ((inhibit-read-only t))
+            (insert "Transcoding: '" recorder-ffmpeg-last-output-file "' -> '" output-file "'\n"))))
     (message "No recorded file to save.")))
 
 (defun recorder-start ()
