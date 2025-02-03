@@ -102,6 +102,16 @@ Omit the option entirely if VALUE is nil."
             (car coords)
             (cadr coords))))
 
+(defun recorder-show-stream (index stream)
+  "Format STREAM with INDEX for display."
+  (format "STREAM #%d: %s from: %s%s\n"
+          index
+          (propertize (car stream) 'face 'bold)
+          (cadr stream)
+          (recorder-opt-map
+           (lambda (s) (format ", size: %s" (recorder-ffmpeg-format-resolution s)))
+           (caddr stream))))
+
 (defun recorder-ffmpeg-stream-args (stream)
   "Decode sexp STREAM into a list of ffmpeg arguments.
 Sexp format is (stream-type device (width height))"
@@ -252,8 +262,12 @@ NOTE: any excess elements in COORDINATES list are ignored."
     (if recorder-ffmpeg-audio-stream
         (add-to-list 'recorder-ffmpeg-streams
                      (list recorder-ffmpeg-audio-stream recorder-ffmpeg-microphone-device)))
-    (let ((inhibit-read-only t))
-      (insert (propertize "*RECORDER*" 'face 'bold) "\n"))))
+    (let ((inhibit-read-only t)
+          (stream-index 0))
+      (insert (propertize "*RECORDER*" 'face 'bold) "\n")
+      (dolist (stream recorder-ffmpeg-streams)
+        (insert (recorder-show-stream (setq stream-index (1+ stream-index)) stream)))
+      (insert (propertize "Filter: " 'face 'bold) recorder-ffmpeg-video-filter "\n"))))
 
 (provide 'recorder)
 ;;; recorder.el ends here
