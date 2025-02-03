@@ -65,7 +65,7 @@ Format: \\'(start-x, start-y, stop-x stop-y)."
   :type 'string
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-video-filter "[2:v]scale=384:216[cam], [1:v][cam]overlay=30:800[video]"
+(defcustom recorder-ffmpeg-video-filter "[1:v]scale=384:216[cam], [2:v][cam]overlay=30:800[video]"
   "Video filter to combine streams with ffmpeg."
   :type 'string
   :group 'recorder)
@@ -188,6 +188,8 @@ NOTE: any excess elements in COORDINATES list are ignored."
 
 (defun recorder-ffmpeg-sentinel (proc status)
   "Sentinel function for fmmpeg process using PROC and STATUS."
+  (if (not (string= status "finished"))
+      (pop-to-buffer "*recorder-ffmpeg*"))
   (with-current-buffer "*recorder*"
     (let ((inhibit-read-only t))
       (insert "Recording stopped: " status))))
