@@ -178,7 +178,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
    (recorder-ffmpeg-audio-codec-arg)
    (recorder-ffmpeg-video-codec-arg)
    (recorder-ffmpeg-output-mapping)
-   (list output-file)))
+   (list "-shortest" output-file)))
 
 (defun recorder-ffmpeg-sentinel (proc status)
   "Sentinel function for fmmpeg process using PROC and STATUS."
