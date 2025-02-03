@@ -4,6 +4,7 @@
 ;;; Code:
 (require 'buffers)
 
+;; Customisation variables and internal variables:
 (defcustom recorder-ffmpeg-path "ffmpeg"
   "Path to ffmpeg executable."
   :type 'string
@@ -81,6 +82,8 @@ Format: \\'(start-x, start-y, stop-x stop-y)."
 (defvar recorder-ffmpeg-streams nil
   "List of streams to record.")
 
+
+;; Internal functions:
 (defun recorder-format-option (option value)
   "Format OPTION and VALUE for ffmpeg command.
 Omit the option entirely if VALUE is nil."
@@ -119,25 +122,6 @@ Sexp format is (stream-type device (width height))"
    (recorder-format-option "-f" (car stream))
    (recorder-format-option "-s" (recorder-opt-map 'recorder-ffmpeg-format-resolution (caddr stream)))
    (recorder-format-option "-i" (cadr stream))))
-
-(defun recorder-playback ()
-  "Play back the recorded file using RECORDER-PLAYBACK-PROGRAM."
-  (interactive)
-  (if recorder-ffmpeg-last-output-file
-      (make-process
-       :name "recorder-playback"
-       :buffer "*recorder-playback*"
-       :command (list recorder-playback-program recorder-ffmpeg-last-output-file))
-    (message "No recorded file to play back.")))
-
-(defun recorder-save-recording ()
-  "Save the recording to a file."
-  (interactive)
-  (if recorder-ffmpeg-last-output-file
-      (let ((output-file (read-file-name "Output file: " recorder-default-writing-dir)))
-        (rename-file recorder-ffmpeg-last-output-file output-file)
-        (setq recorder-ffmpeg-last-output-file nil))
-    (message "No recorded file to save.")))
 
 (defun recorder-ffmpeg-format-resolution (coordinates)
   "Conver a list of 2 COORDINATES to a string readable for ffmpeg.
@@ -202,6 +186,26 @@ NOTE: any excess elements in COORDINATES list are ignored."
           (recorder-save-recording))
     t))
 
+;; Recorder commands:
+(defun recorder-playback ()
+  "Play back the recorded file using RECORDER-PLAYBACK-PROGRAM."
+  (interactive)
+  (if recorder-ffmpeg-last-output-file
+      (make-process
+       :name "recorder-playback"
+       :buffer "*recorder-playback*"
+       :command (list recorder-playback-program recorder-ffmpeg-last-output-file))
+    (message "No recorded file to play back.")))
+
+(defun recorder-save-recording ()
+  "Save the recording to a file."
+  (interactive)
+  (if recorder-ffmpeg-last-output-file
+      (let ((output-file (read-file-name "Output file: " recorder-default-writing-dir)))
+        (rename-file recorder-ffmpeg-last-output-file output-file)
+        (setq recorder-ffmpeg-last-output-file nil))
+    (message "No recorded file to save.")))
+
 (defun recorder-start ()
   "Start recording."
   (interactive)
@@ -221,6 +225,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
   (interactive)
   (process-send-string "recorder-ffmpeg-process" "q"))
 
+;; Define the major mode:
 (defvar-keymap recorder-mode-map
   :doc "Keymap for the recorder mdoe."
   :parent special-mode-map
