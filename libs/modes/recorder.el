@@ -2,14 +2,16 @@
 ;;; Commentary:
 ;;; Provides an interface for audio and video recording using ffmpeg backend.
 ;;; Code:
+(require 'buffers)
+
 (defcustom recorder-ffmpeg-path "ffmpeg"
   "Path to ffmpeg executable."
   :type 'string
   :group 'recorder)
 
-(defcustom recorder-output-file (format "%s/recording.mkv" (getenv "HOME"))
-  "Ffmpeg output filename."
-  :type 'file
+(defcustom recorder-output-format "mkv"
+  "Ffmpeg output format."
+  :type 'string
   :group 'recorder)
 
 (defcustom recorder-playback-program "mplayer"
@@ -68,13 +70,32 @@ Format: \\'(start-x, start-y, stop-x stop-y)."
   :type 'string
   :group 'recorder)
 
+(defcustom recorder-default-writing-dir (getenv "HOME")
+  "Default directory to write recorded files."
+  :type 'directory
+  :group 'recorder)
+
+(defvar recorder-ffmpeg-last-output-file nil
+  "Last output file used for recording.")
+
 (defun recorder-playback ()
   "Play back the recorded file using RECORDER-PLAYBACK-PROGRAM."
   (interactive)
-  (make-process
-   :name "recorder-playback"
-   :buffer "*recorder-playback*"
-   :command (list recorder-playback-program recorder-output-file)))
+  (if recorder-ffmpeg-last-output-file
+      (make-process
+       :name "recorder-playback"
+       :buffer "*recorder-playback*"
+       :command (list recorder-playback-program recorder-ffmpeg-last-output-file))
+    (message "No recorded file to play back.")))
+
+(defun recorder-save-recording ()
+  "Save the recording to a file."
+  (interactive)
+  (if recorder-ffmpeg-last-output-file
+      (let ((output-file (read-file-name "Output file: " recorder-default-writing-dir)))
+        (rename-file recorder-ffmpeg-last-output-file output-file)
+        (setq recorder-ffmpeg-last-output-file nil))
+    (message "No recorded file to save.")))
 
 (defun recorder-ffmpeg-format-resolution (coordinates)
   "Conver a list of 2 COORDINATES to a string readable for ffmpeg.
@@ -146,8 +167,8 @@ NOTE: any excess elements in COORDINATES list are ignored."
      (if audio (list "-map" audio) nil)
      (if video (list "-map" video) nil))))
 
-(defun recorder-ffmpeg-command ()
-  "Construct the ffmpeg command."
+(defun recorder-ffmpeg-command (output-file)
+  "Construct the ffmpeg command writing to OUTPUT-FILE."
   (append
    (list recorder-ffmpeg-path "-y")
    (recorder-ffmpeg-audio-stream-config)
@@ -157,7 +178,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
    (recorder-ffmpeg-audio-codec-arg)
    (recorder-ffmpeg-video-codec-arg)
    (recorder-ffmpeg-output-mapping)
-   (list recorder-output-file)))
+   (list output-file)))
 
 (defun recorder-ffmpeg-sentinel (proc status)
   "Sentinel function for fmmpeg process using PROC and STATUS."
@@ -168,7 +189,9 @@ NOTE: any excess elements in COORDINATES list are ignored."
 (defun recorder-start ()
   "Start recording."
   (interactive)
-  (let ((cmd (recorder-ffmpeg-command))
+  (setq recorder-ffmpeg-last-output-file
+        (make-temp-file "emacs-recorder" nil (concat "." recorder-output-format)))
+  (let ((cmd (recorder-ffmpeg-command recorder-ffmpeg-last-output-file))
         (inhibit-read-only t))
     (make-process
      :name "recorder-ffmpeg-process"
@@ -187,7 +210,8 @@ NOTE: any excess elements in COORDINATES list are ignored."
   :parent special-mode-map
   "p" 'recorder-playback
   "r" 'recorder-start
-  "s" 'recorder-stop)
+  "s" 'recorder-stop
+  "w" 'recorder-save-recording)
 
 (define-derived-mode recorder-mode special-mode "Recorder"
   "Major mode that provides an interface to audio and video recording with ffmpeg."
@@ -196,11 +220,11 @@ NOTE: any excess elements in COORDINATES list are ignored."
 (defun recorder ()
   "Open the recorder interface."
   (interactive)
-  (pop-to-buffer "*recorder*")
-  (recorder-mode)
-  (let ((inhibit-read-only t))
-    (insert "*RECORDER*\n")
-    (insert (format "Output file: %s\n" recorder-output-file))))
+  (setup-buffer "*recorder*"
+    (pop-to-buffer "*recorder*")
+    (recorder-mode)
+    (let ((inhibit-read-only t))
+      (insert (propertize "*RECORDER*" 'face 'bold) "\n"))))
 
 (provide 'recorder)
 ;;; recorder.el ends here
