@@ -269,7 +269,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
         (add-to-list 'recorder-ffmpeg-streams
                      (list recorder-ffmpeg-audio-stream recorder-ffmpeg-microphone-device)))
     (let ((inhibit-read-only t)
-          (stream-index 0))
+          (stream-index -1))
       (insert (propertize "*RECORDER*" 'face 'bold) "\n")
       (dolist (stream recorder-ffmpeg-streams)
         (insert (recorder-show-stream (setq stream-index (1+ stream-index)) stream)))
