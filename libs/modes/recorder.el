@@ -66,9 +66,9 @@ Format: \\'(start-x, start-y, stop-x stop-y)."
   :type 'string
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-video-filter "[1:v]scale=384:216[cam], [2:v][cam]overlay=30:800[video]"
+(defcustom recorder-ffmpeg-video-filter nil
   "Video filter to combine streams with ffmpeg."
-  :type 'string
+  :type 'sexp
   :group 'recorder)
 
 (defcustom recorder-default-writing-dir (getenv "HOME")
@@ -104,6 +104,18 @@ If entered expression starts with a quasi-quote, evaluate it."
     (if (eq (car expr) '\`)
         (eval expr)
       expr)))
+
+(defun recorder-format-filter (expr)
+  "Parse EXPR and convert it to an ffmpeg filter expression."
+  (cond ((stringp expr) expr)
+        ((listp expr)
+         (let ((filter ""))
+           (dolist (elt expr filter)
+             (cond ((symbolp elt) (setq filter (concat filter (format "[%s]" elt))))
+                   ((stringp elt) (setq filter (concat filter elt)))
+                   ((listp elt) (setq filter (concat filter (format "%s=%s" (car elt) (cadr elt)))))
+                   (t (error "Invalid filter element"))))))
+        (t (error "Invalid filter expression"))))
 
 (defun recorder-ffmpeg-desktop-device (&optional dev start-coords)
   "Format the desktop device DEV for ffmpeg with START-COORDS."
@@ -160,9 +172,10 @@ NOTE: any excess elements in COORDINATES list are ignored."
 
 (defun recorder-ffmpeg-filter-arg ()
   "Format ffmpeg arguments for complex filter."
-  (if (string= recorder-ffmpeg-video-filter "")
-      nil
-    (list "-filter_complex" recorder-ffmpeg-video-filter)))
+  (if recorder-ffmpeg-video-filter
+      (list "-filter_complex"
+            (mapconcat 'recorder-format-filter recorder-ffmpeg-video-filter ", "))
+    nil))
 
 (defun recorder-ffmpeg-command (output-file)
   "Construct the ffmpeg command writing to OUTPUT-FILE."
@@ -223,7 +236,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
       (insert (propertize "*RECORDER*" 'face 'bold) "\n")
       (dolist (stream recorder-ffmpeg-streams)
         (insert (recorder-show-stream (setq stream-index (1+ stream-index)) stream)))
-      (insert (propertize "Filter: " 'face 'bold) recorder-ffmpeg-video-filter "\n"))))
+      (insert (propertize "Filter: " 'face 'bold) (cadr (recorder-ffmpeg-filter-arg)) "\n"))))
 
 (defun recorder-playback ()
   "Play back the recorded file using RECORDER-PLAYBACK-PROGRAM."
@@ -286,13 +299,13 @@ NOTE: any excess elements in COORDINATES list are ignored."
 
 (defun recorder-edit-filter (new-filter)
   "Edit the ffmpeg video filter, etting it to NEW-FILTER."
-  (interactive (list (read-string "Filter: " recorder-ffmpeg-video-filter)))
+  (interactive (list (recorder-read-sexp "Filter: " recorder-ffmpeg-video-filter)))
   (setq recorder-ffmpeg-video-filter new-filter)
   (with-current-buffer "*recorder*"
     (let ((inhibit-read-only t))
       (goto-line (+ (length recorder-ffmpeg-streams) 2))
       (delete-region (point) (line-end-position))
-      (insert (propertize "Filter: " 'face 'bold) recorder-ffmpeg-video-filter "\n"))))
+      (insert (propertize "Filter: " 'face 'bold) (cadr (recorder-ffmpeg-filter-arg)) "\n"))))
 
 ;; Define the major mode:
 (defvar-keymap recorder-mode-map
