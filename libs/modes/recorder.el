@@ -97,6 +97,14 @@ Omit the option entirely if VALUE is nil."
       (funcall f x)
     nil))
 
+(defun recorder-read-sexp (prompt &optional default)
+  "Show PROMPT, read a s-expression from minibuffer, providing DEFAULT.
+If entered expression starts with a quasi-quote, evaluate it."
+  (let ((expr (read (read-string prompt (format "%s" default)))))
+    (if (eq (car expr) '\`)
+        (eval expr)
+      expr)))
+
 (defun recorder-ffmpeg-desktop-device (&optional dev start-coords)
   "Format the desktop device DEV for ffmpeg with START-COORDS."
   (let ((coords (or start-coords recorder-ffmpeg-capture-coords)))
@@ -152,9 +160,9 @@ NOTE: any excess elements in COORDINATES list are ignored."
 
 (defun recorder-ffmpeg-filter-arg ()
   "Format ffmpeg arguments for complex filter."
-  (if (and recorder-ffmpeg-video-stream recorder-ffmpeg-desktop-stream)
-      (list "-filter_complex" recorder-ffmpeg-video-filter)
-    nil))
+  (if (string= recorder-ffmpeg-video-filter "")
+      nil
+    (list "-filter_complex" recorder-ffmpeg-video-filter)))
 
 (defun recorder-ffmpeg-command (output-file)
   "Construct the ffmpeg command writing to OUTPUT-FILE."
@@ -207,7 +215,15 @@ NOTE: any excess elements in COORDINATES list are ignored."
                          recorder-ffmpeg-video-resolution)))
   (if recorder-ffmpeg-audio-stream
       (add-to-list 'recorder-ffmpeg-streams
-                   (list recorder-ffmpeg-audio-stream recorder-ffmpeg-microphone-device))))
+                   (list recorder-ffmpeg-audio-stream recorder-ffmpeg-microphone-device)))
+  (with-current-buffer "*recorder*"
+    (let ((inhibit-read-only t)
+          (stream-index -1))
+      (erase-buffer)
+      (insert (propertize "*RECORDER*" 'face 'bold) "\n")
+      (dolist (stream recorder-ffmpeg-streams)
+        (insert (recorder-show-stream (setq stream-index (1+ stream-index)) stream)))
+      (insert (propertize "Filter: " 'face 'bold) recorder-ffmpeg-video-filter "\n"))))
 
 (defun recorder-playback ()
   "Play back the recorded file using RECORDER-PLAYBACK-PROGRAM."
@@ -259,10 +275,31 @@ NOTE: any excess elements in COORDINATES list are ignored."
   (interactive)
   (process-send-string "recorder-ffmpeg-process" "q"))
 
+(defun recorder-edit-screen-capture (coordinates)
+  "Set screen capture coordinates to COORDINATES."
+  (interactive (list (recorder-read-sexp "Coordinates: " recorder-ffmpeg-capture-coords)))
+    (if (and (listp coordinates) (= (length coordinates) 4))
+        (progn
+          (setq recorder-ffmpeg-capture-coords coordinates)
+          (recorder-reload-stream-data))
+      (message "Invalid coordinates.")))
+
+(defun recorder-edit-filter (new-filter)
+  "Edit the ffmpeg video filter, etting it to NEW-FILTER."
+  (interactive (list (read-string "Filter: " recorder-ffmpeg-video-filter)))
+  (setq recorder-ffmpeg-video-filter new-filter)
+  (with-current-buffer "*recorder*"
+    (let ((inhibit-read-only t))
+      (goto-line (+ (length recorder-ffmpeg-streams) 2))
+      (delete-region (point) (line-end-position))
+      (insert (propertize "Filter: " 'face 'bold) recorder-ffmpeg-video-filter "\n"))))
+
 ;; Define the major mode:
 (defvar-keymap recorder-mode-map
   :doc "Keymap for the recorder mdoe."
   :parent special-mode-map
+  "c" 'recorder-edit-screen-capture
+  "f" 'recorder-edit-filter
   "l" 'recorder-reload-stream-data
   "p" 'recorder-playback
   "r" 'recorder-start
@@ -280,13 +317,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
     (pop-to-buffer "*recorder*")
     (recorder-mode)
     (add-hook 'kill-buffer-query-functions 'recorder-check-unsaved-streams)
-    (recorder-reload-stream-data)
-    (let ((inhibit-read-only t)
-          (stream-index -1))
-      (insert (propertize "*RECORDER*" 'face 'bold) "\n")
-      (dolist (stream recorder-ffmpeg-streams)
-        (insert (recorder-show-stream (setq stream-index (1+ stream-index)) stream)))
-      (insert (propertize "Filter: " 'face 'bold) recorder-ffmpeg-video-filter "\n"))))
+    (recorder-reload-stream-data)))
 
 (provide 'recorder)
 ;;; recorder.el ends here
