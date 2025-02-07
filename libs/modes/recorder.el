@@ -204,7 +204,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
 
 (defun recorder-check-unsaved-streams ()
   "Check if there are unsaved streams and prompt the user to save them."
-  (if (get-buffer-process "*recorder-ffmpeg*")
+  (if (and (string= (current-buffer) "*recorder*") (get-buffer-process "*recorder-ffmpeg*"))
       (recorder-stop))
   (if recorder-ffmpeg-last-output-file
       (if (yes-or-no-p "There is an active recording.  Save it?")
