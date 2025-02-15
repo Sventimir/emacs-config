@@ -245,7 +245,13 @@
 (use-package python
   :ensure t
   :hook (python-mode . (lambda ()
-                         (flycheck-add-next-checker 'lsp 'python-pylint))))
+                         (flycheck-add-next-checker 'lsp 'python-pylint)))
+        ; enable python code execution in org-mode src blocks
+        (org-mode . (lambda ()
+                      (require 'lsp-diagnostics)
+                      (require 'flycheck)
+                      (lsp-diagnostics-flycheck-enable)
+                      (flycheck-add-next-checker 'python-flake8 'lsp))))
 
 (add-hook 'python-mode-hook 'lsp-deferred)
 
