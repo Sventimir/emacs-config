@@ -50,6 +50,7 @@
           (global-undo-tree-mode)
           (evil-set-undo-system 'undo-tree)
           (evil-select-search-module 'evil-search-module 'evil-search)
+          (unbind-key (kbd "C-a") evil-motion-state-map)
           (unbind-key (kbd "C-e") evil-motion-state-map)
           (unbind-key (kbd "C-p") evil-normal-state-map)
           (unbind-key (kbd "C-p") evil-emacs-state-map)
@@ -361,6 +362,10 @@
  '(backup-directory-alist '((".*" . "~/.emacs-backups")))
  '(compilation-scroll-output 'first-error)
  '(custom-enabled-themes '(tango-dark))
+ '(ellama-auto-scroll t)
+ '(ellama-chat-display-action-function 'pop-to-buffer)
+ '(ellama-instant-display-action-function 'display-buffer-at-bottom)
+ '(ellama-naming-scheme 'ellama-generate-name-by-llm)
  '(evil-undo-system 'undo-tree)
  '(global-undo-tree-mode t)
  '(haskell-compiler-type 'stack)
@@ -372,7 +377,7 @@
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-l" t)
+ '(lsp-keymap-prefix "C-l")
  '(lua-indent-level 2)
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
@@ -418,7 +423,7 @@
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages
-   '(solidity-mode docker-tramp tree-sitter crux pyenv pylsp lua-mode csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+   '(ellama solidity-mode docker-tramp tree-sitter crux pyenv pylsp lua-mode csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 4)
@@ -516,6 +521,73 @@
                   (mu4e-trash-folder  . "/marcin-pastudzki/[Gmail].Kosz")))))
   )
 
+;; Ellama LLM assistant
+(use-package ellama
+  :ensure t
+  :bind ("C-a" . ellama-transient-main-menu)
+  :init
+  ;; setup key bindings
+  ;; (setopt ellama-keymap-prefix "C-c e")
+  ;; language you want ellama to translate to
+  (setopt ellama-language "English")
+  ;; could be llm-openai for example
+  (require 'llm-ollama)
+  (setopt ellama-provider
+  	  (make-llm-ollama
+  	   ;; this model should be pulled to use it
+  	   ;; value should be the same as you print in terminal during pull
+  	   :chat-model "llama3:8b-instruct-q8_0"
+  	   :embedding-model "nomic-embed-text"
+  	   :default-chat-non-standard-params '(("num_ctx" . 8192))))
+  (setopt ellama-summarization-provider
+  	  (make-llm-ollama
+  	   :chat-model "qwen2.5:3b"
+  	   :embedding-model "nomic-embed-text"
+  	   :default-chat-non-standard-params '(("num_ctx" . 32768))))
+  (setopt ellama-coding-provider
+  	  (make-llm-ollama
+  	   :chat-model "qwen2.5-coder:3b"
+  	   :embedding-model "nomic-embed-text"
+  	   :default-chat-non-standard-params '(("num_ctx" . 32768))))
+  ;; Predefined llm providers for interactive switching.
+  ;; You shouldn't add ollama providers here - it can be selected interactively
+  ;; without it. It is just example.
+  (setopt ellama-providers
+  	  '(("zephyr" . (make-llm-ollama
+  			 :chat-model "zephyr:7b-beta-q6_K"
+  			 :embedding-model "zephyr:7b-beta-q6_K"))
+  	    ("mistral" . (make-llm-ollama
+  			  :chat-model "mistral:7b-instruct-v0.2-q6_K"
+  			  :embedding-model "mistral:7b-instruct-v0.2-q6_K"))
+  	    ("mixtral" . (make-llm-ollama
+  			  :chat-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"
+  			  :embedding-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"))))
+  ;; Naming new sessions with llm
+  (setopt ellama-naming-provider
+  	  (make-llm-ollama
+  	   :chat-model "llama3:8b-instruct-q8_0"
+  	   :embedding-model "nomic-embed-text"
+  	   :default-chat-non-standard-params '(("stop" . ("\n")))))
+  (setopt ellama-naming-scheme 'ellama-generate-name-by-llm)
+  ;; Translation llm provider
+  (setopt ellama-translation-provider
+  	  (make-llm-ollama
+  	   :chat-model "qwen2.5:3b"
+  	   :embedding-model "nomic-embed-text"
+  	   :default-chat-non-standard-params
+  	   '(("num_ctx" . 32768))))
+  (setopt ellama-extraction-provider (make-llm-ollama
+  				      :chat-model "qwen2.5-coder:7b-instruct-q8_0"
+  				      :embedding-model "nomic-embed-text"
+  				      :default-chat-non-standard-params
+  				      '(("num_ctx" . 32768))))
+  ;; customize display buffer behaviour
+  ;; see ~(info "(elisp) Buffer Display Action Functions")~
+  (setopt ellama-chat-display-action-function #'display-buffer-full-frame)
+  (setopt ellama-instant-display-action-function #'display-buffer-at-bottom)
+  :config
+  ;; send last message in chat buffer with C-c C-c
+  (add-hook 'org-ctrl-c-ctrl-c-hook #'ellama-chat-send-last-message))
 
 ;; Spell-checking
 (add-hook 'text-mode-hook 'flyspell-mode)
