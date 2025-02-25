@@ -10,5 +10,6 @@ auto-save-list
 quelpa
 tree-sitter/
 .cache
+eln-cache
 ellama-sessions/
 projects

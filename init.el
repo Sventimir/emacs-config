@@ -356,7 +356,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(ansi-color-faces-vector
-   [default default default italic underline success warning error])
+    [default default default italic underline success warning error])
  '(backup-by-copying t)
  '(backup-by-copying-when-linked t)
  '(backup-directory-alist '((".*" . "~/.emacs-backups")))
@@ -381,61 +381,60 @@
  '(lua-indent-level 2)
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
-   '((dot . t)
-     (emacs-lisp . t)
-     (python . t)
-     (shell . t)
-     (sql . t)))
+    '((dot . t)
+      (emacs-lisp . t)
+      (python . t)
+      (shell . t)
+      (sql . t)))
  '(org-link-parameters
-   '(("bibtex" :follow org-bibtex-open :store org-bibtex-store-link)
-     ("mu4e" :follow mu4e-org-open :store mu4e-org-store-link)
-     ("file+sys")
-     ("file+emacs")
-     ("shell" :follow org-link--open-shell)
-     ("news" :follow
-      #[514 "\301\300\302\4Q\2\"\207"
-            ["news" browse-url ":"]
-            6 "\12\12(fn URL ARG)"])
-     ("mailto" :follow
-      #[514 "\301\300\302\4Q\2\"\207"
-            ["mailto" browse-url ":"]
-            6 "\12\12(fn URL ARG)"])
-     ("https" :follow
-      #[514 "\301\300\302\4Q\2\"\207"
-            ["https" browse-url ":"]
-            6 "\12\12(fn URL ARG)"])
-     ("http" :follow
-      #[514 "\301\300\302\4Q\2\"\207"
-            ["http" browse-url ":"]
-            6 "\12\12(fn URL ARG)"])
-     ("ftp" :follow
-      #[514 "\301\300\302\4Q\2\"\207"
-            ["ftp" browse-url ":"]
-            6 "\12\12(fn URL ARG)"])
-     ("help" :follow org-link--open-help :store org-link--store-help)
-     ("file" :complete org-link-complete-file)
-     ("elisp" :follow org-link--open-elisp)
-     ("doi" :follow org-link-doi-open :export org-link-doi-export)
-     ("firefox" :follow org-link--open-firefox)
-     ("zoommtg" :follow org-link--zoom-follow)))
+    '(("bibtex" :follow org-bibtex-open :store org-bibtex-store-link)
+      ("mu4e" :follow mu4e-org-open :store mu4e-org-store-link)
+      ("file+sys")
+      ("file+emacs")
+      ("shell" :follow org-link--open-shell)
+      ("news" :follow
+       #[514 "\301\300\302\4Q\2\"\207"
+             ["news" browse-url ":"]
+             6 "\12\12(fn URL ARG)"])
+      ("mailto" :follow
+       #[514 "\301\300\302\4Q\2\"\207"
+             ["mailto" browse-url ":"]
+             6 "\12\12(fn URL ARG)"])
+      ("https" :follow
+       #[514 "\301\300\302\4Q\2\"\207"
+             ["https" browse-url ":"]
+             6 "\12\12(fn URL ARG)"])
+      ("http" :follow
+       #[514 "\301\300\302\4Q\2\"\207"
+             ["http" browse-url ":"]
+             6 "\12\12(fn URL ARG)"])
+      ("ftp" :follow
+       #[514 "\301\300\302\4Q\2\"\207"
+             ["ftp" browse-url ":"]
+             6 "\12\12(fn URL ARG)"])
+      ("help" :follow org-link--open-help :store org-link--store-help)
+      ("file" :complete org-link-complete-file)
+      ("elisp" :follow org-link--open-elisp)
+      ("doi" :follow org-link-doi-open :export org-link-doi-export)
+      ("firefox" :follow org-link--open-firefox)
+      ("zoommtg" :follow org-link--zoom-follow)))
  '(org-return-follows-link t)
  '(org-sql-db-config
-   '(postgres :database "postgres" :hostname "localhost" :username "sven"))
+    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
- '(package-selected-packages
-   '(ellama solidity-mode docker-tramp tree-sitter crux pyenv pylsp lua-mode csv-mode graphql-mode go-mode copilot editorconfig elisp-format gnuplot gnuplot-mode nix-mode typescript-mode request envrc dockerfile-mode direnv nix-buffer json-mode haskell-mode haskell-emacs rust-mode project-utils idris-mode idris yaml-mode deferred ocaml-lsp helm-lsp company flycheck-ocaml merlin-eldoc ocp-indent utop dune merlin ocamlformat ocaml-language-server lsp-ocaml yasnippet flycheck lsp-haskell lsp-ui lsp-mode imenu-list helm-ac smtpmail magit tuareg mu4e-overview ac-helm helm evil ##))
+ '(package-selected-packages nil)
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 4)
  '(recorder-default-writing-dir "/home/sven/archive/movie/rec")
  '(recorder-ffmpeg-capture-coords '(1920 150 3840 1080))
  '(recorder-ffmpeg-video-filter
-   '((1:v
-      (scale 384:216)
-      cam)
-     (2:v cam
-          (overlay 30:684)
-          video)))
+    '((1:v
+       (scale 384:216)
+       cam)
+      (2:v cam
+           (overlay 30:684)
+           video)))
  '(recorder-playback-program "mpv")
  '(sh-basic-offset 2)
  '(sql-connection-alist nil)
@@ -520,6 +519,23 @@
                   (mu4e-refile-folder  . "/marcin-pastudzki/[Gmail].Wszystkie")
                   (mu4e-trash-folder  . "/marcin-pastudzki/[Gmail].Kosz")))))
   )
+
+(defun mu4e-email-addresses ()
+  "Return the list of e-mail addresses handled by mu4e."
+  (mapcar (lambda (ctx)
+            (cdr (assoc 'user-mail-address (mu4e-context-vars ctx))))
+          mu4e-contexts))
+
+(defun mu-init (maildir)
+  "Initialise mu in MAILDIR."
+  (interactive (list (read-directory-name "Mail directory: " "~/.local/share/mail")))
+  (shell-command (format
+                  "mu init --maildir %s %s"
+                  (expand-file-name maildir)
+                  (mapconcat (lambda (addr)
+                               (format "--my-address %s" addr))
+                             (mu4e-email-addresses)
+                             " "))))
 
 ;; Ellama LLM assistant
 (use-package ellama
