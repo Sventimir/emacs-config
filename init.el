@@ -356,7 +356,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(ansi-color-faces-vector
-    [default default default italic underline success warning error])
+   [default default default italic underline success warning error])
  '(backup-by-copying t)
  '(backup-by-copying-when-linked t)
  '(backup-directory-alist '((".*" . "~/.emacs-backups")))
@@ -379,48 +379,57 @@
  '(js-indent-level 2)
  '(lsp-keymap-prefix "C-l")
  '(lua-indent-level 2)
+ '(mu4e-drafts-folder "/marcin-jarmuzynski/[Gmail].Wersje robocze")
+ '(mu4e-get-mail-command "offlineimap -o")
+ '(mu4e-modeline-mode t)
+ '(mu4e-notification-support t)
+ '(mu4e-refile-folder "/marcin-jarmuzynski/[Gmail].Wszystkie")
+ '(mu4e-sent-folder "/marcin-jarmuzynski/[Gmail].Wa&AXw-ne")
+ '(mu4e-trash-folder "/marcin-jarmuzynski/[Gmail].Kosz")
+ '(mu4e-update-interval 600)
+ '(mu4e-use-fancy-chars t)
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
-    '((dot . t)
-      (emacs-lisp . t)
-      (python . t)
-      (shell . t)
-      (sql . t)))
+   '((dot . t)
+     (emacs-lisp . t)
+     (python . t)
+     (shell . t)
+     (sql . t)))
  '(org-link-parameters
-    '(("bibtex" :follow org-bibtex-open :store org-bibtex-store-link)
-      ("mu4e" :follow mu4e-org-open :store mu4e-org-store-link)
-      ("file+sys")
-      ("file+emacs")
-      ("shell" :follow org-link--open-shell)
-      ("news" :follow
-       #[514 "\301\300\302\4Q\2\"\207"
-             ["news" browse-url ":"]
-             6 "\12\12(fn URL ARG)"])
-      ("mailto" :follow
-       #[514 "\301\300\302\4Q\2\"\207"
-             ["mailto" browse-url ":"]
-             6 "\12\12(fn URL ARG)"])
-      ("https" :follow
-       #[514 "\301\300\302\4Q\2\"\207"
-             ["https" browse-url ":"]
-             6 "\12\12(fn URL ARG)"])
-      ("http" :follow
-       #[514 "\301\300\302\4Q\2\"\207"
-             ["http" browse-url ":"]
-             6 "\12\12(fn URL ARG)"])
-      ("ftp" :follow
-       #[514 "\301\300\302\4Q\2\"\207"
-             ["ftp" browse-url ":"]
-             6 "\12\12(fn URL ARG)"])
-      ("help" :follow org-link--open-help :store org-link--store-help)
-      ("file" :complete org-link-complete-file)
-      ("elisp" :follow org-link--open-elisp)
-      ("doi" :follow org-link-doi-open :export org-link-doi-export)
-      ("firefox" :follow org-link--open-firefox)
-      ("zoommtg" :follow org-link--zoom-follow)))
+   '(("bibtex" :follow org-bibtex-open :store org-bibtex-store-link)
+     ("mu4e" :follow mu4e-org-open :store mu4e-org-store-link)
+     ("file+sys")
+     ("file+emacs")
+     ("shell" :follow org-link--open-shell)
+     ("news" :follow
+      #[514 "\301\300\302\4Q\2\"\207"
+            ["news" browse-url ":"]
+            6 "\12\12(fn URL ARG)"])
+     ("mailto" :follow
+      #[514 "\301\300\302\4Q\2\"\207"
+            ["mailto" browse-url ":"]
+            6 "\12\12(fn URL ARG)"])
+     ("https" :follow
+      #[514 "\301\300\302\4Q\2\"\207"
+            ["https" browse-url ":"]
+            6 "\12\12(fn URL ARG)"])
+     ("http" :follow
+      #[514 "\301\300\302\4Q\2\"\207"
+            ["http" browse-url ":"]
+            6 "\12\12(fn URL ARG)"])
+     ("ftp" :follow
+      #[514 "\301\300\302\4Q\2\"\207"
+            ["ftp" browse-url ":"]
+            6 "\12\12(fn URL ARG)"])
+     ("help" :follow org-link--open-help :store org-link--store-help)
+     ("file" :complete org-link-complete-file)
+     ("elisp" :follow org-link--open-elisp)
+     ("doi" :follow org-link-doi-open :export org-link-doi-export)
+     ("firefox" :follow org-link--open-firefox)
+     ("zoommtg" :follow org-link--zoom-follow)))
  '(org-return-follows-link t)
  '(org-sql-db-config
-    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
+   '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages nil)
  '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
@@ -429,12 +438,12 @@
  '(recorder-default-writing-dir "/home/sven/archive/movie/rec")
  '(recorder-ffmpeg-capture-coords '(1920 150 3840 1080))
  '(recorder-ffmpeg-video-filter
-    '((1:v
-       (scale 384:216)
-       cam)
-      (2:v cam
-           (overlay 30:684)
-           video)))
+   '((1:v
+      (scale 384:216)
+      cam)
+     (2:v cam
+          (overlay 30:684)
+          video)))
  '(recorder-playback-program "mpv")
  '(sh-basic-offset 2)
  '(sql-connection-alist nil)
