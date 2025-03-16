@@ -273,25 +273,22 @@
   :ensure t)
 
 ;; Explore and edit running docker containers with Emacs.
-(use-package docker-tramp
-  :ensure t)
-
 (use-package nix-mode
   :ensure t
   :mode "\\.nix\\'")
 
-(use-package copilot
-  :quelpa (copilot :fetcher github
-                   :repo "zerolfx/copilot.el"
-                   :branch "main"
-                   :files ("dist" "*.el"))
-  :config (global-unset-key (kbd "C-p"))
-  :bind (("C-p C-p" . 'copilot-mode)
-         ("C-p c" . 'copilot-complete)
-         ("C-p n" . 'copilot-next-completion)
-         ("C-p p" . 'copilot-previous-completion)
-         ("C-p RET" . 'copilot-accept-completion)
-         ("C-p x" . 'copilot-clear-overlay)))
+;; (use-package copilot
+;;   :quelpa (copilot :fetcher github
+;;                    :repo "zerolfx/copilot.el"
+;;                    :branch "main"
+;;                    :files ("dist" "*.el"))
+;;   :config (global-unset-key (kbd "C-p"))
+;;   :bind (("C-p C-p" . 'copilot-mode)
+;;          ("C-p c" . 'copilot-complete)
+;;          ("C-p n" . 'copilot-next-completion)
+;;          ("C-p p" . 'copilot-previous-completion)
+;;          ("C-p RET" . 'copilot-accept-completion)
+;;          ("C-p x" . 'copilot-clear-overlay)))
 
 (use-package graphql-mode
   :ensure t)
@@ -390,37 +387,27 @@
  '(mu4e-use-fancy-chars t)
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
-   '((dot . t)
-     (emacs-lisp . t)
-     (python . t)
-     (shell . t)
-     (sql . t)))
+   '((dot . t) (emacs-lisp . t) (python . t) (shell . t) (sql . t)))
  '(org-link-parameters
    '(("bibtex" :follow org-bibtex-open :store org-bibtex-store-link)
      ("mu4e" :follow mu4e-org-open :store mu4e-org-store-link)
-     ("file+sys")
-     ("file+emacs")
+     ("file+sys") ("file+emacs")
      ("shell" :follow org-link--open-shell)
      ("news" :follow
-      #[514 "\301\300\302\4Q\2\"\207"
-            ["news" browse-url ":"]
-            6 "\12\12(fn URL ARG)"])
+      #[514 "\301\300\302\4Q\2\"\207" ["news" browse-url ":"] 6
+            "\12\12(fn URL ARG)"])
      ("mailto" :follow
-      #[514 "\301\300\302\4Q\2\"\207"
-            ["mailto" browse-url ":"]
-            6 "\12\12(fn URL ARG)"])
+      #[514 "\301\300\302\4Q\2\"\207" ["mailto" browse-url ":"] 6
+            "\12\12(fn URL ARG)"])
      ("https" :follow
-      #[514 "\301\300\302\4Q\2\"\207"
-            ["https" browse-url ":"]
-            6 "\12\12(fn URL ARG)"])
+      #[514 "\301\300\302\4Q\2\"\207" ["https" browse-url ":"] 6
+            "\12\12(fn URL ARG)"])
      ("http" :follow
-      #[514 "\301\300\302\4Q\2\"\207"
-            ["http" browse-url ":"]
-            6 "\12\12(fn URL ARG)"])
+      #[514 "\301\300\302\4Q\2\"\207" ["http" browse-url ":"] 6
+            "\12\12(fn URL ARG)"])
      ("ftp" :follow
-      #[514 "\301\300\302\4Q\2\"\207"
-            ["ftp" browse-url ":"]
-            6 "\12\12(fn URL ARG)"])
+      #[514 "\301\300\302\4Q\2\"\207" ["ftp" browse-url ":"] 6
+            "\12\12(fn URL ARG)"])
      ("help" :follow org-link--open-help :store org-link--store-help)
      ("file" :complete org-link-complete-file)
      ("elisp" :follow org-link--open-elisp)
@@ -432,18 +419,12 @@
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
  '(package-selected-packages nil)
- '(prog-mode-hook '(flyspell-prog-mode copilot-mode))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 4)
  '(recorder-default-writing-dir "/home/sven/archive/movie/rec")
  '(recorder-ffmpeg-capture-coords '(1920 150 3840 1080))
  '(recorder-ffmpeg-video-filter
-   '((1:v
-      (scale 384:216)
-      cam)
-     (2:v cam
-          (overlay 30:684)
-          video)))
+   '((1:v (scale 384:216) cam) (2:v cam (overlay 30:684) video)))
  '(recorder-playback-program "mpv")
  '(sh-basic-offset 2)
  '(sql-connection-alist nil)
@@ -458,9 +439,7 @@
  )
 
 ;; Mu4e config
-(use-package mu4e-overview
-  :ensure t
-  :hook (mu4e-compose . (lambda () (setq indent-tabs-mode nil))))
+(require 'mu4e)
 
 (use-package auth-source-pass
   :ensure t)
@@ -547,72 +526,72 @@
                              " "))))
 
 ;; Ellama LLM assistant
-(use-package ellama
-  :ensure t
-  :bind ("C-a" . ellama-transient-main-menu)
-  :init
-  ;; setup key bindings
-  ;; (setopt ellama-keymap-prefix "C-c e")
-  ;; language you want ellama to translate to
-  (setopt ellama-language "English")
-  ;; could be llm-openai for example
-  (require 'llm-ollama)
-  (setopt ellama-provider
-  	  (make-llm-ollama
-  	   ;; this model should be pulled to use it
-  	   ;; value should be the same as you print in terminal during pull
-  	   :chat-model "llama3:8b-instruct-q8_0"
-  	   :embedding-model "nomic-embed-text"
-  	   :default-chat-non-standard-params '(("num_ctx" . 8192))))
-  (setopt ellama-summarization-provider
-  	  (make-llm-ollama
-  	   :chat-model "qwen2.5:3b"
-  	   :embedding-model "nomic-embed-text"
-  	   :default-chat-non-standard-params '(("num_ctx" . 32768))))
-  (setopt ellama-coding-provider
-  	  (make-llm-ollama
-  	   :chat-model "qwen2.5-coder:3b"
-  	   :embedding-model "nomic-embed-text"
-  	   :default-chat-non-standard-params '(("num_ctx" . 32768))))
-  ;; Predefined llm providers for interactive switching.
-  ;; You shouldn't add ollama providers here - it can be selected interactively
-  ;; without it. It is just example.
-  (setopt ellama-providers
-  	  '(("zephyr" . (make-llm-ollama
-  			 :chat-model "zephyr:7b-beta-q6_K"
-  			 :embedding-model "zephyr:7b-beta-q6_K"))
-  	    ("mistral" . (make-llm-ollama
-  			  :chat-model "mistral:7b-instruct-v0.2-q6_K"
-  			  :embedding-model "mistral:7b-instruct-v0.2-q6_K"))
-  	    ("mixtral" . (make-llm-ollama
-  			  :chat-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"
-  			  :embedding-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"))))
-  ;; Naming new sessions with llm
-  (setopt ellama-naming-provider
-  	  (make-llm-ollama
-  	   :chat-model "llama3:8b-instruct-q8_0"
-  	   :embedding-model "nomic-embed-text"
-  	   :default-chat-non-standard-params '(("stop" . ("\n")))))
-  (setopt ellama-naming-scheme 'ellama-generate-name-by-llm)
-  ;; Translation llm provider
-  (setopt ellama-translation-provider
-  	  (make-llm-ollama
-  	   :chat-model "qwen2.5:3b"
-  	   :embedding-model "nomic-embed-text"
-  	   :default-chat-non-standard-params
-  	   '(("num_ctx" . 32768))))
-  (setopt ellama-extraction-provider (make-llm-ollama
-  				      :chat-model "qwen2.5-coder:7b-instruct-q8_0"
-  				      :embedding-model "nomic-embed-text"
-  				      :default-chat-non-standard-params
-  				      '(("num_ctx" . 32768))))
-  ;; customize display buffer behaviour
-  ;; see ~(info "(elisp) Buffer Display Action Functions")~
-  (setopt ellama-chat-display-action-function #'display-buffer-full-frame)
-  (setopt ellama-instant-display-action-function #'display-buffer-at-bottom)
-  :config
-  ;; send last message in chat buffer with C-c C-c
-  (add-hook 'org-ctrl-c-ctrl-c-hook #'ellama-chat-send-last-message))
+;; (use-package ellama
+;;   :ensure t
+;;   :bind ("C-a" . ellama-transient-main-menu)
+;;   :init
+;;   ;; setup key bindings
+;;   ;; (setopt ellama-keymap-prefix "C-c e")
+;;   ;; language you want ellama to translate to
+;;   (setopt ellama-language "English")
+;;   ;; could be llm-openai for example
+;;   (require 'llm-ollama)
+;;   (setopt ellama-provider
+;;   	  (make-llm-ollama
+;;   	   ;; this model should be pulled to use it
+;;   	   ;; value should be the same as you print in terminal during pull
+;;   	   :chat-model "llama3:8b-instruct-q8_0"
+;;   	   :embedding-model "nomic-embed-text"
+;;   	   :default-chat-non-standard-params '(("num_ctx" . 8192))))
+;;   (setopt ellama-summarization-provider
+;;   	  (make-llm-ollama
+;;   	   :chat-model "qwen2.5:3b"
+;;   	   :embedding-model "nomic-embed-text"
+;;   	   :default-chat-non-standard-params '(("num_ctx" . 32768))))
+;;   (setopt ellama-coding-provider
+;;   	  (make-llm-ollama
+;;   	   :chat-model "qwen2.5-coder:3b"
+;;   	   :embedding-model "nomic-embed-text"
+;;   	   :default-chat-non-standard-params '(("num_ctx" . 32768))))
+;;   ;; Predefined llm providers for interactive switching.
+;;   ;; You shouldn't add ollama providers here - it can be selected interactively
+;;   ;; without it. It is just example.
+;;   (setopt ellama-providers
+;;   	  '(("zephyr" . (make-llm-ollama
+;;   			 :chat-model "zephyr:7b-beta-q6_K"
+;;   			 :embedding-model "zephyr:7b-beta-q6_K"))
+;;   	    ("mistral" . (make-llm-ollama
+;;   			  :chat-model "mistral:7b-instruct-v0.2-q6_K"
+;;   			  :embedding-model "mistral:7b-instruct-v0.2-q6_K"))
+;;   	    ("mixtral" . (make-llm-ollama
+;;   			  :chat-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"
+;;   			  :embedding-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"))))
+;;   ;; Naming new sessions with llm
+;;   (setopt ellama-naming-provider
+;;   	  (make-llm-ollama
+;;   	   :chat-model "llama3:8b-instruct-q8_0"
+;;   	   :embedding-model "nomic-embed-text"
+;;   	   :default-chat-non-standard-params '(("stop" . ("\n")))))
+;;   (setopt ellama-naming-scheme 'ellama-generate-name-by-llm)
+;;   ;; Translation llm provider
+;;   (setopt ellama-translation-provider
+;;   	  (make-llm-ollama
+;;   	   :chat-model "qwen2.5:3b"
+;;   	   :embedding-model "nomic-embed-text"
+;;   	   :default-chat-non-standard-params
+;;   	   '(("num_ctx" . 32768))))
+;;   (setopt ellama-extraction-provider (make-llm-ollama
+;;   				      :chat-model "qwen2.5-coder:7b-instruct-q8_0"
+;;   				      :embedding-model "nomic-embed-text"
+;;   				      :default-chat-non-standard-params
+;;   				      '(("num_ctx" . 32768))))
+;;   ;; customize display buffer behaviour
+;;   ;; see ~(info "(elisp) Buffer Display Action Functions")~
+;;   (setopt ellama-chat-display-action-function #'display-buffer-full-frame)
+;;   (setopt ellama-instant-display-action-function #'display-buffer-at-bottom)
+;;   :config
+;;   ;; send last message in chat buffer with C-c C-c
+;;   (add-hook 'org-ctrl-c-ctrl-c-hook #'ellama-chat-send-last-message))
 
 ;; Spell-checking
 (add-hook 'text-mode-hook 'flyspell-mode)
