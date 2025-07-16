@@ -7,8 +7,12 @@
 
 ;; A table to cache NBP exchange rates in.
 (setq nbp-exchange-rates (make-hash-table)
-      nbp-loaded-dates nil
-      nbp-currency "USD")
+      nbp-loaded-dates nil)
+
+(defcustom nbp-currency "USD"
+  "The currency to donwload exchange rates for."
+  :type 'string
+  :group 'nbp)
 
 (defun nbp-put-rate (rate-obj)
   "Extract exchange rate from RATE-OBJ and store it in cache."
@@ -66,7 +70,8 @@ will be fed to the appropriate function with the tail as the last argument."
                                 (nbp-greatest
                                  'string>
                                  (seq-filter 'identity (list (car (last sorted)) (cdr nbp-loaded-dates))))))
-                         (message "Succesfully loaded NBP rates from %s to %s."
+                         (message "Succesfully loaded NBP rates for %s from %s to %s."
+                                  nbp-currency
                                   (car nbp-loaded-dates)
                                   (cdr nbp-loaded-dates)))))))))
 )

@@ -385,6 +385,7 @@
  '(mu4e-trash-folder "/marcin-jarmuzynski/[Gmail].Kosz")
  '(mu4e-update-interval 600)
  '(mu4e-use-fancy-chars t)
+ '(nbp-currency "EUR")
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
    '((dot . t) (emacs-lisp . t) (python . t) (shell . t) (sql . t)))
