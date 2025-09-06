@@ -648,13 +648,6 @@
   (ide "~/.emacs.d" "emacs-config")
   (find-file "~/.emacs.d/init.el"))
 
-(defun work (repository)
-  "Create a perspective for work in REPOSITORY."
-  (interactive (list (read-file-name "Repository: " (format "%s/work/composable-ibc" (getenv "HOME")))))
-  (load-dir (format "%s/work/emacs" (getenv "HOME")))
-  (require 'work-setup)
-  (ide repository))
-
 ;; Encrypted org-mode extension
 (add-to-list 'auto-mode-alist '("\\.org.gpg\\'" . org-mode))
 
