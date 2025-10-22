@@ -326,6 +326,15 @@
               ("C-l C-f" . 'lua-send-defun)
               ("C-l C-c" . 'lua-restart-with-whole-file)))
 
+(use-package slime
+  :ensure t
+  :hook (lisp-mode . (lambda ()
+                       (load (expand-file-name "~/quicklisp/slime-helper.el"))
+                       ;; Replace "sbcl" with the path to your implementation
+                       (setq inferior-lisp-program "/usr/bin/sbcl"))))
+
+(add-to-list 'auto-mode-alist '("\\.cl\\'" . lisp-mode))
+
 ;; Wesnoth mode
 (add-to-list 'load-path "/usr/share/wesnoth/data/tools/emacs_mode/")
 (autoload 'wesnoth-mode "wesnoth-mode" "Major mode for editing WML." t)
@@ -360,9 +369,9 @@
  '(compilation-scroll-output 'first-error)
  '(custom-enabled-themes '(tango-dark))
  '(ellama-auto-scroll t)
- '(ellama-chat-display-action-function 'pop-to-buffer)
- '(ellama-instant-display-action-function 'display-buffer-at-bottom)
- '(ellama-naming-scheme 'ellama-generate-name-by-llm)
+ '(ellama-chat-display-action-function 'pop-to-buffer t)
+ '(ellama-instant-display-action-function 'display-buffer-at-bottom t)
+ '(ellama-naming-scheme 'ellama-generate-name-by-llm t)
  '(evil-undo-system 'undo-tree)
  '(global-undo-tree-mode t)
  '(haskell-compiler-type 'stack)
@@ -370,6 +379,7 @@
  '(haskell-process-type 'stack-ghci)
  '(idris-interpreter-path "/usr/bin/idris2")
  '(indent-tabs-mode nil)
+ '(inferior-lisp-program "/usr/bin/chez")
  '(inhibit-startup-screen t)
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
@@ -424,7 +434,7 @@
              elisp-format ellama envrc evil flycheck gnuplot
              graphql-mode haskell-mode helm-lsp idris-mode json-mode
              lsp-ui lua-mode magit nix-mode perspective pyvenv
-             quelpa-use-package request rust-mode solidity-mode
+             quelpa-use-package request rust-mode slime solidity-mode
              tree-sitter tuareg typescript-mode undo-tree yaml-mode
              yasnippet))
  '(python-indent-guess-indent-offset nil)
