@@ -73,6 +73,7 @@
 (require 'editing)
 (require 'rust-ext)
 (require 'recorder)
+(require 'networking)
 
 ;; Extended org-mode
 (require 'org-ext)
@@ -379,12 +380,12 @@
  '(haskell-process-type 'stack-ghci)
  '(idris-interpreter-path "/usr/bin/idris2")
  '(indent-tabs-mode nil)
- '(inferior-lisp-program "/usr/bin/chez")
+ '(inferior-lisp-program "/usr/bin/chez" t)
  '(inhibit-startup-screen t)
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-l")
+ '(lsp-keymap-prefix "C-l" t)
  '(lua-indent-level 2)
  '(mu4e-drafts-folder "/marcin-jarmuzynski/[Gmail].Wersje robocze")
  '(mu4e-get-mail-command "offlineimap -o")
@@ -429,14 +430,7 @@
  '(org-sql-db-config
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
- '(package-selected-packages
-   '(ac-helm company crux csv-mode deferred direnv dockerfile-mode dune
-             elisp-format ellama envrc evil flycheck gnuplot
-             graphql-mode haskell-mode helm-lsp idris-mode json-mode
-             lsp-ui lua-mode magit nix-mode perspective pyvenv
-             quelpa-use-package request rust-mode slime solidity-mode
-             tree-sitter tuareg typescript-mode undo-tree yaml-mode
-             yasnippet))
+ '(package-selected-packages nil)
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 4)
  '(recorder-default-writing-dir "/home/sven/archive/movie/rec")
