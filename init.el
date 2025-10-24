@@ -440,9 +440,9 @@
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 4)
  '(recorder-default-writing-dir "/home/sven/archive/movie/rec")
- '(recorder-ffmpeg-capture-coords '(1920 150 3840 1080))
+ '(recorder-ffmpeg-capture-coords '(0 0 1920 1030))
  '(recorder-ffmpeg-video-filter
-   '((1:v (scale 384:216) cam) (2:v cam (overlay 30:684) video)))
+   '((1:v (scale 384:216) cam) (2:v cam (overlay 30:784) video)))
  '(recorder-playback-program "mpv")
  '(sh-basic-offset 2)
  '(sql-connection-alist nil)
