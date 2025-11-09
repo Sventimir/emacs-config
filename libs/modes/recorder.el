@@ -25,7 +25,7 @@
   :type '(choice (const nil) string)
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-microphone-device "alsa_input.usb-Sonix_Technology_Co.__Ltd._USB_2.0_Camera_SN0001-02.iec958-stereo"
+(defcustom recorder-ffmpeg-microphone-device "default"
   "Audio recording device to use with ffmpeg."
   :type 'string
   :group 'recorder)
@@ -252,21 +252,23 @@ NOTE: any excess elements in COORDINATES list are ignored."
   "Save the recording to a file, cutting everything aster DURATION."
   (interactive "sDuration: ")
   (if recorder-ffmpeg-last-output-file
-      (let ((time (if (string-empty-p duration) nil duration))
-            (output-file
-             (expand-file-name
-              (read-file-name "Output file: " recorder-default-writing-dir))))
+      (let* ((time (if (string-empty-p duration) nil duration))
+             (output-file
+              (expand-file-name
+               (read-file-name "Output file: " recorder-default-writing-dir)))
+             (cmd (append
+                   (list recorder-ffmpeg-path "-y" "-i" recorder-ffmpeg-last-output-file)
+                   (recorder-format-option "-t" time)
+                   (list output-file))))
         (make-process
          :name "recorder-ffmpeg-transcoder"
          :buffer "*recorder-ffmpeg*"
-         :command (append
-                   (list recorder-ffmpeg-path "-y" "-i" recorder-ffmpeg-last-output-file)
-                   (recorder-format-option "-t" time)
-                   (list output-file))
+         :command cmd
          :sentinel 'recorder-transcoding-sentinel)
         (with-current-buffer "*recorder*"
           (let ((inhibit-read-only t))
-            (insert "Transcoding: '" recorder-ffmpeg-last-output-file "' -> '" output-file "'\n"))))
+            (insert "Transcoding: '" recorder-ffmpeg-last-output-file "' -> '" output-file "'\n")
+            (insert (mapconcat 'identity cmd " ") "\n"))))
     (message "No recorded file to save.")))
 
 (defun recorder-start ()
