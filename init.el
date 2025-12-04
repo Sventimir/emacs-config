@@ -59,6 +59,9 @@
           (unbind-key (kbd "C-p") evil-operator-state-map)
           (unbind-key (kbd "C-p") evil-visual-state-map))
 
+(use-package hl-line
+  :ensure t
+  :config (set-face-background 'hl-line "grey40"))
 
 (use-package request
   :ensure t)
