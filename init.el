@@ -388,7 +388,7 @@
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-l" t)
+ '(lsp-keymap-prefix "C-l")
  '(lua-indent-level 2)
  '(mu4e-drafts-folder "/marcin-jarmuzynski/[Gmail].Wersje robocze")
  '(mu4e-get-mail-command "offlineimap -o")
@@ -441,6 +441,9 @@
  '(recorder-ffmpeg-video-filter
    '((1:v (scale 384:216) cam) (2:v cam (overlay 30:784) video)))
  '(recorder-playback-program "mpv")
+ '(recorder-screen-presets
+   '(("bbo" (160 115 1870 1075)
+      ((1:v (scale 384:216) cam) (2:v cam (overlay 30:700) video)))))
  '(sh-basic-offset 2)
  '(sql-connection-alist nil)
  '(typescript-indent-level 2)

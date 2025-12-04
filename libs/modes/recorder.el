@@ -76,6 +76,11 @@ Format: \\'(start-x, start-y, stop-x stop-y)."
   :type 'directory
   :group 'recorder)
 
+(defcustom recorder-screen-presets nil
+  "A list of triplets of (name recorder-ffmpeg-capture-coords recorder-ffmpeg-video-filter)."
+  :type '(repeat (list string sexp sexp))
+  :group 'recorder)
+
 (defvar recorder-ffmpeg-last-output-file nil
   "Last output file used for recording.")
 
@@ -308,6 +313,20 @@ NOTE: any excess elements in COORDINATES list are ignored."
       (goto-line (+ (length recorder-ffmpeg-streams) 2))
       (delete-region (point) (line-end-position))
       (insert (propertize "Filter: " 'face 'bold) (cadr (recorder-ffmpeg-filter-arg)) "\n"))))
+
+(defun recorder-find-by-name (name lst)
+  "If the first element of (car LST) is NAME, return (cadr LST), recurse on (cdr LST)."
+  (cond ((not lst) nil)
+        ((string= (caar lst) name) (cdar lst))
+        (t (recorder-find-by-name name (cdr lst)))))
+
+(defun recorder-load-screen-preset (name)
+  "Set capture coords and filter according to the preset named NAME."
+  (interactive "sName:")
+  (let ((settings (recorder-find-by-name name recorder-screen-presets)))
+    (setq recorder-ffmpeg-capture-coords (car settings)
+          recorder-ffmpeg-video-filter (cadr settings)))
+  (recorder-reload-stream-data))
 
 ;; Define the major mode:
 (defvar-keymap recorder-mode-map
