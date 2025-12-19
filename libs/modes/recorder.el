@@ -84,6 +84,9 @@ Format: \\'(start-x, start-y, stop-x stop-y)."
 (defvar recorder-ffmpeg-last-output-file nil
   "Last output file used for recording.")
 
+(defvar recorder-ffmpeg-last-desktop-capture-file nil
+  "Last output file storing just the screen capture.")
+
 (defvar recorder-ffmpeg-streams nil
   "List of streams to record.")
 
@@ -136,9 +139,10 @@ If entered expression starts with a quasi-quote, evaluate it."
           index
           (propertize (car stream) 'face 'bold)
           (cadr stream)
-          (recorder-opt-map
-           (lambda (s) (format ", size: %s" (recorder-ffmpeg-format-resolution s)))
-           (caddr stream))))
+          (or (recorder-opt-map
+               (lambda (s) (format ", size: %s" (recorder-ffmpeg-format-resolution s)))
+               (caddr stream))
+              "")))
 
 (defun recorder-screen-capture-size (coords)
   "Calculate the size of the screen capture from COORDS."
@@ -162,13 +166,16 @@ Sexp format is (stream-type device (width height))"
    (recorder-format-option "-s" (recorder-opt-map 'recorder-ffmpeg-format-resolution (caddr stream)))
    (recorder-format-option "-i" (cadr stream))))
 
-(defun recorder-ffmpeg-mapping-args (&optional streams)
+(defun recorder-ffmpeg-mapping-args (&rest streams)
   "Format ffmpeg mapping arguments for STREAMS."
-  (let* ((streams (or streams recorder-ffmpeg-streams))
-         (audio (recorder-find-stream '("alsa" "pulse") streams)))
-    (append
-     (if audio (list "-map" (format "%d:a" (car audio)) "-c:a" recorder-ffmpeg-output-acodec))
-     (list "-map" "[video]" "-c:v" recorder-ffmpeg-output-vcodec))))
+  (mapcan (lambda (s)
+            (list "-map"
+                  (if (numberp (car s)) (format "%d:%s" (car s) (cadr s)) (format "[%s]" (car s)))
+                  (format "-c:%s" (cadr s))
+                  (cond ((eq (cadr s) 'a) recorder-ffmpeg-output-acodec)
+                        ((eq (cadr s) 'v) recorder-ffmpeg-output-vcodec)
+                        (t (error (format "Unrecognised stream type: %s" (cadr s)))))))
+          streams))
 
 (defun recorder-ffmpeg-format-resolution (coordinates)
   "Conver a list of 2 COORDINATES to a string readable for ffmpeg.
@@ -188,7 +195,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
    (list recorder-ffmpeg-path "-y")
    (mapcan 'recorder-ffmpeg-stream-args recorder-ffmpeg-streams)
    (recorder-ffmpeg-filter-arg)
-   (recorder-ffmpeg-mapping-args)
+   (recorder-ffmpeg-mapping-args '(0 a) '("video" v))
    (list output-file)))
 
 (defun recorder-ffmpeg-sentinel (proc status)
