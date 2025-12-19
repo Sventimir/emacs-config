@@ -216,6 +216,15 @@ NOTE: any excess elements in COORDINATES list are ignored."
     (let ((inhibit-read-only t))
       (insert "Transcoding stopped: " status))))
 
+(defun recorder-screenshot-sentinel (proc status)
+  "Sentinel function for screenshot extraction using PROC and STATUS."
+  (if (not (string= status "finished\n"))
+      (pop-to-buffer "*recorder-ffmpeg*"))
+  (with-current-buffer "*recorder*"
+    (let ((inhibit-read-only t))
+      (insert "Screenshot extraction: " status))))
+
+
 (defun recorder-check-unsaved-streams ()
   "Check if there are unsaved streams and prompt the user to save them."
   (if (and (string= (current-buffer) "*recorder*") (get-buffer-process "*recorder-ffmpeg*"))
@@ -312,6 +321,25 @@ NOTE: any excess elements in COORDINATES list are ignored."
   (interactive)
   (process-send-string "recorder-ffmpeg-process" "q"))
 
+(defun recorder-extract-screenshot (timestamp)
+  "Extract a screenshot from the recording at TIMESTAMP."
+  (interactive "sTimestamp: ")
+  (let* ((output-file
+          (expand-file-name
+           (read-file-name "Output file: " recorder-default-writing-dir)))
+         (cmd (append
+               (list recorder-ffmpeg-path "-y" "-i" recorder-ffmpeg-last-screen-capture-file)
+               (recorder-format-option "-t" timestamp)
+               (list "-vframes" "1")
+               (list output-file))))
+    (make-process
+     :name "recorder-ffmpeg-extract-screenshot"
+     :buffer "*recorder-ffmpeg*"
+     :command cmd
+     :sentinel 'recorder-screenshot-sentinel)
+    (let ((inhibit-read-only t))
+      (insert "Screen capture: '" (mapconcat 'identity cmd " ") "'\n"))))
+
 (defun recorder-edit-screen-capture (coordinates)
   "Set screen capture coordinates to COORDINATES."
   (interactive (list (recorder-read-sexp "Coordinates: " recorder-ffmpeg-capture-coords)))
@@ -355,7 +383,8 @@ NOTE: any excess elements in COORDINATES list are ignored."
   "p" 'recorder-playback
   "r" 'recorder-start
   "s" 'recorder-stop
-  "w" 'recorder-save-recording)
+  "w" 'recorder-save-recording
+  "<f12>" 'recorder-extract-screenshot)
 
 (define-derived-mode recorder-mode special-mode "Recorder"
   "Major mode that provides an interface to audio and video recording with ffmpeg."
