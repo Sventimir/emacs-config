@@ -84,7 +84,7 @@ Format: \\'(start-x, start-y, stop-x stop-y)."
 (defvar recorder-ffmpeg-last-output-file nil
   "Last output file used for recording.")
 
-(defvar recorder-ffmpeg-last-desktop-capture-file nil
+(defvar recorder-ffmpeg-last-screen-capture-file nil
   "Last output file storing just the screen capture.")
 
 (defvar recorder-ffmpeg-streams nil
@@ -189,14 +189,16 @@ NOTE: any excess elements in COORDINATES list are ignored."
             (mapconcat 'recorder-format-filter recorder-ffmpeg-video-filter ", "))
     nil))
 
-(defun recorder-ffmpeg-command (output-file)
-  "Construct the ffmpeg command writing to OUTPUT-FILE."
+(defun recorder-ffmpeg-command (output-file &optional screen-capture-file)
+  "Construct the ffmpeg command writing to OUTPUT-FILE and (optionally) to SCREEN-CAPTURE-FILE."
   (append
    (list recorder-ffmpeg-path "-y")
    (mapcan 'recorder-ffmpeg-stream-args recorder-ffmpeg-streams)
    (recorder-ffmpeg-filter-arg)
    (recorder-ffmpeg-mapping-args '(0 a) '("video" v))
-   (list output-file)))
+   (list output-file)
+   (if (stringp screen-capture-file)
+       (append (recorder-ffmpeg-mapping-args '(2 v)) (list screen-capture-file)))))
 
 (defun recorder-ffmpeg-sentinel (proc status)
   "Sentinel function for fmmpeg process using PROC and STATUS."
@@ -250,15 +252,18 @@ NOTE: any excess elements in COORDINATES list are ignored."
         (insert (recorder-show-stream (setq stream-index (1+ stream-index)) stream)))
       (insert (propertize "Filter: " 'face 'bold) (cadr (recorder-ffmpeg-filter-arg)) "\n"))))
 
-(defun recorder-playback ()
-  "Play back the recorded file using RECORDER-PLAYBACK-PROGRAM."
-  (interactive)
-  (if recorder-ffmpeg-last-output-file
-      (make-process
-       :name "recorder-playback"
-       :buffer "*recorder-playback*"
-       :command (list recorder-playback-program recorder-ffmpeg-last-output-file))
-    (message "No recorded file to play back.")))
+(defun recorder-playback (&optional screen-capture)
+  "Play back the recorded file (SCREEN-CAPTURE or full) using RECORDER-PLAYBACK-PROGRAM."
+  (interactive "P")
+  (let ((filename (if screen-capture
+                      recorder-ffmpeg-last-screen-capture-file
+                    recorder-ffmpeg-last-output-file)))
+    (if filename
+        (make-process
+         :name "recorder-playback"
+         :buffer "*recorder-playback*"
+         :command (list recorder-playback-program filename))
+      (message "No recorded file to play back."))))
 
 (defun recorder-save-recording (duration)
   "Save the recording to a file, cutting everything aster DURATION."
@@ -288,7 +293,12 @@ NOTE: any excess elements in COORDINATES list are ignored."
   (interactive)
   (setq recorder-ffmpeg-last-output-file
         (make-temp-file "emacs-recorder" nil (concat "." recorder-output-format)))
-  (let ((cmd (recorder-ffmpeg-command recorder-ffmpeg-last-output-file))
+  (if recorder-ffmpeg-desktop-stream
+      (setq recorder-ffmpeg-last-screen-capture-file
+            (make-temp-file "emacs-recorder" nil (concat "." recorder-output-format))))
+  (let ((cmd (recorder-ffmpeg-command recorder-ffmpeg-last-output-file
+                                      (if recorder-ffmpeg-desktop-stream
+                                          recorder-ffmpeg-last-screen-capture-file)))
         (inhibit-read-only t))
     (make-process
      :name "recorder-ffmpeg-process"
@@ -337,7 +347,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
 
 ;; Define the major mode:
 (defvar-keymap recorder-mode-map
-  :doc "Keymap for the recorder mdoe."
+  :doc "Keymap for the recorder mode."
   :parent special-mode-map
   "c" 'recorder-edit-screen-capture
   "f" 'recorder-edit-filter
