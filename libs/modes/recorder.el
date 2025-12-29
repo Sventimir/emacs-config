@@ -239,25 +239,25 @@ NOTE: any excess elements in COORDINATES list are ignored."
   "Sentinel function for fmmpeg process using PROC and STATUS."
   (if (not (string= status "finished\n"))
       (pop-to-buffer "*recorder-ffmpeg*"))
-  (with-current-buffer "*recorder*"
+  (with-current-buffer "*recorder-ffmpeg*"
     (let ((inhibit-read-only t))
-      (insert "Recording stopped: " status))))
+      (insert "> Recording stopped: " status))))
 
 (defun recorder-transcoding-sentinel (proc status)
   "Sentinel function for transcoder ffmpeg process using PROC and STATUS."
   (if (not (string= status "finished\n"))
-      (pop-to-buffer "*recorder-ffmpeg-process*"))
-  (with-current-buffer "*recorder*"
+      (pop-to-buffer "*recorder-ffmpeg*"))
+  (with-current-buffer "*recorder-ffmpeg*"
     (let ((inhibit-read-only t))
-      (insert "Transcoding stopped: " status))))
+      (insert "> Transcoding stopped: " status))))
 
 (defun recorder-screenshot-sentinel (proc status)
   "Sentinel function for screenshot extraction using PROC and STATUS."
   (if (not (string= status "finished\n"))
       (pop-to-buffer "*recorder-ffmpeg*"))
-  (with-current-buffer "*recorder*"
+  (with-current-buffer "*recorder-ffmpeg*"
     (let ((inhibit-read-only t))
-      (insert "Screenshot extraction: " status))))
+      (insert "> Screenshot extraction: " status))))
 
 
 (defun recorder-check-unsaved-streams ()
@@ -328,10 +328,11 @@ NOTE: any excess elements in COORDINATES list are ignored."
          :command cmd
          :filter 'recorder-ffmpeg-process-filter
          :sentinel 'recorder-transcoding-sentinel)
-        (with-current-buffer "*recorder*"
+        (with-current-buffer "*recorder-ffmpeg*"
           (let ((inhibit-read-only t))
-            (insert "Transcoding: '" recorder-ffmpeg-last-output-file "' -> '" output-file "'\n")
-            (insert (mapconcat 'identity cmd " ") "\n"))))
+            (insert "> Transcoding: '" recorder-ffmpeg-last-output-file "' -> '" output-file "'\n")
+            (insert "> " (mapconcat 'identity cmd " ") "\n")))
+        (pop-to-buffer "*recorder-ffmpeg*"))
     (message "No recorded file to save.")))
 
 (defun recorder-start ()
@@ -352,7 +353,10 @@ NOTE: any excess elements in COORDINATES list are ignored."
      :command cmd
      :filter 'recorder-ffmpeg-process-filter
      :sentinel 'recorder-ffmpeg-sentinel)
-    (insert "Recording: '" (mapconcat 'identity cmd " ") "'\n")))
+    (with-current-buffer "*recorder-ffmpeg*"
+      (let ((inhibit-read-only t))
+        (insert "> " (mapconcat 'identity cmd " ") "\n")))
+    (pop-to-buffer "*recorder-ffmpeg*")))
 
 (defun recorder-stop ()
   "Stop recording."
@@ -377,8 +381,9 @@ NOTE: any excess elements in COORDINATES list are ignored."
      :command cmd
      :filter 'recorder-ffmpeg-process-filter
      :sentinel 'recorder-screenshot-sentinel)
-    (let ((inhibit-read-only t))
-      (insert "Screen capture: '" (mapconcat 'identity cmd " ") "'\n"))))
+    (with-current-buffer "*recorder-ffmpeg*"
+        (let ((inhibit-read-only t))
+          (insert "> " (mapconcat 'identity cmd " ") "\n")))))
 
 (defun recorder-edit-screen-capture (coordinates)
   "Set screen capture coordinates to COORDINATES."
