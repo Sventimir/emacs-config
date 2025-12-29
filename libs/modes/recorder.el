@@ -113,17 +113,28 @@ If entered expression starts with a quasi-quote, evaluate it."
         (eval expr)
       expr)))
 
-(defun recorder-format-filter (expr)
-  "Parse EXPR and convert it to an ffmpeg filter expression."
-  (cond ((stringp expr) expr)
-        ((listp expr)
-         (let ((filter ""))
-           (dolist (elt expr filter)
-             (cond ((symbolp elt) (setq filter (concat filter (format "[%s]" elt))))
-                   ((stringp elt) (setq filter (concat filter elt)))
-                   ((listp elt) (setq filter (concat filter (format "%s=%s" (car elt) (cadr elt)))))
-                   (t (error "Invalid filter element"))))))
-        (t (error "Invalid filter expression"))))
+(defun recorder-ffmpeg-format-filter (expr)
+  "Convert Lisp EXPR into a string defining an ffmpeg filter specifying input and output streams."
+  (concat
+   (recorder-ffmpeg-format-filter-streams (car expr))
+   (mapconcat 'recorder-ffmpeg-format-filter-descr (cdr (butlast expr)) ",")
+   (recorder-ffmpeg-format-filter-streams (car (last expr)))))
+
+(defun recorder-ffmpeg-format-filter-streams (expr)
+  "Convert Lisp EXPR ionto a string describing an I/O stream or a list of such streams."
+  (if (listp expr)
+      (mapconcat (lambda (e) (format "[%s]" e)) expr)
+    (format "[%s]" expr)))
+
+(defun recorder-ffmpeg-format-filter-descr (expr)
+  "Convert Lisp EXPR into a string describing an ffmpeg filter."
+  (format "%s=%s" (car expr) (mapconcat (lambda (e) (recorder-ffmpeg-format-filter-param e)) (cdr expr) ":")))
+
+(defun recorder-ffmpeg-format-filter-param (expr)
+  "Convert Lisp EXPR into a string description of an ffmpeg filter."
+  (if (listp expr)
+      (format "%s=%s" (car expr) (cadr expr))
+    (format "%s" expr)))
 
 (defun recorder-ffmpeg-desktop-device (&optional dev start-coords)
   "Format the desktop device DEV for ffmpeg with START-COORDS."
@@ -186,7 +197,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
   "Format ffmpeg arguments for complex filter."
   (if recorder-ffmpeg-video-filter
       (list "-filter_complex"
-            (mapconcat 'recorder-format-filter recorder-ffmpeg-video-filter ", "))
+            (mapconcat 'recorder-ffmpeg-format-filter recorder-ffmpeg-video-filter ";"))
     nil))
 
 (defun recorder-ffmpeg-command (output-file &optional screen-capture-file)
@@ -374,6 +385,15 @@ NOTE: any excess elements in COORDINATES list are ignored."
     (setq recorder-ffmpeg-capture-coords (car settings)
           recorder-ffmpeg-video-filter (cadr settings)))
   (recorder-reload-stream-data))
+
+(defun recorder-ffprobe-format (filename)
+  "Get the informattion about FILENAME video format."
+  (with-current-buffer "*recorder-ffprobe*"
+    (erase-buffer))
+  (make-process
+   :name "recorder-ffprobe"
+   :buffer "*recorder-ffprobe*"
+   :command (list "ffprobe" "-v" "error" filename "-show_format" "-print_format" "csv")))
 
 ;; Define the major mode:
 (defvar-keymap recorder-mode-map

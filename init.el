@@ -439,7 +439,7 @@
  '(recorder-default-writing-dir "/home/sven/archive/movie/rec")
  '(recorder-ffmpeg-capture-coords '(0 0 1920 1030))
  '(recorder-ffmpeg-video-filter
-   '((1:v (scale 384:216) cam) (2:v cam (overlay 30:784) video)))
+   '((1:v (scale 384 216) cam) ((2:v cam) (overlay 30 784) video)))
  '(recorder-playback-program "mpv")
  '(recorder-screen-presets
    '(("bbo" (160 115 1870 1075)
