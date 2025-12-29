@@ -195,7 +195,9 @@ NOTE: any excess elements in COORDINATES list are ignored."
    (list recorder-ffmpeg-path "-y")
    (mapcan 'recorder-ffmpeg-stream-args recorder-ffmpeg-streams)
    (recorder-ffmpeg-filter-arg)
-   (recorder-ffmpeg-mapping-args '(0 a) '("video" v))
+   (if recorder-ffmpeg-desktop-stream
+       (recorder-ffmpeg-mapping-args '(0 a) '("video" v))
+     (recorder-ffmpeg-mapping-args '(0 a) '(1 v)))
    (list output-file)
    (if (stringp screen-capture-file)
        (append (recorder-ffmpeg-mapping-args '(2 v)) (list screen-capture-file)))))
