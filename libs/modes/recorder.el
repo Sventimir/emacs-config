@@ -71,6 +71,22 @@ Format: \\'(start-x, start-y, stop-x stop-y)."
   :type 'sexp
   :group 'recorder)
 
+(defcustom recorder-ffmpeg-logs "*recorder-ffmpeg*"
+  "The name of the buffer storing ffmpeg logs."
+  :type 'string
+  :group 'recorder)
+
+(defcustom recorder-ffmpeg-log-level "warning"
+  "The log level to pass into ffmpeg."
+  :type '(choice (const "quiet")
+                 (const "panic")
+                 (const "fatal")
+                 (const "error")
+                 (const "warning")
+                 (const "info")
+                 (const "debug")
+                 (const "trace")))
+
 (defcustom recorder-default-writing-dir (getenv "HOME")
   "Default directory to write recorded files."
   :type 'directory
@@ -203,7 +219,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
 (defun recorder-ffmpeg-command (output-file &optional screen-capture-file)
   "Construct the ffmpeg command writing to OUTPUT-FILE and (optionally) to SCREEN-CAPTURE-FILE."
   (append
-   (list recorder-ffmpeg-path "-y")
+   (list recorder-ffmpeg-path "-hide_banner" "-v" recorder-ffmpeg-log-level "-y")
    (mapcan 'recorder-ffmpeg-stream-args recorder-ffmpeg-streams)
    (recorder-ffmpeg-filter-arg)
    (if recorder-ffmpeg-desktop-stream
@@ -212,6 +228,12 @@ NOTE: any excess elements in COORDINATES list are ignored."
    (list output-file)
    (if (stringp screen-capture-file)
        (append (recorder-ffmpeg-mapping-args '(2 v)) (list screen-capture-file)))))
+
+(defun recorder-ffmpeg-process-filter (proc output)
+  "Filter function for ffmpeg proces PROC returning OUTPUT."
+  (with-current-buffer (process-buffer proc)
+    (let ((inhibit-read-only t))
+      (insert (ansi-color-apply output)))))
 
 (defun recorder-ffmpeg-sentinel (proc status)
   "Sentinel function for fmmpeg process using PROC and STATUS."
@@ -296,13 +318,15 @@ NOTE: any excess elements in COORDINATES list are ignored."
               (expand-file-name
                (read-file-name "Output file: " recorder-default-writing-dir)))
              (cmd (append
-                   (list recorder-ffmpeg-path "-y" "-i" recorder-ffmpeg-last-output-file)
+                   (list recorder-ffmpeg-path "-hide_banner" "-v" recorder-ffmpeg-log-level
+                         "-y" "-i" recorder-ffmpeg-last-output-file)
                    (recorder-format-option "-t" time)
                    (list output-file))))
         (make-process
          :name "recorder-ffmpeg-transcoder"
          :buffer "*recorder-ffmpeg*"
          :command cmd
+         :filter 'recorder-ffmpeg-process-filter
          :sentinel 'recorder-transcoding-sentinel)
         (with-current-buffer "*recorder*"
           (let ((inhibit-read-only t))
@@ -326,6 +350,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
      :name "recorder-ffmpeg-process"
      :buffer "*recorder-ffmpeg*"
      :command cmd
+     :filter 'recorder-ffmpeg-process-filter
      :sentinel 'recorder-ffmpeg-sentinel)
     (insert "Recording: '" (mapconcat 'identity cmd " ") "'\n")))
 
@@ -341,7 +366,8 @@ NOTE: any excess elements in COORDINATES list are ignored."
           (expand-file-name
            (read-file-name "Output file: " recorder-default-writing-dir)))
          (cmd (append
-               (list recorder-ffmpeg-path "-y" "-i" recorder-ffmpeg-last-screen-capture-file)
+               (list recorder-ffmpeg-path "-hide_banner" "-v" recorder-ffmpeg-log-level
+                     "-y" "-i" recorder-ffmpeg-last-screen-capture-file)
                (recorder-format-option "-t" timestamp)
                (list "-vframes" "1")
                (list output-file))))
@@ -349,6 +375,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
      :name "recorder-ffmpeg-extract-screenshot"
      :buffer "*recorder-ffmpeg*"
      :command cmd
+     :filter 'recorder-ffmpeg-process-filter
      :sentinel 'recorder-screenshot-sentinel)
     (let ((inhibit-read-only t))
       (insert "Screen capture: '" (mapconcat 'identity cmd " ") "'\n"))))
@@ -393,7 +420,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
   (make-process
    :name "recorder-ffprobe"
    :buffer "*recorder-ffprobe*"
-   :command (list "ffprobe" "-v" "error" filename "-show_format" "-print_format" "csv")))
+   :command (list "ffprobe" "-hide_banner" "-v" "error" filename "-show_format" "-print_format" "csv")))
 
 ;; Define the major mode:
 (defvar-keymap recorder-mode-map
