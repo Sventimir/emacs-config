@@ -3,6 +3,7 @@
 ;;; Provides an interface for audio and video recording using ffmpeg backend.
 ;;; Code:
 (require 'buffers)
+(require 'org)
 
 ;; Customisation variables and internal variables:
 (defcustom recorder-ffmpeg-path "ffmpeg"
@@ -233,12 +234,13 @@ NOTE: any excess elements in COORDINATES list are ignored."
   "Filter function for ffmpeg proces PROC returning OUTPUT."
   (with-current-buffer (process-buffer proc)
     (let ((inhibit-read-only t))
+      (goto-char (point-max))
       (insert (ansi-color-apply output)))))
 
 (defun recorder-ffmpeg-sentinel (proc status)
   "Sentinel function for fmmpeg process using PROC and STATUS."
   (if (not (string= status "finished\n"))
-      (pop-to-buffer "*recorder-ffmpeg*"))
+      (display-buffer "*recorder-ffmpeg*"))
   (with-current-buffer "*recorder-ffmpeg*"
     (let ((inhibit-read-only t))
       (insert "> Recording stopped: " status))))
@@ -246,7 +248,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
 (defun recorder-transcoding-sentinel (proc status)
   "Sentinel function for transcoder ffmpeg process using PROC and STATUS."
   (if (not (string= status "finished\n"))
-      (pop-to-buffer "*recorder-ffmpeg*"))
+      (display-buffer "*recorder-ffmpeg*"))
   (with-current-buffer "*recorder-ffmpeg*"
     (let ((inhibit-read-only t))
       (insert "> Transcoding stopped: " status))))
@@ -254,7 +256,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
 (defun recorder-screenshot-sentinel (proc status)
   "Sentinel function for screenshot extraction using PROC and STATUS."
   (if (not (string= status "finished\n"))
-      (pop-to-buffer "*recorder-ffmpeg*"))
+      (display-buffer "*recorder-ffmpeg*"))
   (with-current-buffer "*recorder-ffmpeg*"
     (let ((inhibit-read-only t))
       (insert "> Screenshot extraction: " status))))
@@ -268,6 +270,30 @@ NOTE: any excess elements in COORDINATES list are ignored."
       (if (yes-or-no-p "There is an active recording.  Save it?")
           (recorder-save-recording ""))
     t))
+
+(defun recorder-display-input-devices-table (devices)
+  "Display information about available DEVICES in a table."
+  (org-table-create (format "5x%d" (1+ (length devices))))
+  (let ((col 1)
+        (row 2))
+    (dolist (header '("Selected" "Index" "Type" "Device" "Size"))
+      (org-table-goto-column col)
+      (insert header)
+      (setq col (1+ col)))
+    (setq col 1)
+    (org-table-goto-line row)
+    (dolist (dev devices)
+      (org-table-goto-line row)
+      (dolist (item (cons "x" (cons (number-to-string (1- row)) dev)))
+        (org-table-goto-column col)
+        (insert (if (listp item)
+                    (format "%dx%d" (car item) (cadr item))
+                  item))
+        (setq col (1+ col)))
+      (setq row (1+ row)
+            col 1))
+    (org-table-align)
+    (forward-line 1)))
 
 ;; Recorder commands:
 (defun recorder-reload-stream-data ()
@@ -292,8 +318,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
           (stream-index -1))
       (erase-buffer)
       (insert (propertize "*RECORDER*" 'face 'bold) "\n")
-      (dolist (stream recorder-ffmpeg-streams)
-        (insert (recorder-show-stream (setq stream-index (1+ stream-index)) stream)))
+      (recorder-display-input-devices-table recorder-ffmpeg-streams)
       (insert (propertize "Filter: " 'face 'bold) (cadr (recorder-ffmpeg-filter-arg)) "\n"))))
 
 (defun recorder-playback (&optional screen-capture)
@@ -332,7 +357,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
           (let ((inhibit-read-only t))
             (insert "> Transcoding: '" recorder-ffmpeg-last-output-file "' -> '" output-file "'\n")
             (insert "> " (mapconcat 'identity cmd " ") "\n")))
-        (pop-to-buffer "*recorder-ffmpeg*"))
+        (display-buffer "*recorder-ffmpeg*"))
     (message "No recorded file to save.")))
 
 (defun recorder-start ()
@@ -356,7 +381,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
     (with-current-buffer "*recorder-ffmpeg*"
       (let ((inhibit-read-only t))
         (insert "> " (mapconcat 'identity cmd " ") "\n")))
-    (pop-to-buffer "*recorder-ffmpeg*")))
+    (display-buffer "*recorder-ffmpeg*")))
 
 (defun recorder-stop ()
   "Stop recording."
@@ -427,6 +452,17 @@ NOTE: any excess elements in COORDINATES list are ignored."
    :buffer "*recorder-ffprobe*"
    :command (list "ffprobe" "-hide_banner" "-v" "error" filename "-show_format" "-print_format" "csv")))
 
+(defun recorder-toggle-selection ()
+  "If point is inside a table, toggle selection for the current row."
+  (interactive)
+  (if (org-at-table-p)
+      (progn
+        (let ((inhibit-read-only t)
+              (val (org-table-get nil 1)))
+          (cond ((string= val "x") (org-table-put nil 1 "" 'realign))
+                ((string= val "") (org-table-put nil 1 "x" 'realign))
+                (t nil))))))
+
 ;; Define the major mode:
 (defvar-keymap recorder-mode-map
   :doc "Keymap for the recorder mode."
@@ -438,6 +474,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
   "r" 'recorder-start
   "s" 'recorder-stop
   "w" 'recorder-save-recording
+  "SPC" 'recorder-toggle-selection
   "<f12>" 'recorder-extract-screenshot)
 
 (define-derived-mode recorder-mode special-mode "Recorder"
