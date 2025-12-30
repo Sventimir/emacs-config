@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 ;;; Package --- Summary
 ;;; Commentary:
 ;;; Provides an interface for audio and video recording using ffmpeg backend.

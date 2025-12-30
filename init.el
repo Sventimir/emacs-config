@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 ;;; Package --- Emacs initialisation module
 ;;; Commentary:
 ;;; Code:
