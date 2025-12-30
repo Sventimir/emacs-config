@@ -314,7 +314,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
   (if recorder-ffmpeg-audio-stream
       (add-to-list 'recorder-ffmpeg-streams
                    (list recorder-ffmpeg-audio-stream recorder-ffmpeg-microphone-device)))
-  (with-current-buffer "*recorder*"
+  (with-current-buffer "*ffmpeg*"
     (let ((inhibit-read-only t)
           (stream-index -1))
       (erase-buffer)
@@ -424,7 +424,7 @@ NOTE: any excess elements in COORDINATES list are ignored."
   "Edit the ffmpeg video filter, etting it to NEW-FILTER."
   (interactive (list (recorder-read-sexp "Filter: " recorder-ffmpeg-video-filter)))
   (setq recorder-ffmpeg-video-filter new-filter)
-  (with-current-buffer "*recorder*"
+  (with-current-buffer "*ffmpeg*"
     (let ((inhibit-read-only t))
       (goto-line (+ (length recorder-ffmpeg-streams) 2))
       (delete-region (point) (line-end-position))
@@ -464,32 +464,5 @@ NOTE: any excess elements in COORDINATES list are ignored."
                 ((string= val "") (org-table-put nil 1 "x" 'realign))
                 (t nil))))))
 
-;; Define the major mode:
-(defvar-keymap recorder-mode-map
-  :doc "Keymap for the recorder mode."
-  :parent special-mode-map
-  "c" 'recorder-edit-screen-capture
-  "f" 'recorder-edit-filter
-  "l" 'recorder-reload-stream-data
-  "p" 'recorder-playback
-  "r" 'recorder-start
-  "s" 'recorder-stop
-  "w" 'recorder-save-recording
-  "SPC" 'recorder-toggle-selection
-  "<f12>" 'recorder-extract-screenshot)
-
-(define-derived-mode recorder-mode special-mode "Recorder"
-  "Major mode that provides an interface to audio and video recording with ffmpeg."
-  :group 'recorder)
-
-(defun recorder ()
-  "Open the recorder interface."
-  (interactive)
-  (setup-buffer "*recorder*"
-    (pop-to-buffer "*recorder*")
-    (recorder-mode)
-    (add-hook 'kill-buffer-query-functions 'recorder-check-unsaved-streams)
-    (recorder-reload-stream-data)))
-
-(provide 'recorder)
-;;; recorder.el ends here
+(provide 'ffmpeg-recorder)
+;;; ffmpeg-recorder.el ends here

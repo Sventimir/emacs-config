@@ -76,7 +76,7 @@
 (require 'range)
 (require 'editing)
 (require 'rust-ext)
-(require 'recorder)
+(require 'ffmpeg)
 (require 'networking)
 
 ;; Extended org-mode
