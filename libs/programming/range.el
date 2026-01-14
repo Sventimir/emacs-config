@@ -20,6 +20,18 @@
   "Return a range from START to END, inclusive."
   (make-range :start start :start-open-p nil :end end :end-open-p nil))
 
+(defun range-enumerate (range)
+  "Create a list of all the integers in RANGE."
+  (let ((result nil)
+        (counter (range-end range))
+        (stop (range-start range))
+        (cmp (if (range-start-open-p range) '> '>=)))
+    (if (range-end-open-p range) (setq counter (1- counter)))
+    (while (funcall cmp counter stop)
+      (add-to-list 'result counter)
+      (setq counter (1- counter)))
+    result))
+
 (defun small-letter-p (char)
   "Return t if CHAR is a small letter."
   (in-range (make-closed-range 97 122) char))

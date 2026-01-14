@@ -5,464 +5,156 @@
 ;;; Code:
 (require 'buffers)
 (require 'org)
+(require 'range)
+(require 'ffmpeg-timecode)
 
-;; Customisation variables and internal variables:
-(defcustom recorder-ffmpeg-path "ffmpeg"
-  "Path to ffmpeg executable."
-  :type 'string
-  :group 'recorder)
-
-(defcustom recorder-output-format "mkv"
-  "Ffmpeg output format."
-  :type 'string
-  :group 'recorder)
-
-(defcustom recorder-playback-program "mplayer"
-  "Program used for recording playback."
-  :type 'string
-  :group 'recorder)
-
-(defcustom recorder-ffmpeg-audio-stream "pulse"
+(defcustom ffmpeg-recorder-audio-stream "alsa"
   "Audio stream type for ffmpeg."
   :type '(choice (const nil) string)
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-microphone-device "default"
+(defcustom ffmpeg-recorder-microphone-device "default"
   "Audio recording device to use with ffmpeg."
   :type 'string
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-desktop-stream "x11grab"
+(defcustom ffmpeg-recorder-desktop-stream "x11grab"
   "Desktop recording stream to use with ffmpeg."
   :type '(choice (const nil) string)
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-video-stream "v4l2"
+(defcustom ffmpeg-recorder-desktop-size '(3840 1080)
+  "Desktop size."
+  :type '(list number number)
+  :group 'ffmpeg)
+
+(defcustom ffmpeg-recorder-video-stream "v4l2"
   "Video recording stream to use with ffmpeg."
   :type '(choice (const nil) string)
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-video-device "/dev/video0"
+(defcustom ffmpeg-recorder-video-device "/dev/video0"
   "Video recording device to use with ffmpeg."
   :type 'file
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-capture-coords (list 0 0 (display-pixel-width) (display-pixel-height))
-  "Screen coordinates from which to capture.
-Format: \\'(start-x, start-y, stop-x stop-y)."
-  :type '(list natnum)
-  :group 'recorder)
-
-(defcustom recorder-ffmpeg-video-resolution '(1280 720)
+(defcustom ffmpeg-recorder-video-resolution '(1280 720)
   "Video capture resolution for ffmpeg."
   :type '(list natnum)
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-output-acodec "libvorbis"
-  "Audio codec to use for output stream."
+(defcustom ffmpeg-recoder-acodec "flac"
+  "Audio codec to use for output stream.
+Unlike transcoder, we want an uncompressed audio for faster transcoding and better quality."
   :type 'string
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-output-vcodec "libx264"
-  "Video codec to use for output stream."
+(defcustom ffmpeg-recorder-vcodec "zlib"
+  "Video codec to use for output stream.
+Unlike transcoder, we want an uncompressed video for faster transcoding and better quality."
   :type 'string
   :group 'recorder)
 
-(defcustom recorder-ffmpeg-video-filter nil
-  "Video filter to combine streams with ffmpeg."
-  :type 'sexp
-  :group 'recorder)
-
-(defcustom recorder-ffmpeg-logs "*recorder-ffmpeg*"
-  "The name of the buffer storing ffmpeg logs."
+(defcustom ffmpeg-recorder-output-format "mkv"
+  "The container format to use for recorder's output."
   :type 'string
-  :group 'recorder)
+  :group 'ffmpeg)
 
-(defcustom recorder-ffmpeg-log-level "warning"
-  "The log level to pass into ffmpeg."
-  :type '(choice (const "quiet")
-                 (const "panic")
-                 (const "fatal")
-                 (const "error")
-                 (const "warning")
-                 (const "info")
-                 (const "debug")
-                 (const "trace")))
+(defun ffmpeg-recorder-read-streams ()
+  "Read input stream data from the config table."
+  (save-excursion
+    (ffmpeg-goto-element 'table "available-streams")
+    (let ((data (cddr (org-table-to-lisp))))
+      (mapcar (lambda (row)
+                (append (butlast (cdr row))
+                        (list (mapcar 'string-to-number (string-split (car (last row)) "x" t " ")))))
+              (ffmpeg-table-raw-strings
+               (seq-filter (lambda (row) (string= (car row) "x")) data))))))
 
-(defcustom recorder-default-writing-dir (getenv "HOME")
-  "Default directory to write recorded files."
-  :type 'directory
-  :group 'recorder)
-
-(defcustom recorder-screen-presets nil
-  "A list of triplets of (name recorder-ffmpeg-capture-coords recorder-ffmpeg-video-filter)."
-  :type '(repeat (list string sexp sexp))
-  :group 'recorder)
-
-(defvar recorder-ffmpeg-last-output-file nil
-  "Last output file used for recording.")
-
-(defvar recorder-ffmpeg-last-screen-capture-file nil
-  "Last output file storing just the screen capture.")
-
-(defvar recorder-ffmpeg-streams nil
-  "List of streams to record.")
-
-
-;; Internal functions:
-(defun recorder-format-option (option value)
-  "Format OPTION and VALUE for ffmpeg command.
-Omit the option entirely if VALUE is nil."
-  (if value
-      (list option value)
-    nil))
-
-(defun recorder-opt-map (f x)
-  "Map an optional argument X over a function F."
-  (if x
-      (funcall f x)
-    nil))
-
-(defun recorder-read-sexp (prompt &optional default)
-  "Show PROMPT, read a s-expression from minibuffer, providing DEFAULT.
-If entered expression starts with a quasi-quote, evaluate it."
-  (let ((expr (read (read-string prompt (format "%s" default)))))
-    (if (eq (car expr) '\`)
-        (eval expr)
-      expr)))
-
-(defun recorder-ffmpeg-format-filter (expr)
-  "Convert Lisp EXPR into a string defining an ffmpeg filter specifying input and output streams."
-  (concat
-   (recorder-ffmpeg-format-filter-streams (car expr))
-   (mapconcat 'recorder-ffmpeg-format-filter-descr (cdr (butlast expr)) ",")
-   (recorder-ffmpeg-format-filter-streams (car (last expr)))))
-
-(defun recorder-ffmpeg-format-filter-streams (expr)
-  "Convert Lisp EXPR ionto a string describing an I/O stream or a list of such streams."
-  (if (listp expr)
-      (mapconcat (lambda (e) (format "[%s]" e)) expr)
-    (format "[%s]" expr)))
-
-(defun recorder-ffmpeg-format-filter-descr (expr)
-  "Convert Lisp EXPR into a string describing an ffmpeg filter."
-  (format "%s=%s" (car expr) (mapconcat (lambda (e) (recorder-ffmpeg-format-filter-param e)) (cdr expr) ":")))
-
-(defun recorder-ffmpeg-format-filter-param (expr)
-  "Convert Lisp EXPR into a string description of an ffmpeg filter."
-  (if (listp expr)
-      (format "%s=%s" (car expr) (cadr expr))
-    (format "%s" expr)))
-
-(defun recorder-ffmpeg-desktop-device (&optional dev start-coords)
-  "Format the desktop device DEV for ffmpeg with START-COORDS."
-  (let ((coords (or start-coords recorder-ffmpeg-capture-coords)))
-    (format "%s+%d,%d"
-            (or dev (getenv "DISPLAY") "0.0")
-            (car coords)
-            (cadr coords))))
-
-(defun recorder-show-stream (index stream)
-  "Format STREAM with INDEX for display."
-  (format "STREAM #%d: %s from: %s%s\n"
-          index
-          (propertize (car stream) 'face 'bold)
-          (cadr stream)
-          (or (recorder-opt-map
-               (lambda (s) (format ", size: %s" (recorder-ffmpeg-format-resolution s)))
-               (caddr stream))
-              "")))
-
-(defun recorder-screen-capture-size (coords)
-  "Calculate the size of the screen capture from COORDS."
-  (list (- (caddr coords) (car coords))
-        (- (cadddr coords) (cadr coords))))
-
-(defun recorder-find-stream (types streams)
-  "Find the first stream in STREAMS that has on of TYPES as its first element.
-Return the index of the stream and the stream itself."
-  (let ((i 0))
-    (cl-dolist (stream streams)
-      (if (member (car stream) types)
-        (cl-return (list i stream))
-        (setq i (1+ i))))))
-
-(defun recorder-ffmpeg-stream-args (stream)
+(defun ffmpeg-recorder-stream-args (stream)
   "Decode sexp STREAM into a list of ffmpeg arguments.
 Sexp format is (stream-type device (width height))"
   (append
-   (recorder-format-option "-f" (car stream))
-   (recorder-format-option "-s" (recorder-opt-map 'recorder-ffmpeg-format-resolution (caddr stream)))
-   (recorder-format-option "-i" (cadr stream))))
+   (ffmpeg-format-option "-f" (car stream))
+   (ffmpeg-format-option "-s" (ffmpeg-opt-map 'ffmpeg-recorder-format-resolution (caddr stream)))
+   (ffmpeg-format-option "-i" (cadr stream))))
 
-(defun recorder-ffmpeg-mapping-args (&rest streams)
-  "Format ffmpeg mapping arguments for STREAMS."
-  (mapcan (lambda (s)
-            (list "-map"
-                  (if (numberp (car s)) (format "%d:%s" (car s) (cadr s)) (format "[%s]" (car s)))
-                  (format "-c:%s" (cadr s))
-                  (cond ((eq (cadr s) 'a) recorder-ffmpeg-output-acodec)
-                        ((eq (cadr s) 'v) recorder-ffmpeg-output-vcodec)
-                        (t (error (format "Unrecognised stream type: %s" (cadr s)))))))
-          streams))
 
-(defun recorder-ffmpeg-format-resolution (coordinates)
-  "Conver a list of 2 COORDINATES to a string readable for ffmpeg.
+(defun ffmpeg-recorder-mapping-args (streams)
+  "Generate stream of STREAMS mappings for recording."
+  (mapcan (lambda (idx)
+            (list "-map" (number-to-string idx)))
+          (range-uncompress (list (cons 0 (1- (length streams)))))))
+
+(defun ffmpeg-recorder-format-resolution (coordinates)
+  "Convert a list of 2 COORDINATES to a string readable for ffmpeg.
 NOTE: any excess elements in COORDINATES list are ignored."
   (format "%d:%d" (car coordinates) (cadr coordinates)))
 
-(defun recorder-ffmpeg-filter-arg ()
-  "Format ffmpeg arguments for complex filter."
-  (if recorder-ffmpeg-video-filter
-      (list "-filter_complex"
-            (mapconcat 'recorder-ffmpeg-format-filter recorder-ffmpeg-video-filter ";"))
-    nil))
-
-(defun recorder-ffmpeg-command (output-file &optional screen-capture-file)
-  "Construct the ffmpeg command writing to OUTPUT-FILE and (optionally) to SCREEN-CAPTURE-FILE."
-  (append
-   (list recorder-ffmpeg-path "-hide_banner" "-v" recorder-ffmpeg-log-level "-y")
-   (mapcan 'recorder-ffmpeg-stream-args recorder-ffmpeg-streams)
-   (recorder-ffmpeg-filter-arg)
-   (if recorder-ffmpeg-desktop-stream
-       (recorder-ffmpeg-mapping-args '(0 a) '("video" v))
-     (recorder-ffmpeg-mapping-args '(0 a) '(1 v)))
-   (list output-file)
-   (if (stringp screen-capture-file)
-       (append (recorder-ffmpeg-mapping-args '(2 v)) (list screen-capture-file)))))
-
-(defun recorder-ffmpeg-process-filter (proc output)
-  "Filter function for ffmpeg proces PROC returning OUTPUT."
-  (with-current-buffer (process-buffer proc)
-    (let ((inhibit-read-only t))
-      (goto-char (point-max))
-      (insert (ansi-color-apply output)))))
-
-(defun recorder-ffmpeg-sentinel (proc status)
-  "Sentinel function for fmmpeg process using PROC and STATUS."
-  (if (not (string= status "finished\n"))
-      (display-buffer "*recorder-ffmpeg*"))
-  (with-current-buffer "*recorder-ffmpeg*"
-    (let ((inhibit-read-only t))
-      (insert "> Recording stopped: " status))))
-
-(defun recorder-transcoding-sentinel (proc status)
-  "Sentinel function for transcoder ffmpeg process using PROC and STATUS."
-  (if (not (string= status "finished\n"))
-      (display-buffer "*recorder-ffmpeg*"))
-  (with-current-buffer "*recorder-ffmpeg*"
-    (let ((inhibit-read-only t))
-      (insert "> Transcoding stopped: " status))))
-
-(defun recorder-screenshot-sentinel (proc status)
-  "Sentinel function for screenshot extraction using PROC and STATUS."
-  (if (not (string= status "finished\n"))
-      (display-buffer "*recorder-ffmpeg*"))
-  (with-current-buffer "*recorder-ffmpeg*"
-    (let ((inhibit-read-only t))
-      (insert "> Screenshot extraction: " status))))
-
-
-(defun recorder-check-unsaved-streams ()
-  "Check if there are unsaved streams and prompt the user to save them."
-  (if (and (string= (current-buffer) "*recorder*") (get-buffer-process "*recorder-ffmpeg*"))
-      (recorder-stop))
-  (if recorder-ffmpeg-last-output-file
-      (if (yes-or-no-p "There is an active recording.  Save it?")
-          (recorder-save-recording ""))
-    t))
-
-(defun recorder-display-input-devices-table (devices)
-  "Display information about available DEVICES in a table."
-  (org-table-create (format "5x%d" (1+ (length devices))))
-  (let ((col 1)
-        (row 2))
-    (dolist (header '("Selected" "Index" "Type" "Device" "Size"))
-      (org-table-goto-column col)
-      (insert header)
-      (setq col (1+ col)))
-    (setq col 1)
-    (org-table-goto-line row)
-    (dolist (dev devices)
-      (org-table-goto-line row)
-      (dolist (item (cons "x" (cons (number-to-string (1- row)) dev)))
-        (org-table-goto-column col)
-        (insert (if (listp item)
-                    (format "%dx%d" (car item) (cadr item))
-                  item))
-        (setq col (1+ col)))
-      (setq row (1+ row)
-            col 1))
-    (org-table-align)
-    (forward-line 1)))
+(defun ffmpeg-recorder-add-device (dev)
+  "Add a device DEV configuration to the devices table.
+NOTE: this assumes the point already is over the devices table."
+  (dolist (item (cons "x" dev))
+    (insert (if (listp item)
+                (format "%dx%d" (car item) (cadr item))
+              item))
+    (org-table-next-field)))
 
 ;; Recorder commands:
-(defun recorder-reload-stream-data ()
+(defun ffmpeg-recorder-load-stream-data ()
   "Reload the stream data from the customisation variables."
   (interactive)
-  (setq recorder-ffmpeg-streams nil)
-  (if recorder-ffmpeg-desktop-stream
-      (add-to-list 'recorder-ffmpeg-streams
-                   (list recorder-ffmpeg-desktop-stream
-                         (recorder-ffmpeg-desktop-device)
-                         (recorder-screen-capture-size recorder-ffmpeg-capture-coords))))
-  (if recorder-ffmpeg-video-stream
-      (add-to-list 'recorder-ffmpeg-streams
-                   (list recorder-ffmpeg-video-stream
-                         recorder-ffmpeg-video-device
-                         recorder-ffmpeg-video-resolution)))
-  (if recorder-ffmpeg-audio-stream
-      (add-to-list 'recorder-ffmpeg-streams
-                   (list recorder-ffmpeg-audio-stream recorder-ffmpeg-microphone-device)))
+  (let ((inhibit-read-only t))
+    (insert (propertize "*RECORDER*" 'face 'bold) "\n")
+    (ffmpeg-init-table "available-streams" "Selected" "Type" "Device" "Size")
+    (ffmpeg-recorder-add-device (list ffmpeg-recorder-desktop-stream ":0" ffmpeg-recorder-desktop-size))
+    (ffmpeg-recorder-add-device (list ffmpeg-recorder-video-stream ffmpeg-recorder-video-device
+                                      ffmpeg-recorder-video-resolution))
+    (ffmpeg-recorder-add-device (list ffmpeg-recorder-audio-stream ffmpeg-recorder-microphone-device))
+    (org-table-align)))
+
+(defun ffmpeg-recorder-sentinel (proc status)
+  "Sentinel function for the recording process, using PROC and STATUS."
+  (ffmpeg-default-process-sentinel proc status)
   (with-current-buffer "*ffmpeg*"
-    (let ((inhibit-read-only t)
-          (stream-index -1))
-      (erase-buffer)
-      (insert (propertize "*RECORDER*" 'face 'bold) "\n")
-      (recorder-display-input-devices-table recorder-ffmpeg-streams)
-      (insert (propertize "Filter: " 'face 'bold) (cadr (recorder-ffmpeg-filter-arg)) "\n"))))
+    (ffmpeg-goto-element 'table "open-files")
+    (let ((fname (car (last (process-command proc))))
+          (status (string-trim status))
+          (inhibit-read-only t))
+      (search-forward fname)
+      (if (string= status "finished")
+          (let ((length (ffmpeg-file-duration fname)))
+            (org-table-put nil 1 "x")
+            (org-table-put nil 3 (timecode-to-string length)))
+        (org-table-put nil 1 status))
+      (org-table-align))))
 
-(defun recorder-playback (&optional screen-capture)
-  "Play back the recorded file (SCREEN-CAPTURE or full) using RECORDER-PLAYBACK-PROGRAM."
-  (interactive "P")
-  (let ((filename (if screen-capture
-                      recorder-ffmpeg-last-screen-capture-file
-                    recorder-ffmpeg-last-output-file)))
-    (if filename
-        (make-process
-         :name "recorder-playback"
-         :buffer "*recorder-playback*"
-         :command (list recorder-playback-program filename))
-      (message "No recorded file to play back."))))
-
-(defun recorder-save-recording (duration)
-  "Save the recording to a file, cutting everything aster DURATION."
-  (interactive "sDuration: ")
-  (if recorder-ffmpeg-last-output-file
-      (let* ((time (if (string-empty-p duration) nil duration))
-             (output-file
-              (expand-file-name
-               (read-file-name "Output file: " recorder-default-writing-dir)))
-             (cmd (append
-                   (list recorder-ffmpeg-path "-hide_banner" "-v" recorder-ffmpeg-log-level
-                         "-y" "-i" recorder-ffmpeg-last-output-file)
-                   (recorder-format-option "-t" time)
-                   (list output-file))))
-        (make-process
-         :name "recorder-ffmpeg-transcoder"
-         :buffer "*recorder-ffmpeg*"
-         :command cmd
-         :filter 'recorder-ffmpeg-process-filter
-         :sentinel 'recorder-transcoding-sentinel)
-        (with-current-buffer "*recorder-ffmpeg*"
-          (let ((inhibit-read-only t))
-            (insert "> Transcoding: '" recorder-ffmpeg-last-output-file "' -> '" output-file "'\n")
-            (insert "> " (mapconcat 'identity cmd " ") "\n")))
-        (display-buffer "*recorder-ffmpeg*"))
-    (message "No recorded file to save.")))
-
-(defun recorder-start ()
+(defun ffmpeg-recorder-start ()
   "Start recording."
   (interactive)
-  (setq recorder-ffmpeg-last-output-file
-        (make-temp-file "emacs-recorder" nil (concat "." recorder-output-format)))
-  (if recorder-ffmpeg-desktop-stream
-      (setq recorder-ffmpeg-last-screen-capture-file
-            (make-temp-file "emacs-recorder" nil (concat "." recorder-output-format))))
-  (let ((cmd (recorder-ffmpeg-command recorder-ffmpeg-last-output-file
-                                      (if recorder-ffmpeg-desktop-stream
-                                          recorder-ffmpeg-last-screen-capture-file)))
-        (inhibit-read-only t))
-    (make-process
-     :name "recorder-ffmpeg-process"
-     :buffer "*recorder-ffmpeg*"
-     :command cmd
-     :filter 'recorder-ffmpeg-process-filter
-     :sentinel 'recorder-ffmpeg-sentinel)
-    (with-current-buffer "*recorder-ffmpeg*"
-      (let ((inhibit-read-only t))
-        (insert "> " (mapconcat 'identity cmd " ") "\n")))
-    (display-buffer "*recorder-ffmpeg*")))
+  (let ((output-file (make-temp-file "emacs-recorder" nil (concat "." ffmpeg-recorder-output-format)))
+        (streams (ffmpeg-recorder-read-streams))
+        (ffmpeg-process-name "ffmpeg-recorder-process")
+        (ffmpeg-process-sentinel 'ffmpeg-recorder-sentinel))
+    (apply 'ffmpeg-run-command ffmpeg-binary-path
+           (append (mapcan 'ffmpeg-recorder-stream-args streams)
+                   (list "-r" "30" "-time_base" "1/1000")
+                   (ffmpeg-recorder-mapping-args streams)
+                   (list "-c:a" ffmpeg-recoder-acodec "-c:v" ffmpeg-recorder-vcodec
+                         output-file)))
+    (ffmpeg-goto-element 'table "open-files")
+    (goto-char (1- (org-table-end)))
+    (let ((inhibit-read-only t)
+          (idx (string-to-number (org-table-get nil 2))))
+      (dolist (field (list "n/a" output-file "unknown" (current-time-string)))
+        (org-table-next-field)
+        (insert field))
+      (org-table-align))))
 
-(defun recorder-stop ()
+(defun ffmpeg-recorder-stop ()
   "Stop recording."
   (interactive)
-  (process-send-string "recorder-ffmpeg-process" "q"))
-
-(defun recorder-extract-screenshot (timestamp)
-  "Extract a screenshot from the recording at TIMESTAMP."
-  (interactive "sTimestamp: ")
-  (let* ((output-file
-          (expand-file-name
-           (read-file-name "Output file: " recorder-default-writing-dir)))
-         (cmd (append
-               (list recorder-ffmpeg-path "-hide_banner" "-v" recorder-ffmpeg-log-level
-                     "-y" "-i" recorder-ffmpeg-last-screen-capture-file)
-               (recorder-format-option "-t" timestamp)
-               (list "-vframes" "1")
-               (list output-file))))
-    (make-process
-     :name "recorder-ffmpeg-extract-screenshot"
-     :buffer "*recorder-ffmpeg*"
-     :command cmd
-     :filter 'recorder-ffmpeg-process-filter
-     :sentinel 'recorder-screenshot-sentinel)
-    (with-current-buffer "*recorder-ffmpeg*"
-        (let ((inhibit-read-only t))
-          (insert "> " (mapconcat 'identity cmd " ") "\n")))))
-
-(defun recorder-edit-screen-capture (coordinates)
-  "Set screen capture coordinates to COORDINATES."
-  (interactive (list (recorder-read-sexp "Coordinates: " recorder-ffmpeg-capture-coords)))
-    (if (and (listp coordinates) (= (length coordinates) 4))
-        (progn
-          (setq recorder-ffmpeg-capture-coords coordinates)
-          (recorder-reload-stream-data))
-      (message "Invalid coordinates.")))
-
-(defun recorder-edit-filter (new-filter)
-  "Edit the ffmpeg video filter, etting it to NEW-FILTER."
-  (interactive (list (recorder-read-sexp "Filter: " recorder-ffmpeg-video-filter)))
-  (setq recorder-ffmpeg-video-filter new-filter)
-  (with-current-buffer "*ffmpeg*"
-    (let ((inhibit-read-only t))
-      (goto-line (+ (length recorder-ffmpeg-streams) 2))
-      (delete-region (point) (line-end-position))
-      (insert (propertize "Filter: " 'face 'bold) (cadr (recorder-ffmpeg-filter-arg)) "\n"))))
-
-(defun recorder-find-by-name (name lst)
-  "If the first element of (car LST) is NAME, return (cadr LST), recurse on (cdr LST)."
-  (cond ((not lst) nil)
-        ((string= (caar lst) name) (cdar lst))
-        (t (recorder-find-by-name name (cdr lst)))))
-
-(defun recorder-load-screen-preset (name)
-  "Set capture coords and filter according to the preset named NAME."
-  (interactive "sName:")
-  (let ((settings (recorder-find-by-name name recorder-screen-presets)))
-    (setq recorder-ffmpeg-capture-coords (car settings)
-          recorder-ffmpeg-video-filter (cadr settings)))
-  (recorder-reload-stream-data))
-
-(defun recorder-ffprobe-format (filename)
-  "Get the informattion about FILENAME video format."
-  (with-current-buffer "*recorder-ffprobe*"
-    (erase-buffer))
-  (make-process
-   :name "recorder-ffprobe"
-   :buffer "*recorder-ffprobe*"
-   :command (list "ffprobe" "-hide_banner" "-v" "error" filename "-show_format" "-print_format" "csv")))
-
-(defun recorder-toggle-selection ()
-  "If point is inside a table, toggle selection for the current row."
-  (interactive)
-  (if (org-at-table-p)
-      (progn
-        (let ((inhibit-read-only t)
-              (val (org-table-get nil 1)))
-          (cond ((string= val "x") (org-table-put nil 1 "" 'realign))
-                ((string= val "") (org-table-put nil 1 "x" 'realign))
-                (t nil))))))
+  (process-send-string "ffmpeg-recorder-process" "q"))
 
 (provide 'ffmpeg-recorder)
 ;;; ffmpeg-recorder.el ends here
