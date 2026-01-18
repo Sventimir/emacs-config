@@ -42,6 +42,7 @@
 
 ;; Emoji support
 (use-package emojify
+  :ensure t
   :config
   (set-fontset-font
    t 'symbol (font-spec :family "Segoe UI Emoji") nil 'prepend)
@@ -454,7 +455,14 @@
  '(org-sql-db-config
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
- '(package-selected-packages nil)
+ '(package-selected-packages
+   '(ac-helm company crux csv-mode deferred direnv dockerfile-mode dune
+             elisp-format ellama emojify envrc evil flycheck gnuplot
+             graphql-mode haskell-mode helm-lsp idris-mode json-mode
+             lsp-ui lua-mode magit nix-mode perspective pyvenv
+             quelpa-use-package request rust-mode slime solidity-mode
+             tree-sitter tuareg typescript-mode undo-tree yaml-mode
+             yasnippet))
  '(python-indent-guess-indent-offset nil)
  '(python-indent-offset 4)
  '(recorder-default-writing-dir "/home/sven/archive/movie/rec")
