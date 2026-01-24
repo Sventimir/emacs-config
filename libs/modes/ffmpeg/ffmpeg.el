@@ -43,6 +43,7 @@
   "r" 'ffmpeg-recorder-start
   "s" 'ffmpeg-recorder-stop
   "t" 'ffmpeg-transcoder-run
+  "<f12>" 'ffmpeg-transcoder-take-frame
   "SPC" 'ffmpeg-toggle-table-selection)
 
 (define-derived-mode ffmpeg-mode special-mode "ffmpeg"

@@ -166,5 +166,13 @@ Unlike with recorder, we want this to be a well-compressed codec."
           (ffmpeg-table-append-row "open-files" (list "x" filename (timecode-to-string length)))
         (error (format "Could not open %s as a video container." filename))))))
 
+(defun ffmpeg-transcoder-take-frame (timecode fname)
+  "Extract a frame from the selected video at a given TIMECODE into FNAME."
+  (interactive (list (read-timecode "Timecode: ")
+                     (read-file-name "Output file: " ffmpeg-transcoder-default-output-dir)))
+  (apply 'ffmpeg-run-command ffmpeg-binary-path
+         (append (ffmpeg-transcoder-input-arguments)
+                 (list "-t" (timecode-to-string timecode) "-vframes" "1" fname))))
+
 (provide 'ffmpeg-transcoder)
 ;;; ffmpeg-transcoder.el ends here

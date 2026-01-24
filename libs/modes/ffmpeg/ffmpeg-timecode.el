@@ -56,5 +56,9 @@
   "Normalize the timecode TC."
   (number-to-timecode (timecode-to-seconds tc)))
 
+(defun read-timecode (prompt &optional default)
+  "Read a timecode from minibuffer, displaying PROMPT, suggesting DEFAULT answer."
+  (string-to-timecode (read-from-minibuffer prompt (or default "00:00"))))
+
 (provide 'ffmpeg-timecode)
 ;;; ffmpeg-timecode.el ends here
