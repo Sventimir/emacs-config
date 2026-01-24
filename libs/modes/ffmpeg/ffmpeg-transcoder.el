@@ -5,6 +5,7 @@
 ;;; Code:
 (require 'org)
 (require 'ffmpeg-commons)
+(require 'ffmpeg-timecode)
 
 (defcustom ffmpeg-transcoder-vcodec "hevc"
   "The video codec to use for transcoding output.
@@ -159,22 +160,10 @@ Unlike with recorder, we want this to be a well-compressed codec."
   (interactive (list (expand-file-name
                       (read-file-name "Input file:" ffmpeg-transcoder-default-output-dir))))
   (with-current-buffer "*ffmpeg*"
-    (ffmpeg-goto-element 'table "open-files")
-    (goto-char (1- (org-table-end)))
-    (let ((length (cadr (string-split
-                         (shell-command-to-string
-                          (format "%s -hide_banner -v warning -show_format -show_entries format=duration -print_format csv %s"
-                                  ffmpeg-ffprobe-binary-path
-                                  filename))
-                         ",")))
+    (let ((length (ffmpeg-file-duration filename))
           (inhibit-read-only t))
       (if length
-          (progn
-            (org-table-next-field)
-            (org-table-put nil 1 "x")
-            (org-table-put nil 2 filename)
-            (org-table-put nil 3 length)
-            (org-table-align))
+          (ffmpeg-table-append-row "open-files" (list "x" filename (timecode-to-string length)))
         (error (format "Could not open %s as a video container." filename))))))
 
 (provide 'ffmpeg-transcoder)

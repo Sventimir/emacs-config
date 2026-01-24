@@ -45,15 +45,12 @@
   "Convert the number N to the corresponding timecode."
   (let* ((total (floor n))
          (frac (- n total))
-         (tc nil))
-    (dotimes (_ 3)
-      (if (> total 60)
-          (progn
-            (add-to-list 'tc (/ total 60))
-            (setq total (% total 60)))))
-    (add-to-list 'tc total)
-    (setf (car tc) (+ (car tc) frac))
-    (reverse tc)))
+         (tc (list (/ total 60) (+ frac (% total 60)))))
+    (dotimes (_ 2 tc)
+      (if (> (car tc) 60)
+          (let ((n (pop tc)))
+            (push (% n 60) tc)
+            (push (/ n 60) tc))))))
 
 (defun timecode-normalize (tc)
   "Normalize the timecode TC."
