@@ -113,48 +113,40 @@ NOTE: this assumes the point already is over the devices table."
     (ffmpeg-recorder-add-device (list ffmpeg-recorder-audio-stream ffmpeg-recorder-microphone-device))
     (org-table-align)))
 
-(defun ffmpeg-recorder-sentinel (proc status)
-  "Sentinel function for the recording process, using PROC and STATUS."
-  (ffmpeg-default-process-sentinel proc status)
-  (with-current-buffer "*ffmpeg*"
-    (ffmpeg-goto-element 'table "open-files")
-    (let ((fname (car (last (process-command proc))))
-          (status (string-trim status))
-          (inhibit-read-only t))
-      (search-forward fname)
-      (if (string= status "finished")
-          (let ((length (ffmpeg-file-duration fname)))
-            (org-table-put nil 1 "x")
-            (org-table-put nil 3 (timecode-to-string length)))
-        (org-table-put nil 1 status))
-      (org-table-align))))
+(defun ffmpeg-recorder-finish-hook (buffer status)
+  "A function to call with BUFFER and STATUS when a recording process finishes."
+  (if (string= (buffer-name buffer) "*ffmpeg-recorder*")
+      (let ((fname (with-current-buffer buffer (car (last ffmpeg-command)))))
+        (with-current-buffer "*ffmpeg*"
+          (ffmpeg-goto-element 'table "open-files")
+          (let ((status (string-trim status))
+                (inhibit-read-only t))
+            (search-forward fname)
+            (let ((length (ffmpeg-file-duration fname)))
+              (org-table-put nil 1 "x")
+              (org-table-put nil 3 (timecode-to-string length)))
+            (org-table-align))))))
+
+(add-to-list 'compilation-finish-functions 'ffmpeg-recorder-finish-hook)
 
 (defun ffmpeg-recorder-start ()
   "Start recording."
   (interactive)
   (let ((output-file (make-temp-file "emacs-recorder" nil (concat "." ffmpeg-recorder-output-format)))
         (streams (ffmpeg-recorder-read-streams))
-        (ffmpeg-process-name "ffmpeg-recorder-process")
-        (ffmpeg-process-sentinel 'ffmpeg-recorder-sentinel))
+        (ffmpeg-log-buffer "*ffmpeg-recorder*"))
     (apply 'ffmpeg-run-command ffmpeg-binary-path
            (append (mapcan 'ffmpeg-recorder-stream-args streams)
                    (list "-r" "30" "-time_base" "1/1000")
                    (ffmpeg-recorder-mapping-args streams)
                    (list "-c:a" ffmpeg-recoder-acodec "-c:v" ffmpeg-recorder-vcodec
                          output-file)))
-    (ffmpeg-goto-element 'table "open-files")
-    (goto-char (1- (org-table-end)))
-    (let ((inhibit-read-only t)
-          (idx (string-to-number (org-table-get nil 2))))
-      (dolist (field (list "n/a" output-file "unknown" (current-time-string)))
-        (org-table-next-field)
-        (insert field))
-      (org-table-align))))
+    (ffmpeg-table-append-row "open-files" (list "n/a" output-file "unknown" (current-time-string)))))
 
 (defun ffmpeg-recorder-stop ()
   "Stop recording."
   (interactive)
-  (process-send-string "ffmpeg-recorder-process" "q"))
+  (process-send-string (get-buffer-process "*ffmpeg-recorder*") "q"))
 
 (provide 'ffmpeg-recorder)
 ;;; ffmpeg-recorder.el ends here

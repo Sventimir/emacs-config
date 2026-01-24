@@ -125,35 +125,34 @@ Unlike with recorder, we want this to be a well-compressed codec."
                         (t (error (format "Invalid mapping: %s." m))))))
           mappings))
 
-(defun ffmpeg-transcoder-sentinel (proc status)
-  "Sentinel function for the trancoding process, using PROC and STATUS."
-  (ffmpeg-default-process-sentinel proc status)
-  (with-current-buffer "*ffmpeg*"
-    (ffmpeg-goto-element 'table "open-files")
-    (let ((fname (car (last (process-command proc))))
-          (status (string-trim status))
-          (inhibit-read-only t))
-      (goto-char (1- (org-table-end)))
-      (if (string= status "finished")
-          (let ((length (ffmpeg-file-duration fname)))
-            (org-table-put nil 1 "x")
-            (org-table-put nil 2 fname)
-            (org-table-put nil 3 (timecode-to-string length))
-            (org-table-put)
-        (org-table-put nil 1 status))
-      (org-table-align))))
-)
+(defun ffmpeg-transcoder-finish-hook (buffer status)
+  "A function to call with BUFFER and STATUS when transcoding process finishes."
+  (if (string= (buffer-name buffer) "*ffmpeg-transcoder*")
+      (let ((fname (with-current-buffer buffer (car (last ffmpeg-command)))))
+        (with-current-buffer "*ffmpeg*"
+          (let ((status (string-trim status))
+                (inhibit-read-only t))
+            (if (string= status "finished")
+                (let ((length (ffmpeg-file-duration fname)))
+                  (ffmpeg-table-append-row "open-files"
+                                           (list "x"
+                                                 fname
+                                                 (timecode-to-string length)
+                                                 (current-time-string))))))))))
+
+(add-to-list 'compilation-finish-functions 'ffmpeg-transcoder-finish-hook)
 
 (defun ffmpeg-transcoder-run (output-file)
   "Run ffmpeg to transcode the selected files from the inputs table and save result to OUTPUT-FILE."
   (interactive (list (expand-file-name
                       (read-file-name "Output file:" ffmpeg-transcoder-default-output-dir))))
-  (apply 'ffmpeg-run-command ffmpeg-binary-path
-         (append (ffmpeg-transcoder-input-arguments)
-                 (ffmpeg-transcoder-filter-arg)
-                 (ffmpeg-transcoder-mapping-args ffmpeg-transcoder-mappings)
-                 (list "-c:a" ffmpeg-transcoder-acodec "-c:v" ffmpeg-transcoder-vcodec
-                       output-file))))
+  (let ((ffmpeg-log-buffer "*ffmpeg-transcoder*"))
+    (apply 'ffmpeg-run-command ffmpeg-binary-path
+           (append (ffmpeg-transcoder-input-arguments)
+                   (ffmpeg-transcoder-filter-arg)
+                   (ffmpeg-transcoder-mapping-args ffmpeg-transcoder-mappings)
+                   (list "-c:a" ffmpeg-transcoder-acodec "-c:v" ffmpeg-transcoder-vcodec
+                         output-file)))))
 
 (defun ffmpeg-transcoder-open-file (filename)
   "Probe an existing video file at FILENAME and add it to thr list of open files."

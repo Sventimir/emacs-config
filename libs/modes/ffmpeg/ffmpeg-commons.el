@@ -43,15 +43,8 @@
   "Buffer that contains standard output from ffmpeg and other tools.
 Invoked commands are logged too.")
 
-(defvar ffmpeg-process-name "ffmpeg-process"
-  "Name of the ffmpeg process.")
-
-(defvar ffmpeg-process-filter 'ffmpeg-default-process-filter
-  "Filter function for the ffmpeg process.
-Use local let-bindings to alter it if required.")
-
-(defvar ffmpeg-process-sentinel 'ffmpeg-default-process-sentinel
-  "Sentinel functions for the ffmpeg process.
+(defvar ffmpeg-process-finish-hook nil
+  "A function to call when the ffmpeg process finishes.
 Use local let-binding to alter it if required.")
 
 (defun ffmpeg-format-option (option value)
@@ -80,26 +73,18 @@ If entered expression starts with a quasi-quote, evaluate it."
 
 (defun ffmpeg-run-command (executable &rest arguments)
   "Run EXECUTABLE as an async process with ARGUMENTS."
-  (let ((cmd (append (list executable "-hide_banner" "-v" ffmpeg-log-level "-y")
-                     arguments)))
-    (with-current-buffer (get-buffer-create ffmpeg-log-buffer)
-      (let ((inhibit-read-only t))
-        (goto-char (point-max))
-        (insert "> " (mapconcat 'identity cmd " ") "\n\n\n")))
-    (make-process
-     :name ffmpeg-process-name
-     :buffer ffmpeg-log-buffer
-     :command cmd
-     :filter 'compilation-filter
-     :sentinel ffmpeg-process-sentinel)
-    (display-buffer ffmpeg-log-buffer)))
-
-(defun ffmpeg-default-process-sentinel (proc status)
-  "The default process sentinel for ffmpeg PROC exiting with STATUS."
-  (with-current-buffer (process-buffer proc)
-    (let ((inhibit-read-only t))
-      (goto-char (point-max))
-      (insert "> ffmpeg process exited: " status "\n"))))
+  (save-excursion
+    (let ((cmd (append (list executable "-hide_banner" "-v" ffmpeg-log-level "-y")
+                       arguments)))
+      (let* ((buf (compile (mapconcat 'shell-quote-argument cmd " ") t))
+             (proc (get-buffer-process buf))\
+             (old-buf (get-buffer ffmpeg-log-buffer)))
+        (if old-buf (kill-buffer old-buf))
+        (with-current-buffer buf
+          (rename-buffer ffmpeg-log-buffer)
+          (goto-char (point-max))
+          (setq-local ffmpeg-command cmd)))
+      (display-buffer ffmpeg-log-buffer))))
 
 (defun ffmpeg-table-raw-strings (table)
   "Strip all text properties of all strings inside TABLE."
@@ -133,6 +118,16 @@ If entered expression starts with a quasi-quote, evaluate it."
           (lambda (el)
             (if (equal (org-element-property :name el) name) el)))))
       (forward-line 1)))
+
+(defun ffmpeg-table-append-row (name data)
+  "Find table NAME and append a row containing DATA to it."
+  (ffmpeg-goto-element 'table name)
+  (goto-char (1- (org-table-end)))
+  (let ((inhibit-read-only t))
+    (dolist (field data)
+      (org-table-next-field)
+      (insert field))
+    (org-table-align)))
 
 (defun ffmpeg-file-duration (filename)
   "Measure the duration of the file under FILENAME."
