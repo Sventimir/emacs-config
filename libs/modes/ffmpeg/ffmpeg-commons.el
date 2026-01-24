@@ -74,7 +74,8 @@ If entered expression starts with a quasi-quote, evaluate it."
 (defun ffmpeg-run-command (executable &rest arguments)
   "Run EXECUTABLE as an async process with ARGUMENTS."
   (save-excursion
-    (let ((cmd (append (list executable "-hide_banner" "-v" ffmpeg-log-level "-y")
+    (let ((cmd (append (list executable "-hide_banner" "-v" ffmpeg-log-level)
+                       (if (string= executable ffmpeg-ffplay-binary-path) nil '("-y"))
                        arguments)))
       (let* ((buf (compile (mapconcat 'shell-quote-argument cmd " ") t))
              (proc (get-buffer-process buf))\

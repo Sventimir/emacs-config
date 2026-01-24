@@ -29,7 +29,7 @@
   (interactive)
   (save-excursion
     (org-table-goto-column 2)
-    (ffmpeg-run-command ffmpeg-ffplay-binary-path (org-table-get-field))))
+    (ffmpeg-run-command ffmpeg-ffplay-binary-path (string-trim (org-table-get-field)))))
 
 ;; Define the major mode:
 (defvar-keymap ffmpeg-mode-map
