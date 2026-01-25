@@ -394,9 +394,9 @@
  '(ffmpeg-recorder-vcodec "libx264")
  '(ffmpeg-transcoder-default-output-dir "/home/sven/archive/movie/rec")
  '(ffmpeg-transcoder-filter
-   '(((0:v:0) (crop (x 0) (y 0) (w 1920) (h 1030)) (scr))
-     ((0:v:1) (scale 384 216) (cam))
-     ((scr cam) (overlay 10 743) (vid))))
+   '`(((0:v:0) (crop ,@(screen-coords 0 0 1920 1030)) (scr))
+      ((0:v:1) (scale 384 216) (cam))
+      ((scr cam) (overlay 10 743) (vid))))
  '(ffmpeg-transcoder-mappings '(vid (0 a)))
  '(ffmpeg-transcoder-vcodec "libx264")
  '(global-undo-tree-mode t)

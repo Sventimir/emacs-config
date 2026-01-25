@@ -4,6 +4,7 @@
 (require 'ffmpeg-commons)
 (require 'ffmpeg-recorder)
 (require 'ffmpeg-transcoder)
+(require 'ffmpeg-filters)
 
 
 (defun ffmpeg-toggle-table-selection ()

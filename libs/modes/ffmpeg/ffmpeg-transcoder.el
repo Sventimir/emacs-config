@@ -40,12 +40,13 @@ Unlike with recorder, we want this to be a well-compressed codec."
   :group 'ffmpeg)
 
 
-(defun ffmpeg-transcoder-filter-arg ()
-  "Format ffmpeg arguments for complex filter."
-  (if ffmpeg-transcoder-filter
-      (list "-filter_complex"
-            (mapconcat 'ffmpeg-format-filter ffmpeg-transcoder-filter ";"))
-    nil))
+(defun ffmpeg-transcoder-filter-arg (arg)
+  "Format ffmpeg arguments ARG for complex filter.
+If the expression starts with quasi-quote, evaluate it before returning."
+  (let* ((expr (if (eq (car arg) '\`)
+                   (eval arg)
+                 arg)))
+    (if expr (list "-filter_complex" (mapconcat 'ffmpeg-format-filter expr ";")))))
 
 (defun ffmpeg-format-filter (expr)
   "Convert Lisp EXPR into a string defining an ffmpeg filter specifying input and output streams."
@@ -73,7 +74,10 @@ Unlike with recorder, we want this to be a well-compressed codec."
 (defun ffmpeg-transcoder-display-filter ()
   "Display the contents of FFMPEG-TRANSCODER-FILTER in the current buffer."
   (let ((inhibit-read-only t))
-    (insert (propertize "Filter: " 'face 'bold) (or (cadr (ffmpeg-transcoder-filter-arg)) "") "\n")))
+    (insert (propertize "Filter: " 'face 'bold)
+            (or (cadr (ffmpeg-transcoder-filter-arg ffmpeg-transcoder-filter))
+                "")
+            "\n")))
 
 (defun ffmpeg-transcoder-display-mappings ()
   "Display the contents of FFMPEG-TRANSCODER-MAPPINGS in the current buffer."
@@ -89,7 +93,7 @@ Unlike with recorder, we want this to be a well-compressed codec."
 
 (defun ffmpeg-transcoder-edit-filter (new-filter)
   "Edit the ffmpeg video filter, etting it to NEW-FILTER."
-  (interactive (list (ffmpeg-read-sexp "Filter: " ffmpeg-transcoder-filter)))
+  (interactive (list (read (read-string "Filter: " (format "%s" ffmpeg-transcoder-filter)))))
   (setq ffmpeg-transcoder-filter new-filter)
   (with-current-buffer "*ffmpeg*"
     (ffmpeg-goto-element 'paragraph "transcoder-filter")
@@ -150,7 +154,7 @@ Unlike with recorder, we want this to be a well-compressed codec."
   (let ((ffmpeg-log-buffer "*ffmpeg-transcoder*"))
     (apply 'ffmpeg-run-command ffmpeg-binary-path
            (append (ffmpeg-transcoder-input-arguments)
-                   (ffmpeg-transcoder-filter-arg)
+                   (ffmpeg-transcoder-filter-arg ffmpeg-transcoder-filter)
                    (ffmpeg-transcoder-mapping-args ffmpeg-transcoder-mappings)
                    (list "-c:a" ffmpeg-transcoder-acodec "-c:v" ffmpeg-transcoder-vcodec
                          output-file)))))
