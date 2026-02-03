@@ -32,7 +32,7 @@
 
 (defun string-to-timecode (s)
   "Convert the string S representing a timecode to the corresponding timecode."
-  (string-match "^\\(\\([0-9]\\{1,2\\}:\\)?\\([0-9]\\{1,2\\}:\\)\\)?\\([0-9]+\\(\\.[0-9]+\\)\\)$" s)
+  (string-match "^\\(\\([0-9]\\{1,2\\}:\\)?\\([0-9]\\{1,2\\}:\\)\\)?\\([0-9]+\\(\\.[0-9]+\\)?\\)$" s)
   (timecode-normalize
    (mapcan (lambda (idx)
              (let ((start (nth (* 2 idx) (match-data)))

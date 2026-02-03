@@ -410,7 +410,7 @@
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-l" t)
+ '(lsp-keymap-prefix "C-l")
  '(lua-indent-level 2)
  '(mu4e-drafts-folder "/marcin-jarmuzynski/[Gmail].Wersje robocze")
  '(mu4e-get-mail-command "offlineimap -o")
@@ -422,6 +422,8 @@
  '(mu4e-update-interval 600)
  '(mu4e-use-fancy-chars t)
  '(nbp-currency "EUR")
+ '(org-agenda-files '("~/agenda.org"))
+ '(org-agenda-loop-over-headlines-in-active-region nil)
  '(org-babel-haskell-compiler "ghc -dynamic")
  '(org-babel-load-languages
    '((dot . t) (emacs-lisp . t) (python . t) (shell . t) (sql . t)))
@@ -455,6 +457,7 @@
  '(org-sql-db-config
    '(postgres :database "postgres" :hostname "localhost" :username "sven"))
  '(org-support-shift-select 'always)
+ '(org-todo-keywords '((sequence "TODO" "RECURRING" "DONE")))
  '(package-selected-packages
    '(ac-helm company crux csv-mode deferred direnv dockerfile-mode dune
              elisp-format ellama emojify envrc evil flycheck gnuplot
