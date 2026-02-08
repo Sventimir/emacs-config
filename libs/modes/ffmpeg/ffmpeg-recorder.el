@@ -6,42 +6,8 @@
 (require 'buffers)
 (require 'org)
 (require 'range)
+(require 'ffmpeg-streams)
 (require 'ffmpeg-timecode)
-
-(defcustom ffmpeg-recorder-audio-stream "alsa"
-  "Audio stream type for ffmpeg."
-  :type '(choice (const nil) string)
-  :group 'recorder)
-
-(defcustom ffmpeg-recorder-microphone-device "default"
-  "Audio recording device to use with ffmpeg."
-  :type 'string
-  :group 'recorder)
-
-(defcustom ffmpeg-recorder-desktop-stream "x11grab"
-  "Desktop recording stream to use with ffmpeg."
-  :type '(choice (const nil) string)
-  :group 'recorder)
-
-(defcustom ffmpeg-recorder-desktop-size '(3840 1080)
-  "Desktop size."
-  :type '(list number number)
-  :group 'ffmpeg)
-
-(defcustom ffmpeg-recorder-video-stream "v4l2"
-  "Video recording stream to use with ffmpeg."
-  :type '(choice (const nil) string)
-  :group 'recorder)
-
-(defcustom ffmpeg-recorder-video-device "/dev/video0"
-  "Video recording device to use with ffmpeg."
-  :type 'file
-  :group 'recorder)
-
-(defcustom ffmpeg-recorder-video-resolution '(1280 720)
-  "Video capture resolution for ffmpeg."
-  :type '(list natnum)
-  :group 'recorder)
 
 (defcustom ffmpeg-recoder-acodec "flac"
   "Audio codec to use for output stream.
@@ -76,8 +42,8 @@ Unlike transcoder, we want an uncompressed video for faster transcoding and bett
 Sexp format is (stream-type device (width height))"
   (append
    (ffmpeg-format-option "-f" (car stream))
-   (ffmpeg-format-option "-s" (ffmpeg-opt-map 'ffmpeg-recorder-format-resolution (caddr stream)))
-   (ffmpeg-format-option "-i" (cadr stream))))
+   (ffmpeg-format-option "-s" (ffmpeg-opt-map 'ffmpeg-recorder-format-resolution (cadddr stream)))
+   (ffmpeg-format-option "-i" (caddr stream))))
 
 
 (defun ffmpeg-recorder-mapping-args (streams)
@@ -91,28 +57,7 @@ Sexp format is (stream-type device (width height))"
 NOTE: any excess elements in COORDINATES list are ignored."
   (format "%d:%d" (car coordinates) (cadr coordinates)))
 
-(defun ffmpeg-recorder-add-device (dev)
-  "Add a device DEV configuration to the devices table.
-NOTE: this assumes the point already is over the devices table."
-  (dolist (item (cons "x" dev))
-    (insert (if (listp item)
-                (format "%dx%d" (car item) (cadr item))
-              item))
-    (org-table-next-field)))
-
 ;; Recorder commands:
-(defun ffmpeg-recorder-load-stream-data ()
-  "Reload the stream data from the customisation variables."
-  (interactive)
-  (let ((inhibit-read-only t))
-    (insert (propertize "*RECORDER*" 'face 'bold) "\n")
-    (ffmpeg-init-table "available-streams" "Selected" "Type" "Device" "Size")
-    (ffmpeg-recorder-add-device (list ffmpeg-recorder-desktop-stream ":0" ffmpeg-recorder-desktop-size))
-    (ffmpeg-recorder-add-device (list ffmpeg-recorder-video-stream ffmpeg-recorder-video-device
-                                      ffmpeg-recorder-video-resolution))
-    (ffmpeg-recorder-add-device (list ffmpeg-recorder-audio-stream ffmpeg-recorder-microphone-device))
-    (org-table-align)))
-
 (defun ffmpeg-recorder-finish-hook (buffer status)
   "A function to call with BUFFER and STATUS when a recording process finishes."
   (if (string= (buffer-name buffer) "*ffmpeg-recorder*")
