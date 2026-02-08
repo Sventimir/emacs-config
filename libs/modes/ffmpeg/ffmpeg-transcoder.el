@@ -176,7 +176,8 @@ If the expression starts with quasi-quote, evaluate it before returning."
                      (read-file-name "Output file: " ffmpeg-transcoder-default-output-dir)))
   (apply 'ffmpeg-run-command ffmpeg-binary-path
          (append (ffmpeg-transcoder-input-arguments)
-                 (list "-t" (number-to-string (timecode-to-seconds timecode)) "-vframes" "1" fname))))
+                 (list "-ss" (number-to-string (timecode-to-seconds timecode)) "-vframes" "1"
+                       "-update" "1" fname))))
 
 (provide 'ffmpeg-transcoder)
 ;;; ffmpeg-transcoder.el ends here
