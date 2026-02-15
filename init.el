@@ -392,6 +392,24 @@
  '(ffmpeg-recoder-acodec "libvorbis")
  '(ffmpeg-recorder-audio-stream "pulse")
  '(ffmpeg-recorder-vcodec "libx264")
+ '(ffmpeg-saved-filters
+   '(("funbridge" \`
+      (((0:v:0) (crop (\,@ (screen-coords 0 0 1920 1030))) (scr))
+       ((0:v:1) (scale 384 216) (cam))
+       ((scr cam) (overlay 10 743) (vid))))
+     ("intobridge" \`
+      (((0:v:0) (crop (\,@ (screen-coords 150 116 1920 1080))) (scr))
+       ((0:v:1) (scale 384 216) (cam))
+       ((scr cam) (overlay 10 (\, (- 964 226))) (vid))))
+     ("bbo" \`
+      (((0:v:0) (split) (scr1 scr2))
+       ((scr1) (crop (\,@ (screen-coords 164 850 1340 1040)))
+        (boxblur 5) (chat))
+       ((scr2 chat) (overlay 164 850) (bg1))
+       ((bg1) (crop (\,@ (screen-coords 164 116 1870 1040))) (bg2))
+       ((0:v:1) (scale 384 216) (cam))
+       ((bg2 cam) (overlay 10 (\, (- 924 226))) (vid))
+       ((0:a) (asetpts PTS+1/TB) (aud))))))
  '(ffmpeg-transcoder-default-output-dir "/home/sven/archive/movie/rec")
  '(ffmpeg-transcoder-filter
    '`(((0:v:0) (crop ,@(screen-coords 0 0 1920 1030)) (scr))

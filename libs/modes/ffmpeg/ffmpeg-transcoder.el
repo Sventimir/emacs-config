@@ -39,6 +39,11 @@ Unlike with recorder, we want this to be a well-compressed codec."
   :type 'string
   :group 'ffmpeg)
 
+(defcustom ffmpeg-saved-filters nil
+  "A list of transcoding filters previously saved for reuse."
+  :type '(alist :key-type string :value-type sexp)
+  :group 'ffmpeg)
+
 
 (defun ffmpeg-transcoder-filter-arg (arg)
   "Format ffmpeg arguments ARG for complex filter.
@@ -178,6 +183,27 @@ If the expression starts with quasi-quote, evaluate it before returning."
          (append (ffmpeg-transcoder-input-arguments)
                  (list "-ss" (number-to-string (timecode-to-seconds timecode)) "-vframes" "1"
                        "-update" "1" fname))))
+
+(defun ffmpeg-transcoder-load-filter (name)
+  "Load previously saved transcoding filter named NAME."
+  (interactive (list (completing-read "Filter: " ffmpeg-saved-filters)))
+  (ffmpeg-transcoder-edit-filter (cdr (assoc name ffmpeg-saved-filters))))
+
+(defun ffmpeg-transcoder-save-filter (name)
+  "Save the current transcoding filter by NAME."
+  (interactive "sName: ")
+  (let ((slot (cdr (assoc name ffmpeg-saved-filters))))
+    (if slot
+        (setf slot ffmpeg-transcoder-filter)
+      (add-to-list 'ffmpeg-saved-filters (cons name ffmpeg-transcoder-filter)))
+    (customize-save-variable 'ffmpeg-saved-filters ffmpeg-saved-filters)))
+
+(defun ffmpeg-transcoder-delete-filter (name)
+  "Remove NAME from the list od saved filters."
+  (interactive (list (completing-read "Filter: " (mapcar 'car ffmpeg-saved-filters))))
+  (customize-save-variable 'ffmpeg-saved-filters
+                           (delq (assoc name ffmpeg-saved-filters) ffmpeg-saved-filters)))
+
 
 (provide 'ffmpeg-transcoder)
 ;;; ffmpeg-transcoder.el ends here

@@ -37,7 +37,8 @@
   :doc "Keymap for the recorder mode."
   :parent special-mode-map
   "f" 'ffmpeg-transcoder-edit-filter
-  "l" 'ffmpeg-recorder-reload-stream-data
+  "l" 'ffmpeg-transcorder-load-filter
+  "S" 'ffmpeg-transcoder-save-filter
   "m" 'ffmpeg-transcoder-edit-mappings
   "o" 'ffmpeg-transcoder-open-file
   "p" 'ffmpeg-playback
