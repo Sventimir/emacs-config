@@ -36,6 +36,8 @@
 (defvar-keymap ffmpeg-mode-map
   :doc "Keymap for the recorder mode."
   :parent special-mode-map
+  "c" 'ffmpeg-transcoder-cut
+  "C" 'ffmpeg-transcoder-concat
   "f" 'ffmpeg-transcoder-edit-filter
   "l" 'ffmpeg-transcoder-load-filter
   "S" 'ffmpeg-transcoder-save-filter

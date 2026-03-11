@@ -116,14 +116,19 @@ If the expression starts with quasi-quote, evaluate it before returning."
       (delete-region (line-beginning-position) (line-beginning-position 2))
       (ffmpeg-transcoder-display-mappings))))
 
-(defun ffmpeg-transcoder-input-arguments ()
+(defun ffmpeg-transcoder-input-files ()
   "Read selected input files from the table."
   (save-excursion
     (ffmpeg-goto-element 'table "open-files")
-    (mapcan (lambda (row)
-              (list "-i" (cadr row)))
+    (mapcar (lambda (row)
+              (cadr row))
             (ffmpeg-table-raw-strings
              (seq-filter (lambda (row) (string= (car row) "x")) (cddr (org-table-to-lisp)))))))
+
+(defun ffmpeg-transcoder-input-arguments ()
+  "Prefix each input filename in FFMPEG-TANSCODER-INPUT-FILES with -i flag."
+  (mapcan (lambda (fname) (list "-i" fname))
+          (ffmpeg-transcoder-input-files)))
 
 (defun ffmpeg-transcoder-mapping-args (mappings)
   "Generate mapping arguments for ffmpeg from MAPPINGS."
@@ -181,8 +186,34 @@ If the expression starts with quasi-quote, evaluate it before returning."
                      (read-file-name "Output file: " ffmpeg-transcoder-default-output-dir)))
   (apply 'ffmpeg-run-command ffmpeg-binary-path
          (append (ffmpeg-transcoder-input-arguments)
-                 (list "-ss" (number-to-string (timecode-to-seconds timecode)) "-vframes" "1"
-                       "-update" "1" fname))))
+                 (append
+                  (list "-ss" (number-to-string (timecode-to-seconds timecode)))
+                  (ffmpeg-transcoder-filter-arg ffmpeg-transcoder-filter)
+                  (ffmpeg-transcoder-mapping-args ffmpeg-transcoder-mappings)
+                  (list "-vframes" "1" "-update" "1" fname)))))
+
+(defun ffmpeg-transcoder-cut (start end output-file)
+  "Cut out a part of input material delimited by START and END; save to OUTPUT-FILE."
+  (interactive (list (read-timecode "Start: ")
+                     (read-timecode "End: ")
+                     (read-file-name "Output file: " ffmpeg-transcoder-default-output-dir)))
+  (let ((ffmpeg-log-buffer "*ffmpeg-transcoder*"))
+    (apply 'ffmpeg-run-command ffmpeg-binary-path
+           (append (list "-ss" (timecode-to-string start)
+                         "-to" (timecode-to-string end))
+                   (ffmpeg-transcoder-input-arguments)
+                   (list output-file)))))
+
+(defun ffmpeg-transcoder-concat (output-file)
+  "Concatenate selected streams into the OUTPUT-FILE."
+  (interactive (list (read-file-name "Output file: " ffmpeg-transcoder-default-output-dir)))
+  (let* ((ffmpeg-log-buffer "*ffmpeg-transcoder*")
+         (file-list (apply 'concat
+                           (mapcar (lambda (f) (format "file '%s'\n" f))
+                                   (ffmpeg-transcoder-input-files))))
+         (list-file-name (make-temp-file "emacs-trancoder-inputs-" nil ".lst" file-list)))
+    (apply 'ffmpeg-run-command ffmpeg-binary-path
+           (list "-f" "concat" "-safe" "0" "-i" list-file-name "-c" "copy" output-file))))
 
 (defun ffmpeg-transcoder-load-filter (name)
   "Load previously saved transcoding filter named NAME."

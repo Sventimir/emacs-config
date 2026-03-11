@@ -60,5 +60,9 @@
   "Read a timecode from minibuffer, displaying PROMPT, suggesting DEFAULT answer."
   (string-to-timecode (read-from-minibuffer prompt (or default "00:00"))))
 
+(defun with-timecodes (f &rest timecodes)
+  "Apply F to TIMECODES converted to numbers; convert resulting number to timecode."
+  (number-to-timecode (apply f (mapcar 'timecode-to-seconds timecodes))))
+
 (provide 'ffmpeg-timecode)
 ;;; ffmpeg-timecode.el ends here
