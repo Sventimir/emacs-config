@@ -140,5 +140,10 @@ If entered expression starts with a quasi-quote, evaluate it."
                    filename))
           ","))))
 
+(defun ffmpeg-absolute-path (path)
+  "Transform home PATH into an absolute one."
+  (let ((home (getenv "HOME")))
+    (string-replace "~" home path)))
+
 (provide 'ffmpeg-commons)
 ;;; ffmpeg-commons.el ends here

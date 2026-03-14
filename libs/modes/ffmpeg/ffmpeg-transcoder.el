@@ -167,14 +167,14 @@ If the expression starts with quasi-quote, evaluate it before returning."
                    (ffmpeg-transcoder-filter-arg ffmpeg-transcoder-filter)
                    (ffmpeg-transcoder-mapping-args ffmpeg-transcoder-mappings)
                    (list "-c:a" ffmpeg-transcoder-acodec "-c:v" ffmpeg-transcoder-vcodec
-                         output-file)))))
+                         (ffmpeg-absolute-path output-file))))))
 
 (defun ffmpeg-transcoder-open-file (filename)
   "Probe an existing video file at FILENAME and add it to thr list of open files."
   (interactive (list (expand-file-name
                       (read-file-name "Input file:" ffmpeg-transcoder-default-output-dir))))
   (with-current-buffer "*ffmpeg*"
-    (let ((length (ffmpeg-file-duration filename))
+    (let ((length (ffmpeg-file-duration (ffmpeg-absolute-path filename)))
           (inhibit-read-only t))
       (if length
           (ffmpeg-table-append-row "open-files" (list "x" filename (timecode-to-string length)))
@@ -190,7 +190,7 @@ If the expression starts with quasi-quote, evaluate it before returning."
                   (list "-ss" (number-to-string (timecode-to-seconds timecode)))
                   (ffmpeg-transcoder-filter-arg ffmpeg-transcoder-filter)
                   (ffmpeg-transcoder-mapping-args ffmpeg-transcoder-mappings)
-                  (list "-vframes" "1" "-update" "1" fname)))))
+                  (list "-vframes" "1" "-update" "1" (ffmpeg-absolute-path fname))))))
 
 (defun ffmpeg-transcoder-cut (start end output-file)
   "Cut out a part of input material delimited by START and END; save to OUTPUT-FILE."
@@ -202,7 +202,7 @@ If the expression starts with quasi-quote, evaluate it before returning."
            (append (list "-ss" (timecode-to-string start)
                          "-to" (timecode-to-string end))
                    (ffmpeg-transcoder-input-arguments)
-                   (list output-file)))))
+                   (list (ffmpeg-absolute-path output-file))))))
 
 (defun ffmpeg-transcoder-concat (output-file)
   "Concatenate selected streams into the OUTPUT-FILE."
@@ -213,7 +213,7 @@ If the expression starts with quasi-quote, evaluate it before returning."
                                    (ffmpeg-transcoder-input-files))))
          (list-file-name (make-temp-file "emacs-trancoder-inputs-" nil ".lst" file-list)))
     (apply 'ffmpeg-run-command ffmpeg-binary-path
-           (list "-f" "concat" "-safe" "0" "-i" list-file-name "-c" "copy" output-file))))
+           (list "-f" "concat" "-safe" "0" "-i" list-file-name "-c" "copy" (ffmpeg-absolute-path output-file)))))
 
 (defun ffmpeg-transcoder-load-filter (name)
   "Load previously saved transcoding filter named NAME."
