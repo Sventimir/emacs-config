@@ -98,7 +98,7 @@ If the expression starts with quasi-quote, evaluate it before returning."
 
 (defun ffmpeg-transcoder-edit-filter (new-filter)
   "Edit the ffmpeg video filter, etting it to NEW-FILTER."
-  (interactive (list (read (read-string "Filter: " (format "%s" ffmpeg-transcoder-filter)))))
+  (interactive (list (read (read-string "Filter: " (format "%S" ffmpeg-transcoder-filter)))))
   (setq ffmpeg-transcoder-filter new-filter)
   (with-current-buffer "*ffmpeg*"
     (ffmpeg-goto-element 'paragraph "transcoder-filter")

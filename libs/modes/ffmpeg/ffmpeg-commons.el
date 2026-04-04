@@ -78,7 +78,7 @@ If entered expression starts with a quasi-quote, evaluate it."
                        (if (string= executable ffmpeg-ffplay-binary-path) nil '("-y"))
                        arguments)))
       (let* ((buf (compile (mapconcat 'shell-quote-argument cmd " ") t))
-             (proc (get-buffer-process buf))\
+             (proc (get-buffer-process buf))
              (old-buf (get-buffer ffmpeg-log-buffer)))
         (if old-buf (kill-buffer old-buf))
         (with-current-buffer buf
