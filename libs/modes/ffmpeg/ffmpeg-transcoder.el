@@ -5,6 +5,7 @@
 ;;; Code:
 (require 'org)
 (require 'ffmpeg-commons)
+(require 'ffmpeg-filter-compiler)
 (require 'ffmpeg-timecode)
 
 (defcustom ffmpeg-transcoder-vcodec "hevc"
@@ -51,30 +52,7 @@ If the expression starts with quasi-quote, evaluate it before returning."
   (let* ((expr (if (eq (car arg) '\`)
                    (eval arg)
                  arg)))
-    (if expr (list "-filter_complex" (mapconcat 'ffmpeg-format-filter expr ";")))))
-
-(defun ffmpeg-format-filter (expr)
-  "Convert Lisp EXPR into a string defining an ffmpeg filter specifying input and output streams."
-  (concat
-   (ffmpeg-format-filter-streams (car expr))
-   (mapconcat 'ffmpeg-format-filter-descr (cdr (butlast expr)) ",")
-   (ffmpeg-format-filter-streams (car (last expr)))))
-
-(defun ffmpeg-format-filter-streams (expr)
-  "Convert Lisp EXPR ionto a string describing an I/O stream or a list of such streams."
-  (if (listp expr)
-      (mapconcat (lambda (e) (format "[%s]" e)) expr)
-    (format "[%s]" expr)))
-
-(defun ffmpeg-format-filter-descr (expr)
-  "Convert Lisp EXPR into a string describing an ffmpeg filter."
-  (format "%s=%s" (car expr) (mapconcat (lambda (e) (ffmpeg-format-filter-param e)) (cdr expr) ":")))
-
-(defun ffmpeg-format-filter-param (expr)
-  "Convert Lisp EXPR into a string description of an ffmpeg filter."
-  (if (listp expr)
-      (format "%s=%s" (car expr) (cadr expr))
-    (format "%s" expr)))
+    (if expr (list "-filter_complex" (ffmpeg-filter-codegen expr)))))
 
 (defun ffmpeg-transcoder-display-filter ()
   "Display the contents of FFMPEG-TRANSCODER-FILTER in the current buffer."
