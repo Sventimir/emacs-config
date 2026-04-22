@@ -442,7 +442,7 @@
  '(nbp-currency "EUR")
  '(org-agenda-files '("~/agenda.org"))
  '(org-agenda-loop-over-headlines-in-active-region nil)
- '(org-babel-haskell-compiler "ghc -dynamic")
+ '(org-babel-haskell-compiler "stack ghci")
  '(org-babel-load-languages
    '((dot . t) (emacs-lisp . t) (python . t) (shell . t) (sql . t)))
  '(org-link-parameters
