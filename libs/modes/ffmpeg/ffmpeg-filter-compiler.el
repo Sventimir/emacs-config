@@ -3,6 +3,7 @@
 ;;; Commentary:
 ;;; A set of utilities for building complex filters for ffmpeg more conveniently.
 ;;; Code:
+(require 'cl-lib)
 (require 'seq)
 (require 'ffmpeg-filters)
 
