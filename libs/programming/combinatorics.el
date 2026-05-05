@@ -1,9 +1,22 @@
 ;;; -*- lexical-binding: t -*-
-;;; Package: Combinatoric
+;;; Package: Combinatorics
 ;;; Commentary:
 ;;; A set of simple combinatorics functions.
 ;;; Code:
 (require 'cl-lib)
+(require 'range)
+
+(defun range-multiply (low hi)
+  "Multiply the numbers in range from LOW to HI (inclusive) together."
+  (apply '* (range-uncompress (list (cons low hi)))))
+
+(defun factorial (n)
+  "Compute the factorial of N."
+  (range-multiply 1 n))
+
+(defun choose (n k)
+  "Compute the number of choices of K elements of a set of N elements."
+  (/ (range-multiply (1+ k) n) (factorial (- n k))))
 
 (defun selections (set)
   "Convert SET into a list of cionsecutive heads and their tails."
@@ -36,5 +49,5 @@
      (lambda (subset) (list subset (complements set* subset)))
      (seq-sort-by 'length '< (choices set*)))))
 
-(provide 'combinatoric)
+(provide 'combinatorics)
 ;;; combinatorics.el ends here
