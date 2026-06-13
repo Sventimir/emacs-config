@@ -6,7 +6,9 @@
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
-(package-refresh-contents)
+
+(with-timeout (30 (display-warning 'package-refresh "Updating packages timed out!" :error "*Messages*"))
+    (package-refresh-contents))
 
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
@@ -403,15 +405,6 @@
        ((0:v:1) (scale 384 216) (cam))
        ((bg2 cam) (overlay 10 (\, (- 924 226))) (vid))
        ((0:a) (asetpts PTS+0.5/TB) (aud))))
-     ("bbo-no-adds" \`
-      (((0:v:0) (split 2) (scr1 scr2))
-       ((scr1) (crop (\,@ (screen-coords 0 850 1340 1040)))
-        (boxblur 5) (chat))
-       ((scr2 chat) (overlay 0 850) (bg1))
-       ((bg1) (crop (\,@ (screen-coords 0 116 1870 1040))) (bg2))
-       ((0:v:1) (scale 384 216) (cam))
-       ((bg2 cam) (overlay 10 (\, (- 924 226))) (vid))
-       ((0:a) (asetpts PTS+1/TB) (aud))))
      ("funbridge" \`
       (((0:v:0) (crop (\,@ (screen-coords 0 0 1920 1030))) (scr))
        ((0:v:1) (scale 384 216) (cam))

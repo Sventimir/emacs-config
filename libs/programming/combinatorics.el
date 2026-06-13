@@ -5,6 +5,7 @@
 ;;; Code:
 (require 'cl-lib)
 (require 'range)
+(require 'seq)
 
 (defun range-multiply (low hi)
   "Multiply the numbers in range from LOW to HI (inclusive) together."
@@ -20,10 +21,10 @@
 
 (defun selections (set)
   "Convert SET into a list of cionsecutive heads and their tails."
-  (if (string-empty-p set)
+  (if (seq-empty-p set)
       nil
-    (let ((tail (substring set 1)))
-      (cons (cons (substring set 0 1) tail) (selections tail)))))
+    (let ((tail (seq-drop set 1)))
+      (cons (cons (seq-first set) tail) (selections tail)))))
 
 (defun combine (sel)
   "Combine first element of SEL with all possible elements of the second element."
@@ -35,18 +36,24 @@
   (mapcan 'combine (selections set)))
 
 (defun choices (set)
-  "Compute all the possible usbsets of SET, including the empty set."
-  (cons "" (mapcar (lambda (l) (apply 'concat l)) (choices* set))))
+  "Compute all the possible subsets of SET, including the empty set."
+  (cons nil (choices* set)))
 
 (defun complements (set subset)
   "Pair SUBSET with its complement in SET."
-  (apply 'string (cl-set-difference (string-to-list set) (string-to-list subset))))
+  (let ((cs (cl-set-difference (string-to-list set) (string-to-list subset))))
+    (if (eq (type-of set) 'string)
+        (apply 'string cs)
+      cs)))
 
 (defun splits (set)
   "Create a list of all possible splits of SET into 2 subsets."
-  (let ((set* (string-trim set)))
+  (let ((set* (if (stringp set) (string-trim set) set)))
     (mapcar
-     (lambda (subset) (list subset (complements set* subset)))
+     (lambda (subset)
+       (list
+        (if (eq (type-of set) 'string) (apply 'string subset) subset)
+        (complements set* subset)))
      (seq-sort-by 'length '< (choices set*)))))
 
 (provide 'combinatorics)
