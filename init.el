@@ -77,6 +77,7 @@
 (use-package request
   :ensure t)
 
+(require 'f)
 (require 'gitlab)
 (require 'polynomial)
 (require 'music-meta)
@@ -772,6 +773,25 @@
 
 ;; Enable envrc
 (envrc-global-mode)
+
+;; Emacs Lisp package template
+(defun insert-emacs-lisp-package-template ()
+  "Initialize the Lisp module."
+  (goto-char (point-min))
+  (insert ";;; -*- lexical-binding: t -*-\n"
+          ";;; Package --- \n"
+          ";;; Commentary:\n"
+          ";;; Code:\n\n")
+  (goto-char (point-max))
+  (let ((filename (f-filename (buffer-file-name (current-buffer)))))
+      (insert "(provide '" (f-no-ext filename) ")\n"
+              ";;; " filename " ends here")))
+
+(defun initialize-emacs-lisp-package ()
+  "Insert empty Emacs Lisp package template if the file is empty."
+  (if (flycheck-buffer-empty-p) (insert-emacs-lisp-package-template)))
+
+(add-to-list 'emacs-lisp-mode-hook 'initialize-emacs-lisp-package)
 
 (provide 'init)
 ;;; init.el ends here
