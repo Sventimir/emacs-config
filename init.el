@@ -789,7 +789,10 @@
 
 (defun initialize-emacs-lisp-package ()
   "Insert empty Emacs Lisp package template if the file is empty."
-  (if (flycheck-buffer-empty-p) (insert-emacs-lisp-package-template)))
+  (if (and
+       (flycheck-buffer-empty-p)
+       (buffer-file-name (current-buffer))) ;; filename is not nil
+      (insert-emacs-lisp-package-template)))
 
 (add-to-list 'emacs-lisp-mode-hook 'initialize-emacs-lisp-package)
 
