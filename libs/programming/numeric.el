@@ -7,6 +7,15 @@
   (if (and (natnump a) (natnump b))
       (/ (+ a b -1) b)))
 
+(defun gcd (a b)
+  "Find the greates common denominator of A and B."
+  (let ((x (max a b)) (y (min a b)))
+    (while (> y 0)
+      (let ((r (% x y)))
+        (setq x y
+              y r)))
+    x))
+
 (defun insert-sep (str sep block)
   "Insert SEP into STR every BLOCK characters counting from the end."
   (if (> (length str) block)
