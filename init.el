@@ -440,7 +440,7 @@
  '(ispell-dictionary "en_GB")
  '(ispell-program-name "hunspell")
  '(js-indent-level 2)
- '(lsp-keymap-prefix "C-l" t)
+ '(lsp-keymap-prefix "C-l")
  '(lua-indent-level 2)
  '(mu4e-drafts-folder "/marcin-jarmuzynski/[Gmail].Wersje robocze")
  '(mu4e-get-mail-command "offlineimap -o")
@@ -518,7 +518,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(hl-line ((t (:inherit highlight :extend t :background "dark khaki")))))
 
 ;; Mu4e config
 (require 'mu4e)
