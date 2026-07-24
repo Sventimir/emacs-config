@@ -4,6 +4,7 @@
 
 (require 'org)
 (require 'org-element)
+(require 'evil)
 (require 'request)
 
 (defun org-babel-execute:curl (body params)
@@ -18,7 +19,7 @@
           (setq args (append args (list "-H" header))))
         (erase-buffer)
         (apply 'call-process "curl" nil "*curl-output*" nil args)
-        (goto-line 4) ; Skip the networking stats.
+        (forward-line 4) ; Skip the networking stats.
         (condition-case nil
             (json-pretty-print (point) (point-max))
           (error nil))
@@ -40,6 +41,30 @@
 (defun org-link--open-firefox (url &optional _)
   "Open URL with Firefox."
   (org-link-custom-open "firefox" url))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((shell . t)
+   (python . t)
+   (haskell . t)))
+
+;; Org-mode
+(define-key org-mode-map (kbd "C-c SPC") (lambda ()
+                                           "Clear table cell at point and enter insert state."
+                                           (interactive)
+                                           (progn
+                                             (org-table-blank-field)
+                                             (evil-insert-state))))
+
+(define-key org-mode-map (kbd "C-c l y") (lambda ()
+                                           "Copy URL of the link at point."
+                                           (interactive)
+                                           (kill-new (org-element-property :raw-link (org-element-context)))))
+
+(define-key org-mode-map (kbd "C-c C-RET") 'org-table-insert-row)
+
+;; Encrypted org-mode extension
+(add-to-list 'auto-mode-alist '("\\.org.gpg\\'" . org-mode))
 
 (provide 'org-ext)
 ;;; org-ext.el ends here
