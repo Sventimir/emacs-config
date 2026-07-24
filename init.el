@@ -3,6 +3,7 @@
 ;;; Commentary:
 ;;; Code:
 
+;; Initialize packages and update.
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
@@ -42,15 +43,20 @@
 (electric-pair-mode)
 (electric-indent-mode -1)
 
-;; Emoji support
-(use-package emojify
-  :ensure t
-  :config
-  (set-fontset-font
-   t 'symbol (font-spec :family "Segoe UI Emoji") nil 'prepend)
-  (setq emojify-display-style 'unicode)
-  (setq emojify-emoji-styles '(unicode))
-  (bind-key* (kbd "C-c /") #'emojify-insert-emoji)) ; override binding in any mode
+;; Utilities
+(use-package f
+  :ensure t)
+
+(use-package quelpa-use-package
+  :ensure t)
+
+(require 'f)
+;; Local packages
+(require 'editing)
+(require 'rust-ext)
+(require 'ffmpeg)
+(require 'org-ext)
+(require 'mail)
 
 ;; Evil mode
 (use-package undo-tree
@@ -79,66 +85,11 @@
 (use-package request
   :ensure t)
 
-(require 'f)
-(require 'gitlab)
-(require 'polynomial)
-(require 'music-meta)
-(require 'numeric)
-(require 'locstack)
-(require 'pacman)
-(require 'range)
-(require 'editing)
-(require 'rust-ext)
-(require 'ffmpeg)
-(require 'networking)
-
-;; Extended org-mode
-(require 'org-ext)
-(require 'github)
-(require 'nbp)
-(require 'ipbox)
-
-;; Executing Org mode's code blocks
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((shell . t)
-   (python . t)
-   (haskell . t)))
-
-;; Org-mode
-(define-key org-mode-map (kbd "C-c SPC") (lambda ()
-                                           "Clear table cell at point and enter insert state."
-                                           (interactive)
-                                           (progn
-                                             (org-table-blank-field)
-                                             (evil-insert-state))))
-
-(define-key org-mode-map (kbd "C-c l y") (lambda ()
-                                           "Copy URL of the link at point."
-                                           (interactive)
-                                           (kill-new (org-element-property :raw-link (org-element-context)))))
-
-(define-key org-mode-map (kbd "C-c C-RET") 'org-table-insert-row)
-
 ;; Plots in ORG mode
 (use-package gnuplot
   :ensure t)
 
-(use-package quelpa-use-package
-  :ensure t)
-
 (use-package eshell
-  :ensure t)
-
-(use-package recentf
-  :ensure t
-  :config (recentf-mode 1)
-  :init (setq recentf-max-menu-items 25
-              recentf-max-saved-items 25)
-  :bind (("C-x C-r" . 'recentf-open-files)))
-
-;; Direnv
-(use-package direnv
   :ensure t)
 
 ;; Perspectives
@@ -153,12 +104,18 @@
   :ensure t
   :bind (("C-x E" . crux-eval-and-replace)))
 
+;; Emoji support
+(use-package emojify
+  :ensure t
+  :config
+  (set-fontset-font
+   t 'symbol (font-spec :family "Segoe UI Emoji") nil 'prepend)
+  (setq emojify-display-style 'unicode)
+  (setq emojify-emoji-styles '(unicode))
+  (bind-key* (kbd "C-c /") #'emojify-insert-emoji)) ; override binding in any mode
 
 ;; Tree-sitter support
 (use-package tree-sitter
-  :ensure t)
-
-(use-package tsc
   :ensure t)
 
 ;; Configure Tree-sitter. Unfortunately this cannot
@@ -196,13 +153,7 @@
               ("c" . 'flyspell-correct-word-before-point)
               ("d" . 'ispell-change-dictionary)))
 
-(use-package envrc
-  :ensure t)
-
 (use-package deferred
-  :ensure t)
-
-(use-package yasnippet
   :ensure t)
 
 (use-package company
@@ -256,7 +207,7 @@
               ("C-c C-c" . 'compile))
   :hook (tuareg-mode . (lambda () (setq-local compile-command "dune build"))))
 
-(add-hook 'tuareg-mode-hook 'locstack-mode)
+(add-hook 'tuareg-mode-hook (lambda () (require 'locstack) (locstack-mode)))
 
 (use-package dune
   :ensure t)
@@ -290,28 +241,6 @@
 (use-package dockerfile-mode
   :ensure t)
 
-;; Explore and edit running docker containers with Emacs.
-(use-package nix-mode
-  :ensure t
-  :mode "\\.nix\\'")
-
-;; (use-package copilot
-;;   :quelpa (copilot :fetcher github
-;;                    :repo "zerolfx/copilot.el"
-;;                    :branch "main"
-;;                    :files ("dist" "*.el"))
-;;   :config (global-unset-key (kbd "C-p"))
-;;   :bind (("C-p C-p" . 'copilot-mode)
-;;          ("C-p c" . 'copilot-complete)
-;;          ("C-p n" . 'copilot-next-completion)
-;;          ("C-p p" . 'copilot-previous-completion)
-;;          ("C-p RET" . 'copilot-accept-completion)
-;;          ("C-p x" . 'copilot-clear-overlay)))
-
-(use-package graphql-mode
-  :ensure t)
-
-;; Idris
 (use-package idris-mode
   :ensure t
   :init
@@ -320,17 +249,11 @@
   :hook
     (idris-mode . (lambda () (goto-project-root "\.ipkg"))))
 
-;; Rust
 (use-package rust-mode
   :ensure t
   :bind (:map rust-mode-map
               ("C-c C-c C-c" . 'compile))
   :hook (rust-mode . (lambda () (setq-local compile-command "cargo build"))))
-
-(add-hook 'tuareg-mode-hook 'locstack-mode)
-
-(use-package typescript-mode
-  :ensure t)
 
 (use-package lua-mode
   :ensure t
@@ -371,9 +294,152 @@
 (use-package json-mode
   :ensure t)
 
-(use-package solidity-mode
-  :ensure t)
+;; Ellama LLM assistant
+(use-package ellama
+  :ensure t
+  :bind ("C-a" . ellama-transient-main-menu)
+  :init
+  ;; setup key bindings
+  ;; (setopt ellama-keymap-prefix "C-c e")
+  ;; language you want ellama to translate to
+  (setopt ellama-language "English")
+  ;; could be llm-openai for example
+  (require 'llm-ollama)
+  (setopt ellama-provider
+  	  (make-llm-ollama
+  	   ;; this model should be pulled to use it
+  	   ;; value should be the same as you print in terminal during pull
+  	   :chat-model "llama3:8b-instruct-q8_0"
+  	   :embedding-model "nomic-embed-text"
+  	   :default-chat-non-standard-params '(("num_ctx" . 8192))))
+  (setopt ellama-summarization-provider
+  	  (make-llm-ollama
+  	   :chat-model "qwen2.5:3b"
+  	   :embedding-model "nomic-embed-text"
+  	   :default-chat-non-standard-params '(("num_ctx" . 32768))))
+  (setopt ellama-coding-provider
+  	  (make-llm-ollama
+  	   :chat-model "qwen2.5-coder:3b"
+  	   :embedding-model "nomic-embed-text"
+  	   :default-chat-non-standard-params '(("num_ctx" . 32768))))
+  ;; Predefined llm providers for interactive switching.
+  ;; You shouldn't add ollama providers here - it can be selected interactively
+  ;; without it. It is just example.
+  (setopt ellama-providers
+  	  '(("zephyr" . (make-llm-ollama
+  			 :chat-model "zephyr:7b-beta-q6_K"
+  			 :embedding-model "zephyr:7b-beta-q6_K"))
+  	    ("mistral" . (make-llm-ollama
+  			  :chat-model "mistral:7b-instruct-v0.2-q6_K"
+  			  :embedding-model "mistral:7b-instruct-v0.2-q6_K"))
+  	    ("mixtral" . (make-llm-ollama
+  			  :chat-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"
+  			  :embedding-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"))))
+  ;; Naming new sessions with llm
+  (setopt ellama-naming-provider
+  	  (make-llm-ollama
+  	   :chat-model "llama3:8b-instruct-q8_0"
+  	   :embedding-model "nomic-embed-text"
+  	   :default-chat-non-standard-params '(("stop" . ("\n")))))
+  (setopt ellama-naming-scheme 'ellama-generate-name-by-llm)
+  ;; Translation llm provider
+  (setopt ellama-translation-provider
+  	  (make-llm-ollama
+  	   :chat-model "qwen2.5:3b"
+  	   :embedding-model "nomic-embed-text"
+  	   :default-chat-non-standard-params
+  	   '(("num_ctx" . 32768))))
+  (setopt ellama-extraction-provider (make-llm-ollama
+  				      :chat-model "qwen2.5-coder:7b-instruct-q8_0"
+  				      :embedding-model "nomic-embed-text"
+  				      :default-chat-non-standard-params
+  				      '(("num_ctx" . 32768))))
+  ;; customize display buffer behaviour
+  ;; see ~(info "(elisp) Buffer Display Action Functions")~
+  (setopt ellama-chat-display-action-function #'display-buffer-full-frame)
+  (setopt ellama-instant-display-action-function #'display-buffer-at-bottom)
+  :config
+  ;; send last message in chat buffer with C-c C-c
+  (add-hook 'org-ctrl-c-ctrl-c-hook #'ellama-chat-send-last-message))
 
+;; Spell-checking
+(add-hook 'text-mode-hook 'flyspell-mode)
+(add-hook 'prog-mode-hook 'flyspell-prog-mode)
+
+(require 'window-management)
+
+;; Miscellanea
+(defun active-minor-modes ()
+  "Return a list of active minor modes for the current buffer."
+  (interactive)
+  (seq-filter 'symbol-value (mapcar 'car minor-mode-alist)))
+
+(defun ide (workdir &optional name)
+  "Create perspective NAME and open the project in WORKDIR inside it."
+  (interactive "fWorkdir: ")
+  (let ((default (file-name-base (string-remove-suffix "/" workdir))))
+    (persp-switch (or name (read-string "Perspective name: " default))))
+  (setq default-directory workdir)
+  (load-dir workdir)
+  (split-window-right)
+  (magit-status-setup-buffer workdir)
+  (toggle-selected-window-dedicated-p)
+  (split-window-below)
+  (switch-to-buffer "*Messages*")
+  (setq default-directory workdir)
+  (select-window (previous-window)))
+
+(defun config ()
+  "Create a perspective for editing Emacs configuration."
+  (interactive)
+  (ide "~/.emacs.d" "emacs-config")
+  (find-file "~/.emacs.d/init.el"))
+
+;; Emacs Lisp package template
+(defun insert-emacs-lisp-package-template ()
+  "Initialize the Lisp module."
+  (goto-char (point-min))
+  (insert ";;; -*- lexical-binding: t -*-\n"
+          ";;; Package --- \n"
+          ";;; Commentary:\n"
+          ";;; Code:\n\n")
+  (goto-char (point-max))
+  (let ((filename (f-filename (buffer-file-name (current-buffer)))))
+      (insert "(provide '" (f-no-ext filename) ")\n"
+              ";;; " filename " ends here")))
+
+(defun initialize-emacs-lisp-package ()
+  "Insert empty Emacs Lisp package template if the file is empty."
+  (if (and
+       (flycheck-buffer-empty-p)
+       (buffer-file-name (current-buffer))) ;; filename is not nil
+      (insert-emacs-lisp-package-template)))
+
+(add-to-list 'emacs-lisp-mode-hook 'initialize-emacs-lisp-package)
+
+;; Global key bindings
+(global-set-key (kbd "C-x b") 'helm-buffers-list)
+(global-set-key (kbd "C-x c c") 'config) ;; see config function defined below
+
+;; Programming utilities
+(global-set-key (kbd "C-x C-g b") 'magit-blame)
+(global-set-key (kbd "C-x C-g C-f") 'github-open-file)
+(global-set-key (kbd "C-x C-g l") 'github-generate-link)
+(global-set-key (kbd "C-x _") (lambda () (interactive) (insert-sep-region "_" 3)))
+
+(global-set-key (kbd "C-x C-g g") (lambda () (interactive)
+                                    (make-process
+                                     :name "gitg"
+                                     :buffer "*gitg*"
+                                     :command '("gitg"))))
+
+(define-key epa-key-list-mode-map (kbd "C-s") 'epa-mark-key)
+(define-key epa-key-list-mode-map (kbd "C-u") 'epa-unmark-key)
+
+;; Make numpad decimal separator behave like period rather than coma.
+(global-set-key [kp-separator] (kbd "."))
+
+;; The remainder of the file is managed by Customization. Do not edit manually.
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -519,275 +585,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(hl-line ((t (:inherit highlight :extend t :background "dark khaki")))))
-
-;; Mu4e config
-(require 'mu4e)
-
-(use-package auth-source-pass
-  :ensure t)
-(use-package smtpmail
-  :ensure t)
-
-(setq mu4e-get-mail-command "offlineimap -o"
-      mu4e-update-interval (* 10 60)
-      mu4e-enable-notifications t
-      mu4e-view-show-addresses 't
-      message-send-mail-function 'smtpmail-send-it
-      auth-sources '(password-store))
-
-(with-eval-after-load 'mu4e
-  (setq mu4e-contexts
-        `(
-        ,(make-mu4e-context
-          :name "Sventimir"
-          :match-func
-            (lambda (msg)
-              (when msg
-                (string-prefix-p "/sventimir" (mu4e-message-field msg :maildir))))
-          :vars '((user-mail-address . "svantimir@gmail.com")
-                  (user-full-name    . "Sventimir")
-                  (smtpmail-smtp-server  . "smtp.gmail.com")
-                  (smtpmail-smtp-user . "svantimir@gmail.com")
-                  (smtpmail-smtp-service . 587)
-                  (smtpmail-stream-type  . starttls)
-                  (mu4e-drafts-folder  . "/sventimir/[Gmail].Wersje robocze")
-                  (mu4e-sent-folder  . "/sventimir/[Gmail].Wa&AXw-ne")
-                  (mu4e-refile-folder  . "/sventimir/[Gmail].Wszystkie")
-                  (mu4e-trash-folder  . "/sventimir/[Gmail].Kosz")))
-
-        ,(make-mu4e-context
-          :name "Gmail-MarcinJarmuzynski"
-          :match-func
-            (lambda (msg)
-              (when msg
-                (string-prefix-p "/marcin-jarmuzynski" (mu4e-message-field msg :maildir))))
-          :vars '((user-mail-address . "marcin.jarmuzynski@gmail.com")
-                  (user-full-name    . "Marcin Jarmużyński")
-                  (smtpmail-smtp-server  . "smtp.gmail.com")
-                  (smtpmail-smtp-user . "marcin.jarmuzynski@gmail.com")
-                  (smtpmail-smtp-service . 587)
-                  (smtpmail-stream-type  . starttls)
-                  (mu4e-drafts-folder  . "/marcin-jarmuzynski/[Gmail].Wersje robocze")
-                  (mu4e-sent-folder  . "/marcin-jarmuzynski/[Gmail].Wa&AXw-ne")
-                  (mu4e-refile-folder  . "/marcin-jarmuzynski/[Gmail].Wszystkie")
-                  (mu4e-trash-folder  . "/marcin-jarmuzynski/[Gmail].Kosz")))
-
-        ,(make-mu4e-context
-          :name "Gmail-MarcinPastudzki"
-          :match-func
-            (lambda (msg)
-              (when msg
-                (string-prefix-p "/marcin-pastudzki" (mu4e-message-field msg :maildir))))
-          :vars '((user-mail-address . "marcin.pastudzki@gmail.com")
-                  (user-full-name    . "Marcin Pastudzki")
-                  (smtpmail-smtp-server  . "smtp.gmail.com")
-                  (smtpmail-smtp-user . "marcin.pastudzki@gmail.com")
-                  (smtpmail-smtp-service . 587)
-                  (smtpmail-stream-type  . starttls)
-                  (mu4e-drafts-folder  . "/marcin-pastudzki/[Gmail].Wersje robocze")
-                  (mu4e-sent-folder  . "/marcin-pastudzki/[Gmail].Wa&AXw-ne")
-                  (mu4e-refile-folder  . "/marcin-pastudzki/[Gmail].Wszystkie")
-                  (mu4e-trash-folder  . "/marcin-pastudzki/[Gmail].Kosz")))))
-  )
-
-(defun mu4e-email-addresses ()
-  "Return the list of e-mail addresses handled by mu4e."
-  (mapcar (lambda (ctx)
-            (cdr (assoc 'user-mail-address (mu4e-context-vars ctx))))
-          mu4e-contexts))
-
-(defun mu-init (maildir)
-  "Initialise mu in MAILDIR."
-  (interactive (list (read-directory-name "Mail directory: " "~/.local/share/mail")))
-  (shell-command (format
-                  "mu init --maildir %s %s"
-                  (expand-file-name maildir)
-                  (mapconcat (lambda (addr)
-                               (format "--my-address %s" addr))
-                             (mu4e-email-addresses)
-                             " "))))
-
-;; Ellama LLM assistant
-(use-package ellama
-  :ensure t
-  :bind ("C-a" . ellama-transient-main-menu)
-  :init
-  ;; setup key bindings
-  ;; (setopt ellama-keymap-prefix "C-c e")
-  ;; language you want ellama to translate to
-  (setopt ellama-language "English")
-  ;; could be llm-openai for example
-  (require 'llm-ollama)
-  (setopt ellama-provider
-  	  (make-llm-ollama
-  	   ;; this model should be pulled to use it
-  	   ;; value should be the same as you print in terminal during pull
-  	   :chat-model "llama3:8b-instruct-q8_0"
-  	   :embedding-model "nomic-embed-text"
-  	   :default-chat-non-standard-params '(("num_ctx" . 8192))))
-  (setopt ellama-summarization-provider
-  	  (make-llm-ollama
-  	   :chat-model "qwen2.5:3b"
-  	   :embedding-model "nomic-embed-text"
-  	   :default-chat-non-standard-params '(("num_ctx" . 32768))))
-  (setopt ellama-coding-provider
-  	  (make-llm-ollama
-  	   :chat-model "qwen2.5-coder:3b"
-  	   :embedding-model "nomic-embed-text"
-  	   :default-chat-non-standard-params '(("num_ctx" . 32768))))
-  ;; Predefined llm providers for interactive switching.
-  ;; You shouldn't add ollama providers here - it can be selected interactively
-  ;; without it. It is just example.
-  (setopt ellama-providers
-  	  '(("zephyr" . (make-llm-ollama
-  			 :chat-model "zephyr:7b-beta-q6_K"
-  			 :embedding-model "zephyr:7b-beta-q6_K"))
-  	    ("mistral" . (make-llm-ollama
-  			  :chat-model "mistral:7b-instruct-v0.2-q6_K"
-  			  :embedding-model "mistral:7b-instruct-v0.2-q6_K"))
-  	    ("mixtral" . (make-llm-ollama
-  			  :chat-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"
-  			  :embedding-model "mixtral:8x7b-instruct-v0.1-q3_K_M-4k"))))
-  ;; Naming new sessions with llm
-  (setopt ellama-naming-provider
-  	  (make-llm-ollama
-  	   :chat-model "llama3:8b-instruct-q8_0"
-  	   :embedding-model "nomic-embed-text"
-  	   :default-chat-non-standard-params '(("stop" . ("\n")))))
-  (setopt ellama-naming-scheme 'ellama-generate-name-by-llm)
-  ;; Translation llm provider
-  (setopt ellama-translation-provider
-  	  (make-llm-ollama
-  	   :chat-model "qwen2.5:3b"
-  	   :embedding-model "nomic-embed-text"
-  	   :default-chat-non-standard-params
-  	   '(("num_ctx" . 32768))))
-  (setopt ellama-extraction-provider (make-llm-ollama
-  				      :chat-model "qwen2.5-coder:7b-instruct-q8_0"
-  				      :embedding-model "nomic-embed-text"
-  				      :default-chat-non-standard-params
-  				      '(("num_ctx" . 32768))))
-  ;; customize display buffer behaviour
-  ;; see ~(info "(elisp) Buffer Display Action Functions")~
-  (setopt ellama-chat-display-action-function #'display-buffer-full-frame)
-  (setopt ellama-instant-display-action-function #'display-buffer-at-bottom)
-  :config
-  ;; send last message in chat buffer with C-c C-c
-  (add-hook 'org-ctrl-c-ctrl-c-hook #'ellama-chat-send-last-message))
-
-;; Spell-checking
-(add-hook 'text-mode-hook 'flyspell-mode)
-(add-hook 'prog-mode-hook 'flyspell-prog-mode)
-
-(defun toggle-selected-window-dedicated-p ()
-  "Toggle dedicated status of the currently selected window."
-  (interactive)
-  (let* ((window (selected-window))
-         (status (not (window-dedicated-p window))))
-    (progn
-      (set-window-dedicated-p window status)
-      (message "The %s %s dedicated now" window (if status "is" "is not")))))
-
-;; Miscellanea
-(defun active-minor-modes ()
-  "Return a list of active minor modes for the current buffer."
-  (interactive)
-  (seq-filter 'symbol-value (mapcar 'car minor-mode-alist)))
-
-;; Predefined perspectives
-(defun persp-mail ()
-  "Create a perspective and open mu4e inside it."
-  (interactive)
-  (persp-switch "mail")
-  (mu4e))
-
-(defun ide (workdir &optional name)
-  "Create perspective NAME and open the project in WORKDIR inside it."
-  (interactive "fWorkdir: ")
-  (let ((default (file-name-base (string-remove-suffix "/" workdir))))
-    (persp-switch (or name (read-string "Perspective name: " default))))
-  (setq default-directory workdir)
-  (load-dir workdir)
-  (split-window-right)
-  (magit-status-setup-buffer workdir)
-  (toggle-selected-window-dedicated-p)
-  (split-window-below)
-  (switch-to-buffer "*Messages*")
-  (setq default-directory workdir)
-  (select-window (previous-window)))
-
-(defun config ()
-  "Create a perspective for editing Emacs configuration."
-  (interactive)
-  (ide "~/.emacs.d" "emacs-config")
-  (find-file "~/.emacs.d/init.el"))
-
-;; Encrypted org-mode extension
-(add-to-list 'auto-mode-alist '("\\.org.gpg\\'" . org-mode))
-
-
-;; Global key bindings
-(global-set-key (kbd "C-x m") 'persp-mail)
-(global-set-key (kbd "C-x b") 'helm-buffers-list)
-(global-set-key (kbd "C-x c c") 'config) ;; see config function defined below
-
-;; Window management
-(global-set-key (kbd "C->") (lambda () (interactive) (select-window (next-window))))
-(global-set-key (kbd "C-<") (lambda () (interactive) (select-window (previous-window))))
-(global-set-key (kbd "M-<down>") 'evil-window-down)
-(global-set-key (kbd "M-<up>") 'evil-window-up)
-(global-set-key (kbd "M-<left>") 'evil-window-left)
-(global-set-key (kbd "M-<right>") 'evil-window-right)
-(global-set-key (kbd "C-x w h") 'split-window-right)
-(global-set-key (kbd "C-x w v") 'split-window-below)
-(global-set-key (kbd "C-x w d") 'toggle-selected-window-dedicated-p)
-(global-set-key (kbd "C-M-<up>") 'enlarge-window)
-(global-set-key (kbd "C-M-<right>") 'enlarge-window-horizontally)
-(global-set-key (kbd "C-M-<down>") 'shrink-window)
-(global-set-key (kbd "C-M-<left>") 'shrink-window-horizontally)
-
-;; Programming utilities
-(global-set-key (kbd "C-x C-g b") 'magit-blame)
-(global-set-key (kbd "C-x C-g C-f") 'github-open-file)
-(global-set-key (kbd "C-x C-g l") 'github-generate-link)
-(global-set-key (kbd "C-x _") (lambda () (interactive) (insert-sep-region "_" 3)))
-
-(global-set-key (kbd "C-x C-g g") (lambda () (interactive)
-                                    (make-process
-                                     :name "gitg"
-                                     :buffer "*gitg*"
-                                     :command '("gitg"))))
-
-(define-key epa-key-list-mode-map (kbd "C-s") 'epa-mark-key)
-(define-key epa-key-list-mode-map (kbd "C-u") 'epa-unmark-key)
-
-;; Make numpad decimal separator behave like period rather than coma.
-(global-set-key [kp-separator] (kbd "."))
-
-;; Enable envrc
-(envrc-global-mode)
-
-;; Emacs Lisp package template
-(defun insert-emacs-lisp-package-template ()
-  "Initialize the Lisp module."
-  (goto-char (point-min))
-  (insert ";;; -*- lexical-binding: t -*-\n"
-          ";;; Package --- \n"
-          ";;; Commentary:\n"
-          ";;; Code:\n\n")
-  (goto-char (point-max))
-  (let ((filename (f-filename (buffer-file-name (current-buffer)))))
-      (insert "(provide '" (f-no-ext filename) ")\n"
-              ";;; " filename " ends here")))
-
-(defun initialize-emacs-lisp-package ()
-  "Insert empty Emacs Lisp package template if the file is empty."
-  (if (and
-       (flycheck-buffer-empty-p)
-       (buffer-file-name (current-buffer))) ;; filename is not nil
-      (insert-emacs-lisp-package-template)))
-
-(add-to-list 'emacs-lisp-mode-hook 'initialize-emacs-lisp-package)
 
 (provide 'init)
 ;;; init.el ends here
