@@ -79,8 +79,7 @@
           (unbind-key (kbd "C-p") evil-visual-state-map))
 
 (use-package hl-line
-  :ensure t
-  :config (set-face-background 'hl-line "grey40"))
+  :ensure t)
 
 (use-package request
   :ensure t)
@@ -495,6 +494,7 @@
       ((scr cam) (overlay 10 ,(- 1030 226)) (vid))))
  '(ffmpeg-transcoder-mappings '(vid (0 a)))
  '(ffmpeg-transcoder-vcodec "libx264")
+ '(global-hl-line-mode t)
  '(global-undo-tree-mode t)
  '(haskell-compiler-type 'stack)
  '(haskell-interactive-popup-errors nil)
@@ -584,7 +584,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(hl-line ((t (:inherit highlight :extend t :background "dark khaki")))))
+ '(hl-line ((t (:inherit highlight :extend t :background "royal blue")))))
 
 (provide 'init)
 ;;; init.el ends here
