@@ -79,7 +79,9 @@
           (unbind-key (kbd "C-p") evil-visual-state-map))
 
 (use-package hl-line
-  :ensure t)
+  :ensure t
+  :config (global-hl-line-mode 0)
+          (hl-line-mode 0))
 
 (use-package request
   :ensure t)
@@ -494,7 +496,6 @@
       ((scr cam) (overlay 10 ,(- 1030 226)) (vid))))
  '(ffmpeg-transcoder-mappings '(vid (0 a)))
  '(ffmpeg-transcoder-vcodec "libx264")
- '(global-hl-line-mode t)
  '(global-undo-tree-mode t)
  '(haskell-compiler-type 'stack)
  '(haskell-interactive-popup-errors nil)

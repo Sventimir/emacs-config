@@ -3,6 +3,7 @@
 ;;; Commentary: A package for working with tabular data.
 ;;; Code:
 (require 'dash)
+(require 's)
 
 (cl-defstruct relation (columns nil :type 'list :readonly t)
                        (key nil :type 'list :readonly t)
@@ -25,10 +26,10 @@
         (columns nil)
         (data nil))
     (dolist (item contents)
-      (cond ((keywordp item) (progn
-                               (push item columns)
-                               (if (eq 'col last) (push nil data))
-                               (setq last 'col)))
+      (cond ((symbolp item) (progn
+                              (push item columns)
+                              (if (eq 'col last) (push nil data))
+                              (setq last 'col)))
             ((eq 'col last) (progn
                               (push item data)
                               (setq last 'datum)))
@@ -53,10 +54,10 @@
   (let* ((cols (relation-columns r))
          (sort (or sorting-col (relation-key r)))
          (idx (cl-position sort cols)))
-    (cons (mapcar (lambda (c) (substring (symbol-name c) 1)) cols)
+    (cons (mapcar (lambda (c) (string-trim-left (symbol-name c) ":")) cols)
           (cons 'hline
                 (if idx
-                    (seq-sort-by (lambda (row) (nth idx row)) (or sorting-f 'string<) (relation-data r))
+                    (seq-sort-by (lambda (row) (nth idx row)) (or sorting-f 'rel<) (relation-data r))
                   (relation-data r))))))
 
 (defun rel-columns (r)
@@ -124,6 +125,71 @@
                    :data (seq-filter (lambda (row)
                                        (apply f (mapcar (lambda (i) (nth i row)) is)))
                                      (relation-data r)))))
+
+(defun rel< (a b)
+  "Compare A and B accordiongly to their type."
+  (cond ((stringp a) (string< a b))
+        ((numberp a) (< a b))
+        (t (signal 'error `(invalid-argument 'comparison ,a ,b)))))
+
+(defun rel-sql-interpret (expr)
+  "The entrypoint to rel-sql interpreter, converting EXPR into a rel operation."
+  (let ((cmd (intern-soft (s-concat "rel-sql-" (symbol-name (car expr))))))
+    (eval (cons cmd (cdr expr)))))
+
+(defmacro rel-sql-where (rel-expr filter-expr)
+  "Generate code to filter REL-EXPR using FILTER-EXPR."
+  (let* ((rel (eval rel-expr))
+         (cols (rel-columns rel)))
+      `(rel-filter ,rel
+                   (lambda ,(mapcar (lambda (s) (intern (string-trim (symbol-name s) ":"))) cols)
+                     ,(rel-sql-rec-normalize-infix-op filter-expr))
+                     ,@cols)))
+
+(defmacro rel-sql-select (&rest args)
+  "Interpret the SEELCT expression consisting of ARGS as rel-sql.
+Walk through ARGS until from symbol is found; then everything before from
+becomes a column to project, while everything after becomes a relation
+expression to evaluate."
+  (let* ((from-idx (seq-position args 'from))
+         (where-idx (seq-position args 'where))
+         (cols (take from-idx args))
+         (rel-expr (rel-sql-interpret (car (drop (1+ from-idx) args))))
+         (filt-expr (if where-idx
+                        `(rel-sql-where ,rel-expr ,(drop (1+ where-idx) args))
+                      rel-expr)))
+    `(rel-project ,filt-expr ,@(mapcar 'rel-sql-quote-column cols))))
+
+(defmacro rel-sql-singleton (&rest args)
+  "A rel-sql wrapper calling rel-singleton with columns quoted in ARGS."
+  `(rel-singleton ,@(mapcar (lambda (arg) (if (symbolp arg) (rel-sql-quote-column arg) arg)) args)))
+
+(defalias 'rel-sql-unary 'rel-unary)
+
+(defmacro rel-sql-product (&rest exprs)
+  "Translate EXPRS to relations and compute their product."
+  `(rel-times ,@(mapcar 'rel-sql-interpret exprs)))
+
+(defun rel-sql-quote-column (colname)
+  "Quote the column name COLNAME so that it does nor act as a Lisp variable."
+  (intern (s-concat ":" (symbol-name colname))))
+
+(defun rel-sql-normalize-infix-op (expr)
+  "Rearrange symbols in EXPR so that they form a valid Lisp function call."
+  (if (and (symbolp (cadr expr)) (symbol-function (cadr expr)))
+      (cons (cadr expr) (cons (car expr) (cddr expr)))
+    expr))
+
+(defun rel-sql-rec-normalize-infix-op (expr)
+  "Recursively apply rel-sql-normalize-infix-op to EXPR and its subexpressions."
+  (if (listp expr)
+      (mapcar 'rel-sql-rec-normalize-infix-op (rel-sql-normalize-infix-op expr))
+    expr))
+
+(defun org-babel-execute:rel-sql (body params)
+  "Interpret an SQL-like Lisp in BODY describing a relation, using PARAMS."
+  (let ((expr (read (format "(%s)" body))))
+    (rel-to-org-table (rel-sql-interpret expr))))
 
 (provide 'relation)
 ;;; relation.el ends here
