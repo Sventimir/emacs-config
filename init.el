@@ -475,7 +475,7 @@
      ("funbridge" \`
       (((0:v:0) (crop (\,@ (screen-coords 0 0 1920 1030))) (scr))
        ((0:v:1) (scale 384 216) (cam))
-       ((scr cam) (overlay 10 743) (vid))))
+       ((scr cam) (overlay 10 804) (vid))))
      ("intobridge" \`
       (((0:v:0) (crop (\,@ (screen-coords 150 116 1920 1080))) (scr))
        ((0:v:1) (scale 384 216) (cam))
