@@ -1,4 +1,4 @@
-;;; org-ext --- Extend ORG mode!
+;;; org-ext --- Extend ORG mode!  -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;;; Code:
 

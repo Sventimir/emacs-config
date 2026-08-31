@@ -1,5 +1,6 @@
-;;; Package --- Summary
-;;; Commentary: Extensions for the Rust mode
+;;; Package --- Summary  -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Extensions for the Rust mode
 ;;; Code:
 
 (defun rust-mode-run-test-at-point ()

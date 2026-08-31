@@ -1,5 +1,6 @@
-;;; project-utils --- Some basic utils for navigating projects.
+;;; project-utils --- Project navigation  -*- lexical-binding: t; -*-
 ;;; Commentary:
+;;; Some basic utils for navigating projects.
 ;;; Code:
 
 (defun rm-suffix (suf str)
